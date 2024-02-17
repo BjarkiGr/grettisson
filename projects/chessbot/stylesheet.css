@@ -1,0 +1,25 @@
+.board {
+  display: flex;
+}
+
+
+.row {
+  flex-direction: row;
+
+}
+
+.cell {
+  width: 80px;
+  height: 80px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.dark {
+  background-color: #1A2975;
+}
+
+.light {
+  background-color: #8094F7;
+}

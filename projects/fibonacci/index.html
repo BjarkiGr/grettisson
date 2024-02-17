@@ -1,17 +1,57 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Document</title>
-  <link rel="stylesheet" href="stylesheet.css">
+  <head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimal-ui" />
+    <link rel="stylesheet" href="../../styles/stylesheet.css">
+    <link href='https://fonts.googleapis.com/css?family=Roboto Mono' rel='stylesheet'>
+    <title>Fibonacci</title>
+    <script type="text/javascript" async
+  src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
+
 </head>
 <body>
-  <h1>Fibonacci generator</h1>
-  <h3>Generates the top 250 fibonacci numbers</h3>
-  <input id="fibNumber">
-  <button id="calculateButton">Calculate</button>
-  <h4 id="calculatedFib"></h4>
-  <script src="fibonacci.js"></script>
+  <div class="header">
+    <a class="header-item" href="/">Forsíða</p>
+    <a href="" class="header-item">Advent of Code</a>
+    <div class="header-item">
+        <a class="header-item">Verkefnin mín
+        <div class="dropdown-content">
+          <a href="/projects/fibonacci/">Fibonacci sequence generator</a>
+
+        </div>
+      </div>
+  </div>
+
+  <div class="main">
+    <div class="main-item">
+      <h1>Fibonacci generator</h1>
+      <h3>Generates the n-th number in the fibonacci sequence</h3>
+      <input id="fibNumber">
+      <button id="calculateButton">Calculate</button>
+      <h4 id="calculatedFib"></h4>
+      <h4 id="displayNumbers"></h4>
+      <script src="fibonacci.js"></script>
+    </div>
+
+    <div class="main-item">
+      <h2>Understanding the Fibonacci Sequence:</h2>
+      <div class="main-item-text">
+      The Fibonacci sequence is a series of numbers in which each number is the sum of the two preceding ones, usually starting with 0 and 1. In mathematical terms, it is defined by the recurrence relation:
+      <br>
+      <br>
+      \[ F(n) = F(n-1) + F(n-2) \]
+      <br>
+      <br>
+      The sequence begins with 0 and 1, and each subsequent number is the sum of the two preceding ones. So, it goes: 0, 1, 1, 2, 3, 5, 8, 13, 21, and so on. The sequence was introduced to the West by the Italian mathematician Leonardo Fibonacci in his book Liber Abaci, published in 1202, though the sequence had been previously described in Indian mathematics.
+      <br>
+      <br>
+      The Fibonacci sequence has fascinating applications and connections in various fields, including mathematics, nature, and art. It appears in the branching of trees, the arrangement of leaves on stems, the spiral arrangement of seeds in a sunflower, and even in the proportions of the Parthenon in Athens.
+    </div>
+    </div>
+  </div>
 </body>
 </html>
