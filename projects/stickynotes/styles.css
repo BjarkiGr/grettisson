@@ -75,7 +75,7 @@ a:visited {
     color: inherit;
 }
 
-h1 {
+.heading {
     position: fixed;
     font-size: 24px;
     top: 1rem;
@@ -86,7 +86,7 @@ h1 {
 }
 
 @media screen and (max-width: 600px) {
-    h1 {
+    .heading {
       font-size: 16px;
     }
   }
