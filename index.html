@@ -2,42 +2,24 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimal-ui" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My IP Address & Location</title>
     <link rel="stylesheet" href="styles/stylesheet.css">
-    <link href="https://fonts.googleapis.com/css2?family=Kode+Mono:wght@400..700&display=swap" rel="stylesheet">
-    <title>Grettisson</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
 </head>
 <body>
-    <div class="header">
-        <a class="header-item" href="/">Forsíða</p>
-        <a href="" class="header-item">Advent of Code</a>
-        <div class="header-item">
-            <a class="header-item">Verkefnin mín
-            <div class="dropdown-content">
-              <a href="/projects/fibonacci/">Fibonacci Sequence Generator</a>
-              <a href="/projects/stickynotes/">Sticky Notes App</a>
-    
-            </div>
-          </div>
-      </div>
-    
-
-    <div class="main">
-        <div class="main-item">
-            <img src="" alt="hér kemur mynd af mér" class="profile-picture">
-        </div>
-        <div class="main-item">
-            <p class="main-item-text">
-                Hæ! Ég heiti Bjarki Grettisson. Þetta er vefsíðan mín. Hérna set ég inn öll verkefni sem ég er að vinna í eða hef unnið í.
-            </p>
-
-            <p class="main-item-text">
-                Þessi síða er ennþá í vinnslu.
-            </p>
-        </div>
-        
+    <div class="post-it" style="cursor:pointer" onclick="window.location='/projects/stickynotes'">
+        <img src="resources/postit.png" alt="Post-it Note">
     </div>
+    <div id="info-container">
+        <h1>Your IP Address & Location:</h1>
+        <div id="ip">Loading IP...</div>
+        <div id="location">Loading location...</div>
+        <div id="weather">Loading weather...</div>
+    </div>
+    <div id="map"></div>
 
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>

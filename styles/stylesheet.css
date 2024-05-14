@@ -1,105 +1,43 @@
-
-.dropdown-content {
-  display: none;
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background-color: #f0f0f0;
+  position: relative;
+}
+#info-container {
+  text-align: center;
+  margin-bottom: 20px;
+}
+#ip, #location, #weather {
+  font-size: 24px;
+  font-weight: bold;
+  padding: 10px 20px;
+  border: 2px solid #333;
+  border-radius: 5px;
+  background-color: #fff;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
+}
+#map {
+  width: 80%;
+  height: 400px;
+  border: 2px solid #333;
+  border-radius: 5px;
+}
+.post-it {
   position: absolute;
-  min-width: 160px;
-  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+  top: 10px;
+  right: 10px;
   z-index: 1;
 }
-
-.dropdown-content a {
-  float: none;
-  text-decoration: none;
-  display: block;
-  text-align: left;
-}
-
-.dropdown-content a:hover {
-  background-color: #ddd;
-}
-
-.header-item:hover .dropdown-content {
-  display: block;
-}
-
-html, body {
-  font-family: 'Kode Mono', monospace;
-  font-size: 14px;
-  padding: 0;
-  margin: 0;
-}
-
-
-.header {
-  font-family: "Kode Mono", monospace;
-  font-size: 20px;
-  display: flex;
-  flex-direction: row;
-  justify-content: center;
-  background-color: #E4E4E4;
-  overflow: hidden;
-
-}
-
-@media screen and (max-width: 500px) {
-.header {
-  flex-direction: column;
-  padding-bottom: 10px;
-}
-}
-
-.header-item {
-  text-decoration: none;
-  padding-top: 2vh;
-  color: #313131;
-  border-radius: 20px;
-  transition: ease-in-out 0.3s;
-  padding-left: 10px;
-  padding-right: 10px;
-  border: none;
-  outline: none;
-  background-color: inherit;
-  font-family: inherit; /* Important for vertical align on mobile phones */
-  margin: 0;
-  
-
-
-}
-
-.header-item:hover,
-.header-item:focus-visible {
-background-color: #E4E4E4;
-}
-
-.header-item {
-margin: 0 1em;
-}
-
-.main {
-max-width: 800px;
-margin: auto;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-padding: 25px;
-}
-
-
-.profile-picture {
-  width: 20%;
-filter:grayscale(100%);
-display: flex;
-flex-direction: column;
-justify-content: center;
-padding: 1em;
-border: 1px dashed #313131;
-transition: ease-in-out 0.3s;
-}
-
-.profile-picture:hover{
-filter: grayscale(0%);
-}
-
-.main-item-text {
-  text-align: justify;
+.post-it img {
+  width: 150px; /* Adjust the width and height based on your image */
+  height: auto;
+  cursor: pointer;
 }
