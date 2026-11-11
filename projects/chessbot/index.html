@@ -4,7 +4,7 @@
   <!-- Document metadata: browser title, character encoding and responsive layout. -->
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Chess PvP</title>
+  <title>Chess — Player vs Computer</title>
 
   <!-- Keep styling in its own file so the HTML stays focused on structure. -->
   <link rel="stylesheet" href="/projects/chessbot/style.css">
@@ -17,7 +17,7 @@
     <header class="page-header">
       <div>
         <h1>Chess</h1>
-        <p class="subtitle">Local two-player chess</p>
+        <p class="subtitle">Play locally against a simple chess engine</p>
       </div>
     </header>
 
@@ -34,12 +34,33 @@
           <p id="status" class="status" aria-live="polite">Starting game…</p>
           <p id="turn" class="turn">White to move</p>
 
+          <!-- Choose whether the second player is a person or the built-in engine. -->
+          <label class="setting-label" for="opponent-select">Opponent</label>
+          <select id="opponent-select" class="setting-select">
+            <option value="human">Human (two players)</option>
+            <option value="computer" selected>Computer</option>
+          </select>
+
+          <!-- Engine strength controls search depth and move selection quality. -->
+          <label class="setting-label" for="difficulty-select">Engine difficulty</label>
+          <select id="difficulty-select" class="setting-select">
+            <option value="beginner">Beginner — Level 1</option>
+            <option value="club" selected>Club — Level 2</option>
+            <option value="strong">Strong — Level 3</option>
+          </select>
+
           <div class="button-grid">
-            <button id="undo-button" class="control-button" type="button">Undo move</button>
+            <button id="undo-button" class="control-button" type="button">Undo turn</button>
             <button id="new-game-button" class="control-button" type="button">New game</button>
             <button id="flip-button" class="control-button" type="button">Flip board</button>
             <button id="clear-button" class="control-button" type="button">Clear selection</button>
           </div>
+        </section>
+
+        <section class="panel">
+          <h2 class="panel-heading">Engine</h2>
+          <p id="engine-status" class="engine-status">Ready</p>
+          <p class="engine-note">This is a starter engine using minimax search with alpha-beta pruning. It is not Stockfish-strength.</p>
         </section>
 
         <section class="panel">
@@ -51,8 +72,8 @@
 
         <section class="panel help-panel">
           <h2 class="panel-heading">How to play</h2>
-          <p>Select one of your pieces. Legal destination squares will be highlighted. Select a highlighted square to move.</p>
-          <p>Both players use the same device and board.</p>
+          <p>Select a piece, then select a highlighted destination. You play White; the computer plays Black.</p>
+          <p>Switch to Human for local two-player games. The engine searches legal moves and evaluates material and piece placement.</p>
         </section>
       </aside>
     </div>
@@ -65,10 +86,10 @@
       <h2 id="promotion-heading">Promote your pawn</h2>
       <p>Choose the piece you want.</p>
       <div class="promotion-options">
-        <button type="button" data-promotion="q" aria-label="Promote to queen">♕<span>Queen</span></button>
-        <button type="button" data-promotion="r" aria-label="Promote to rook">♖<span>Rook</span></button>
-        <button type="button" data-promotion="b" aria-label="Promote to bishop">♗<span>Bishop</span></button>
-        <button type="button" data-promotion="n" aria-label="Promote to knight">♘<span>Knight</span></button>
+        <button type="button" data-promotion="q" aria-label="Promote to queen">♛<span>Queen</span></button>
+        <button type="button" data-promotion="r" aria-label="Promote to rook">♜<span>Rook</span></button>
+        <button type="button" data-promotion="b" aria-label="Promote to bishop">♝<span>Bishop</span></button>
+        <button type="button" data-promotion="n" aria-label="Promote to knight">♞<span>Knight</span></button>
       </div>
     </div>
   </div>

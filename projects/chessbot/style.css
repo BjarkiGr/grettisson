@@ -14,6 +14,7 @@
   --dark-square: #77917e;
   --highlight: #e6c75a;
   --legal-move: rgba(25, 80, 48, 0.68);
+  --field-background: #293332;
 }
 
 /* ---------- 2. Basic page layout ---------- */
@@ -121,14 +122,15 @@ h1 {
 }
 
 .piece.white {
+  /* Solid glyphs tinted white: no outline or stroke effect. */
   color: #fffdf4;
-  -webkit-text-stroke: 1px #333;
-  text-shadow: 0 1px 2px #0005;
+  text-shadow: 0 2px 2px #0005;
 }
 
 .piece.black {
+  /* Solid dark glyphs for the opposing side. */
   color: #171a1b;
-  -webkit-text-stroke: 0.4px #f5f0e4;
+  text-shadow: 0 1px 1px #fff3;
 }
 
 /* Empty legal destination: small dot in the centre of the square. */
@@ -303,4 +305,42 @@ h1 {
 @media (max-width: 470px) {
   .sidebar { display: flex; }
   .piece { font-size: 10vw; }
+}
+
+
+/* ---------- 9. Engine settings ---------- */
+.setting-label {
+  display: block;
+  margin: 14px 0 6px;
+  color: var(--muted-text);
+  font-size: 12px;
+  font-weight: 650;
+  letter-spacing: .03em;
+  text-transform: uppercase;
+}
+
+.setting-select {
+  width: 100%;
+  padding: 10px 11px;
+  border: 1px solid #465452;
+  border-radius: 7px;
+  color: var(--main-text);
+  background: var(--field-background);
+  font: inherit;
+}
+
+.setting-select:disabled {
+  opacity: .55;
+}
+
+.engine-status {
+  margin: 0;
+  color: var(--main-text);
+  font-weight: 650;
+}
+
+.engine-note {
+  margin: 6px 0 0;
+  color: var(--muted-text);
+  font-size: 12px;
 }

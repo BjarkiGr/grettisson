@@ -1,35 +1,31 @@
 /*
  * ================================================================
- * CHESS PVP — JAVASCRIPT
+ * CHESS PVP + STARTER ENGINE — JAVASCRIPT
  * ================================================================
- * This file connects the page to the chess rules library.
+ * Responsibilities:
+ * 1. chess.js handles the official chess rules and legal moves.
+ * 2. This file handles the board UI, player input and game controls.
+ * 3. The starter engine chooses moves using minimax + alpha-beta pruning.
  *
- * IMPORTANT ARCHITECTURE NOTE:
- * - HTML defines the page structure.
- * - CSS defines the visual appearance.
- * - This JavaScript controls the board, user input and game state.
- * - chess.js supplies the chess rules: legal moves, check, castling,
- *   en passant, promotion, checkmate, stalemate, and draw conditions.
+ * ENGINE DESIGN:
+ * - Beginner: shallow search and some move variety.
+ * - Club: deeper search and a more consistent evaluation.
+ * - Strong: deeper search with move ordering.
  *
- * chess.js is a rules library, NOT a computer opponent. Both players
- * still move manually. Later, an AI engine can choose moves and call
- * the same game.move(...) interface.
+ * This is deliberately a small learning engine, not a replacement for
+ * Stockfish. It gives us a foundation that can be improved in stages.
  * ================================================================
  */
 
-// Import the chess rules library from a CDN.
-// This keeps the project to the three requested files.
-// The browser needs an internet connection to load this dependency.
+// Import chess.js. It validates moves and maintains the complete chess state.
 import { Chess } from "https://cdn.jsdelivr.net/npm/chess.js@1.4.0/+esm";
 
 // ----------------------------------------------------------------
 // 1. GAME STATE AND HTML ELEMENT REFERENCES
 // ----------------------------------------------------------------
 
-// Create a new game in the standard starting position.
 const game = new Chess();
 
-// Cache important HTML elements so we do not repeatedly search the page.
 const boardElement = document.getElementById("board");
 const statusElement = document.getElementById("status");
 const turnElement = document.getElementById("turn");
@@ -39,60 +35,51 @@ const newGameButton = document.getElementById("new-game-button");
 const flipButton = document.getElementById("flip-button");
 const clearButton = document.getElementById("clear-button");
 const promotionDialog = document.getElementById("promotion-dialog");
+const opponentSelect = document.getElementById("opponent-select");
+const difficultySelect = document.getElementById("difficulty-select");
+const engineStatusElement = document.getElementById("engine-status");
 
-// Unicode chess symbols used to display pieces.
-// The key combines piece color ("w" or "b") and piece type.
+// Use solid chess glyphs for both sides. CSS tints them white or dark.
 const PIECE_SYMBOLS = {
-  wk: "♔", wq: "♕", wr: "♖", wb: "♗", wn: "♘", wp: "♙",
+  wk: "♚", wq: "♛", wr: "♜", wb: "♝", wn: "♞", wp: "♟",
   bk: "♚", bq: "♛", br: "♜", bb: "♝", bn: "♞", bp: "♟"
 };
 
-// These variables describe the current user-interface selection.
-let selectedSquare = null;       // The square the player selected first.
-let legalDestinations = [];      // Squares the selected piece may legally move to.
-let boardIsFlipped = false;      // Whether Black is shown at the bottom.
-let pendingPromotion = null;     // Stores a pawn move while promotion is chosen.
+// UI state; these variables do not alter the actual chess position.
+let selectedSquare = null;
+let legalDestinations = [];
+let boardIsFlipped = false;
+let pendingPromotion = null;
+let engineIsThinking = false;
+
+// The human always plays White in computer mode.
+// In human mode both sides can use the same board.
+const HUMAN_COLOR = "w";
 
 // ----------------------------------------------------------------
-// 2. BOARD COORDINATES AND DISPLAY
+// 2. BOARD DISPLAY
 // ----------------------------------------------------------------
 
-/**
- * Return all 64 square names in the order they should appear.
- * Normal view: a8 to h1. Flipped view: h1 to a8.
- */
 function getDisplaySquares() {
+  // Generate rank/file order based on board orientation.
   const files = boardIsFlipped ? "hgfedcba" : "abcdefgh";
   const ranks = boardIsFlipped ? "12345678" : "87654321";
-
-  // Build an array of 64 algebraic square names, e.g. ["a8", "b8", ...].
   return [...ranks].flatMap(rank => [...files].map(file => file + rank));
 }
 
-/**
- * Draw the current position and all visual markers.
- * The chess.js board is the source of truth; the HTML is rebuilt from it.
- */
 function renderBoard() {
-  // Clear the previous board display before drawing the current position.
   boardElement.innerHTML = "";
 
-  // Get the current position as an 8 x 8 array from chess.js.
   const position = game.board();
-
-  // Read the last move so its origin and destination can be highlighted.
-  const moveHistory = game.history({ verbose: true });
-  const lastMove = moveHistory.length ? moveHistory[moveHistory.length - 1] : null;
+  const verboseHistory = game.history({ verbose: true });
+  const lastMove = verboseHistory.length ? verboseHistory[verboseHistory.length - 1] : null;
   const lastMoveSquares = lastMove ? [lastMove.from, lastMove.to] : [];
 
-  // Create one button for each square in the selected orientation.
   for (const squareName of getDisplaySquares()) {
-    // Convert algebraic notation (such as "e4") into array indexes.
     const fileIndex = squareName.charCodeAt(0) - 97;
     const rankIndex = 8 - Number(squareName[1]);
     const piece = position[rankIndex][fileIndex];
 
-    // Each square is a button, making it clickable and keyboard accessible.
     const squareButton = document.createElement("button");
     squareButton.type = "button";
     squareButton.className = "square";
@@ -104,21 +91,13 @@ function renderBoard() {
         : `${squareName}, empty`
     );
 
-    // Alternate square colors. a8 is light and h1 is light.
-    const isLightSquare = (fileIndex + rankIndex) % 2 === 1;
+    // a8 is light; h1 is light as well.
+    const isLightSquare = (fileIndex + rankIndex) % 2 === 0;
     squareButton.classList.add(isLightSquare ? "light" : "dark");
 
-    // Mark the currently selected piece.
-    if (selectedSquare === squareName) {
-      squareButton.classList.add("selected");
-    }
+    if (selectedSquare === squareName) squareButton.classList.add("selected");
+    if (lastMoveSquares.includes(squareName)) squareButton.classList.add("last-move");
 
-    // Shade the two squares involved in the previous move.
-    if (lastMoveSquares.includes(squareName)) {
-      squareButton.classList.add("last-move");
-    }
-
-    // If a piece occupies the square, add its Unicode symbol.
     if (piece) {
       const pieceElement = document.createElement("span");
       pieceElement.className = `piece ${piece.color === "w" ? "white" : "black"}`;
@@ -126,111 +105,91 @@ function renderBoard() {
       squareButton.appendChild(pieceElement);
     }
 
-    // Show a dot for a quiet move, or a ring for a capture.
+    // A dot means a quiet legal move; a ring means a legal capture.
     if (legalDestinations.includes(squareName)) {
       const marker = document.createElement("span");
       marker.className = piece ? "legal-capture" : "legal-dot";
       squareButton.appendChild(marker);
     }
 
-    // Add rank labels along the left edge of the board.
+    // Rank labels appear on the left edge.
     const isLeftEdge = boardIsFlipped ? fileIndex === 7 : fileIndex === 0;
     if (isLeftEdge) {
-      const rankLabel = document.createElement("span");
-      rankLabel.className = "coordinate rank";
-      rankLabel.textContent = squareName[1];
-      squareButton.appendChild(rankLabel);
+      const label = document.createElement("span");
+      label.className = "coordinate rank";
+      label.textContent = squareName[1];
+      squareButton.appendChild(label);
     }
 
-    // Add file labels along the bottom edge of the board.
+    // File labels appear along the bottom edge.
     const isBottomEdge = boardIsFlipped ? rankIndex === 0 : rankIndex === 7;
     if (isBottomEdge) {
-      const fileLabel = document.createElement("span");
-      fileLabel.className = "coordinate file";
-      fileLabel.textContent = squareName[0];
-      squareButton.appendChild(fileLabel);
+      const label = document.createElement("span");
+      label.className = "coordinate file";
+      label.textContent = squareName[0];
+      squareButton.appendChild(label);
     }
 
-    // Send square clicks to the central input handler.
     squareButton.addEventListener("click", () => handleSquareClick(squareName));
-
-    // Add this square to the visible board.
     boardElement.appendChild(squareButton);
   }
 
-  // Refresh all information panels after drawing the board.
   renderGameStatus();
   renderMoveHistory();
 
-  // Undo is only available when at least one move has been played.
-  undoButton.disabled = game.history().length === 0;
+  undoButton.disabled = game.history().length === 0 || engineIsThinking;
+  opponentSelect.disabled = engineIsThinking;
+  difficultySelect.disabled = engineIsThinking || opponentSelect.value !== "computer";
+  clearButton.disabled = engineIsThinking;
 }
 
 // ----------------------------------------------------------------
-// 3. GAME STATUS: TURN, CHECK, CHECKMATE AND DRAWS
+// 3. STATUS AND MOVE HISTORY
 // ----------------------------------------------------------------
 
-/**
- * Update the status panel using the chess rules library.
- * All game-ending decisions come from chess.js, not visual guesses.
- */
 function renderGameStatus() {
   const sideToMove = game.turn() === "w" ? "White" : "Black";
 
-  // Checkmate takes priority over all other status messages.
   if (game.isCheckmate()) {
-    statusElement.textContent = `Checkmate — ${sideToMove === "White" ? "Black" : "White"} wins`;
+    const winner = sideToMove === "White" ? "Black" : "White";
+    statusElement.textContent = `Checkmate — ${winner} wins`;
     turnElement.textContent = "Game over";
     return;
   }
 
-  // A stalemate is a draw: the player has no legal moves but is not in check.
   if (game.isStalemate()) {
     statusElement.textContent = "Draw — stalemate";
     turnElement.textContent = "Game over";
     return;
   }
 
-  // Insufficient material means neither side can possibly checkmate.
   if (game.isInsufficientMaterial()) {
     statusElement.textContent = "Draw — insufficient material";
     turnElement.textContent = "Game over";
     return;
   }
 
-  // Threefold repetition is a draw claim in tournament rules.
   if (game.isThreefoldRepetition()) {
     statusElement.textContent = "Draw — threefold repetition";
     turnElement.textContent = "Game over";
     return;
   }
 
-  // Other draw conditions supported by chess.js.
   if (game.isDraw()) {
     statusElement.textContent = "Draw";
     turnElement.textContent = "Game over";
     return;
   }
 
-  // If the game is still active, show whose turn it is and whether they are checked.
   turnElement.textContent = `${sideToMove} to move`;
   statusElement.textContent = game.isCheck()
     ? `${sideToMove} is in check`
     : "Game in progress";
 }
 
-// ----------------------------------------------------------------
-// 4. MOVE HISTORY
-// ----------------------------------------------------------------
-
-/**
- * Render the game's SAN (algebraic) move list.
- * Example: 1. e4 e5 2. Nf3 Nc6
- */
 function renderMoveHistory() {
   const moves = game.history();
 
-  // Show a simple empty state before the first move.
   if (moves.length === 0) {
     historyElement.innerHTML = '<p class="empty-history">No moves yet.</p>';
     return;
@@ -238,7 +197,6 @@ function renderMoveHistory() {
 
   historyElement.innerHTML = "";
 
-  // Each row contains a move number, White's move and Black's move.
   for (let index = 0; index < moves.length; index += 2) {
     const moveNumber = document.createElement("span");
     moveNumber.className = "move-number";
@@ -252,170 +210,444 @@ function renderMoveHistory() {
     blackMove.className = "move-entry";
     blackMove.textContent = moves[index + 1] || "";
 
-    // Highlight whichever move was played most recently.
     if (index === moves.length - 1) whiteMove.classList.add("latest");
     if (index + 1 === moves.length - 1) blackMove.classList.add("latest");
 
     historyElement.append(moveNumber, whiteMove, blackMove);
   }
 
-  // Keep the newest move visible when the history becomes long.
   historyElement.scrollTop = historyElement.scrollHeight;
 }
 
 // ----------------------------------------------------------------
-// 5. PLAYER INPUT AND LEGAL MOVES
+// 4. PLAYER INPUT
 // ----------------------------------------------------------------
 
-/**
- * Handle a click on a board square.
- *
- * Flow:
- * 1. If a selected piece can legally move to this square, make that move.
- * 2. Otherwise, if this square contains the current player's piece, select it.
- * 3. Otherwise, clear the selection.
- */
+function isHumanTurn() {
+  // In computer mode, only White is controlled by the human.
+  return opponentSelect.value === "human" || game.turn() === HUMAN_COLOR;
+}
+
 function handleSquareClick(squareName) {
-  // Do not accept moves after the game ends or while promotion is open.
-  if (game.isGameOver() || pendingPromotion) return;
+  // Ignore input after the game ends, during promotion, or during engine search.
+  if (game.isGameOver() || pendingPromotion || engineIsThinking || !isHumanTurn()) {
+    return;
+  }
 
   const clickedPiece = game.get(squareName);
 
-  // CASE 1: The player clicked a legal destination for the selected piece.
+  // If this square is a legal destination for the selected piece, move there.
   if (selectedSquare && legalDestinations.includes(squareName)) {
-    // Get legal moves from the selected square to the clicked destination.
-    const candidateMoves = game.moves({ square: selectedSquare, verbose: true })
+    const matchingMoves = game.moves({ square: selectedSquare, verbose: true })
       .filter(move => move.to === squareName);
 
-    // A pawn reaching the final rank has four legal promotion choices.
-    const promotionMove = candidateMoves.find(move => move.promotion);
-    if (promotionMove) {
+    // Pawn promotion needs the player to choose the new piece first.
+    if (matchingMoves.some(move => move.promotion)) {
       pendingPromotion = { from: selectedSquare, to: squareName };
       promotionDialog.classList.add("visible");
       return;
     }
 
-    // chess.js validates and applies the move, then updates the game state.
     game.move({ from: selectedSquare, to: squareName });
     clearPieceSelection();
     renderBoard();
+    maybeStartEngineTurn();
     return;
   }
 
-  // CASE 2: The clicked square has a piece belonging to the player to move.
+  // Select a piece only if it belongs to the side whose turn it is.
   if (clickedPiece && clickedPiece.color === game.turn()) {
     selectedSquare = squareName;
-
-    // Ask chess.js for every legal move that piece can make.
     legalDestinations = game.moves({ square: squareName, verbose: true })
       .map(move => move.to);
   } else {
-    // CASE 3: Empty square or opponent piece that is not a legal target.
     clearPieceSelection();
   }
 
   renderBoard();
 }
 
-/**
- * Clear all selection-related state.
- * This does not change the chess position.
- */
 function clearPieceSelection() {
   selectedSquare = null;
   legalDestinations = [];
 }
 
 // ----------------------------------------------------------------
-// 6. PAWN PROMOTION
+// 5. PAWN PROMOTION
 // ----------------------------------------------------------------
 
-// Attach one click handler to each promotion choice.
 document.querySelectorAll("[data-promotion]").forEach(button => {
   button.addEventListener("click", () => {
-    // A promotion choice is only meaningful when a pawn move is waiting.
     if (!pendingPromotion) return;
 
-    // The selected data attribute is q, r, b or n.
-    const promotionPiece = button.dataset.promotion;
-
-    // Apply the promotion through chess.js so legality is still enforced.
+    // The button stores one of the promotion piece letters: q, r, b or n.
     game.move({
       from: pendingPromotion.from,
       to: pendingPromotion.to,
-      promotion: promotionPiece
+      promotion: button.dataset.promotion
     });
 
-    // Close the dialog and clear temporary input state.
-    pendingPromotion = null;
-    promotionDialog.classList.remove("visible");
+    closePromotionDialog();
     clearPieceSelection();
     renderBoard();
+    maybeStartEngineTurn();
   });
 });
 
-// ----------------------------------------------------------------
-// 7. GAME CONTROLS
-// ----------------------------------------------------------------
-
-// Undo the previous half-move. Calling undo also restores special move state.
-undoButton.addEventListener("click", () => {
-  game.undo();
-  closePromotionDialog();
-  clearPieceSelection();
-  renderBoard();
-});
-
-// Reset all pieces and game state to the standard starting position.
-newGameButton.addEventListener("click", () => {
-  game.reset();
-  closePromotionDialog();
-  clearPieceSelection();
-  renderBoard();
-});
-
-// Flip the board view without changing the actual chess position.
-flipButton.addEventListener("click", () => {
-  boardIsFlipped = !boardIsFlipped;
-  renderBoard();
-});
-
-// Remove selection highlights while leaving the game untouched.
-clearButton.addEventListener("click", () => {
-  clearPieceSelection();
-  renderBoard();
-});
-
-/**
- * Shared helper for closing the promotion dialog.
- */
 function closePromotionDialog() {
   pendingPromotion = null;
   promotionDialog.classList.remove("visible");
 }
 
 // ----------------------------------------------------------------
-// 8. INITIALIZE THE APPLICATION
+// 6. STARTER CHESS ENGINE: EVALUATION
 // ----------------------------------------------------------------
 
-// Draw the standard starting position when the page loads.
+// Basic piece values in centipawns (100 = roughly one pawn).
+const PIECE_VALUES = {
+  p: 100,
+  n: 320,
+  b: 335,
+  r: 500,
+  q: 900,
+  k: 20000
+};
+
+// Convert a file/rank coordinate to distance from the board centre.
+// This rewards pieces that occupy useful central squares.
+function centreBonus(file, rank) {
+  const fileDistance = Math.abs(3.5 - file);
+  const rankDistance = Math.abs(3.5 - rank);
+  return 7 - (fileDistance + rankDistance) * 2;
+}
+
+/**
+ * Evaluate a position from White's perspective.
+ * Positive score favours White; negative score favours Black.
+ *
+ * This is intentionally understandable rather than sophisticated.
+ * It evaluates material, central activity, pawn advancement and bishop pair.
+ */
+function evaluatePosition(chess) {
+  const board = chess.board();
+  let score = 0;
+  let whiteBishops = 0;
+  let blackBishops = 0;
+
+  for (let rank = 0; rank < 8; rank++) {
+    for (let file = 0; file < 8; file++) {
+      const piece = board[rank][file];
+      if (!piece) continue;
+
+      const sign = piece.color === "w" ? 1 : -1;
+      const type = piece.type;
+      const material = PIECE_VALUES[type];
+
+      // Material is the foundation: a queen is worth more than a pawn.
+      score += sign * material;
+
+      if (type === "b") {
+        if (piece.color === "w") whiteBishops++;
+        else blackBishops++;
+      }
+
+      // Knights and bishops generally benefit from central squares.
+      if (type === "n" || type === "b") {
+        score += sign * centreBonus(file, rank) * (type === "n" ? 2 : 1);
+      }
+
+      // Encourage pawns to advance, but do not overvalue them.
+      if (type === "p") {
+        const advancement = piece.color === "w" ? 6 - rank : rank - 1;
+        score += sign * advancement * 7;
+        score += sign * centreBonus(file, rank) * 1.5;
+      }
+
+      // Small centralization bonus for the king in the endgame.
+      if (type === "k") {
+        const nonKingPieces = board.flat().filter(p => p && p.type !== "k").length;
+        if (nonKingPieces <= 8) {
+          score += sign * centreBonus(file, rank) * 3;
+        }
+      }
+    }
+  }
+
+  // A pair of bishops is a useful long-term advantage.
+  if (whiteBishops >= 2) score += 28;
+  if (blackBishops >= 2) score -= 28;
+
+  return score;
+}
+
+// ----------------------------------------------------------------
+// 7. STARTER CHESS ENGINE: MINIMAX + ALPHA-BETA PRUNING
+// ----------------------------------------------------------------
+
+/**
+ * Convert evaluation to the perspective of the side whose turn it is.
+ * This lets the search use negamax: each side tries to maximize its score.
+ */
+function evaluateForSideToMove(chess) {
+  const whiteScore = evaluatePosition(chess);
+  return chess.turn() === "w" ? whiteScore : -whiteScore;
+}
+
+/**
+ * Order promising moves first.
+ * Captures and promotions are searched early, helping alpha-beta prune more.
+ */
+function orderMoves(moves) {
+  const value = { p: 100, n: 320, b: 335, r: 500, q: 900, k: 20000 };
+
+  return moves.sort((a, b) => {
+    const scoreMove = move => {
+      let score = 0;
+      if (move.captured) {
+        // Prefer winning a valuable piece with a less valuable attacker.
+        score += 1000 + value[move.captured] - value[move.piece] / 10;
+      }
+      if (move.promotion) score += 800 + value[move.promotion];
+      if (move.san.includes("+")) score += 40;
+      return score;
+    };
+
+    return scoreMove(b) - scoreMove(a);
+  });
+}
+
+/**
+ * Negamax search.
+ *
+ * depth: how many half-moves ahead to examine.
+ * alpha: best score the current search path can guarantee.
+ * beta: opponent's cutoff threshold.
+ * ply: number of plies from the root, used to prefer quicker mates.
+ */
+function negamax(chess, depth, alpha, beta, ply = 0) {
+  // Terminal positions must be checked before the depth cutoff.
+  if (chess.isCheckmate()) return -100000 + ply;
+  if (chess.isDraw()) return 0;
+
+  // At depth zero, return the static evaluation.
+  if (depth === 0) return evaluateForSideToMove(chess);
+
+  let bestScore = -Infinity;
+  const moves = orderMoves(chess.moves({ verbose: true }));
+
+  for (const move of moves) {
+    // Play the candidate move on the search position.
+    chess.move(move);
+
+    // Negate the opponent's score because their perspective is reversed.
+    const score = -negamax(chess, depth - 1, -beta, -alpha, ply + 1);
+
+    // Restore the position before examining the next candidate.
+    chess.undo();
+
+    if (score > bestScore) bestScore = score;
+    if (score > alpha) alpha = score;
+
+    // Alpha-beta cutoff: remaining moves cannot improve this line.
+    if (alpha >= beta) break;
+  }
+
+  return bestScore;
+}
+
+/**
+ * Choose the engine's move.
+ * The game itself is not changed during search; a temporary Chess instance
+ * is created from the current FEN and used to explore possible continuations.
+ */
+function findBestEngineMove() {
+  const difficulty = difficultySelect.value;
+
+  // Each level increases the number of half-moves searched.
+  const searchDepth = {
+    beginner: 1,
+    club: 2,
+    strong: 3
+  }[difficulty] || 2;
+
+  const searchPosition = new Chess(game.fen());
+  const legalMoves = orderMoves(searchPosition.moves({ verbose: true }));
+
+  if (legalMoves.length === 0) return null;
+
+  let bestScore = -Infinity;
+  let bestMoves = [];
+
+  for (const move of legalMoves) {
+    searchPosition.move(move);
+
+    // Search from the opponent's point of view, then reverse the score.
+    const score = -negamax(
+      searchPosition,
+      searchDepth - 1,
+      -Infinity,
+      Infinity,
+      1
+    );
+
+    searchPosition.undo();
+
+    if (score > bestScore) {
+      bestScore = score;
+      bestMoves = [move];
+    } else if (score === bestScore) {
+      bestMoves.push(move);
+    }
+  }
+
+  // Beginner mode chooses randomly among equally scored moves.
+  // This makes the lowest level less predictable and less rigid.
+  const chosenIndex = difficulty === "beginner"
+    ? Math.floor(Math.random() * bestMoves.length)
+    : 0;
+
+  return bestMoves[chosenIndex];
+}
+
+// ----------------------------------------------------------------
+// 8. ENGINE TURN MANAGEMENT
+// ----------------------------------------------------------------
+
+/**
+ * Run the engine after the human has moved.
+ * setTimeout lets the browser paint the "thinking" status before searching.
+ */
+function maybeStartEngineTurn() {
+  if (opponentSelect.value !== "computer") return;
+  if (game.isGameOver() || game.turn() !== "b") return;
+
+  engineIsThinking = true;
+  engineStatusElement.textContent = "Thinking…";
+  clearPieceSelection();
+  renderBoard();
+
+  // Small delay makes the computer's turn visible instead of instantaneous.
+  window.setTimeout(() => {
+    // A new game or mode change may have happened before this callback runs.
+    if (opponentSelect.value !== "computer" || game.isGameOver() || game.turn() !== "b") {
+      engineIsThinking = false;
+      renderBoard();
+      return;
+    }
+
+    const engineMove = findBestEngineMove();
+
+    if (engineMove) {
+      // Apply the engine's selected move to the real game.
+      game.move({
+        from: engineMove.from,
+        to: engineMove.to,
+        promotion: engineMove.promotion
+      });
+    }
+
+    engineIsThinking = false;
+    engineStatusElement.textContent = "Ready";
+    renderBoard();
+  }, 120);
+}
+
+// ----------------------------------------------------------------
+// 9. GAME CONTROLS AND SETTINGS
+// ----------------------------------------------------------------
+
+// Undo one full turn in computer mode (human move + engine reply).
+undoButton.addEventListener("click", () => {
+  if (engineIsThinking) return;
+
+  // In computer mode, undo a complete human+engine turn when the engine
+  // has already replied. If the last move was White's (for example, White
+  // delivered checkmate), undo only that one move.
+  const historyBeforeUndo = game.history({ verbose: true });
+  const lastMove = historyBeforeUndo[historyBeforeUndo.length - 1];
+
+  if (
+    opponentSelect.value === "computer" &&
+    lastMove &&
+    lastMove.color === "b"
+  ) {
+    game.undo(); // Remove the computer's reply.
+    game.undo(); // Remove the human move that prompted that reply.
+  } else {
+    game.undo(); // Human-vs-human, or no computer reply has been made.
+  }
+
+  closePromotionDialog();
+  clearPieceSelection();
+  engineStatusElement.textContent = "Ready";
+  renderBoard();
+});
+
+// Start a new game and return the board to its standard position.
+newGameButton.addEventListener("click", () => {
+  game.reset();
+  engineIsThinking = false;
+  closePromotionDialog();
+  clearPieceSelection();
+  engineStatusElement.textContent = "Ready";
+  renderBoard();
+});
+
+// Flip the view only; this does not alter the actual position.
+flipButton.addEventListener("click", () => {
+  boardIsFlipped = !boardIsFlipped;
+  renderBoard();
+});
+
+// Clear selection highlights.
+clearButton.addEventListener("click", () => {
+  clearPieceSelection();
+  renderBoard();
+});
+
+// Changing opponent resets the game to avoid confusing turn ownership.
+opponentSelect.addEventListener("change", () => {
+  game.reset();
+  engineIsThinking = false;
+  closePromotionDialog();
+  clearPieceSelection();
+  engineStatusElement.textContent = "Ready";
+  renderBoard();
+  maybeStartEngineTurn();
+});
+
+// Difficulty can be changed during a game; it affects the next engine move.
+difficultySelect.addEventListener("change", () => {
+  const labels = {
+    beginner: "Beginner selected",
+    club: "Club level selected",
+    strong: "Strong level selected"
+  };
+  engineStatusElement.textContent = labels[difficultySelect.value] || "Ready";
+});
+
+// ----------------------------------------------------------------
+// 10. INITIALIZE
+// ----------------------------------------------------------------
+
+// Draw the initial position. Computer mode starts with the human as White.
 renderBoard();
 
 // ----------------------------------------------------------------
-// 9. FUTURE ENGINE INTEGRATION — DEVELOPMENT NOTES
+// 11. IDEAS FOR FUTURE ENGINE DEVELOPMENT
 // ----------------------------------------------------------------
 /*
- * Later, a computer opponent can be added without rewriting the board.
+ * Possible next steps:
  *
- * Suggested extension:
+ * 1. Increase search depth with iterative deepening.
+ * 2. Add quiescence search so the engine does not stop in the middle
+ *    of a capture sequence.
+ * 3. Add piece-square tables for more accurate positional evaluation.
+ * 4. Add transposition tables to avoid searching the same position twice.
+ * 5. Add opening-book support.
+ * 6. Move the engine into a Web Worker so deeper searches do not block
+ *    the user interface.
+ * 7. Eventually connect a Python engine or write a stronger JS engine.
  *
- * 1. Create a function such as chooseEngineMove(fen).
- * 2. Send game.fen() to your Python engine or a JavaScript engine.
- * 3. Receive a move in UCI format, for example "e2e4".
- * 4. Convert that UCI move into { from: "e2", to: "e4" }.
- * 5. Apply it with game.move(...), then call renderBoard().
- *
- * Keep the engine's move selection separate from the rules library.
- * chess.js checks whether a proposed move is legal; your future engine
- * will decide which legal move is strategically best.
+ * Keep move selection separate from the chess rules and board rendering.
  */
