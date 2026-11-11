@@ -1,0 +1,306 @@
+/* =========================================================
+   CHESS PVP — STYLE SHEET
+   This file controls appearance only. Game rules live in script.js.
+   ========================================================= */
+
+/* ---------- 1. Theme variables ---------- */
+:root {
+  --page-background: #111516;
+  --panel-background: #1d2425;
+  --panel-border: #344041;
+  --main-text: #edf1ed;
+  --muted-text: #aab5b2;
+  --light-square: #e8dfc9;
+  --dark-square: #77917e;
+  --highlight: #e6c75a;
+  --legal-move: rgba(25, 80, 48, 0.68);
+}
+
+/* ---------- 2. Basic page layout ---------- */
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  padding: 28px 16px;
+  color: var(--main-text);
+  background: radial-gradient(circle at top, #283231, var(--page-background) 58%);
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+.app {
+  width: min(100%, 1050px);
+  margin: 0 auto;
+}
+
+.page-header {
+  margin-bottom: 20px;
+}
+
+h1 {
+  margin: 0;
+  font-size: clamp(28px, 4vw, 36px);
+  letter-spacing: -0.04em;
+}
+
+.subtitle {
+  margin: 4px 0 0;
+  color: var(--muted-text);
+}
+
+/* Two-column desktop layout: board on the left, controls on the right. */
+.game-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 290px;
+  gap: 22px;
+  align-items: start;
+}
+
+/* ---------- 3. Chessboard and squares ---------- */
+.board-area {
+  width: 100%;
+  max-width: 720px;
+  margin: 0 auto;
+}
+
+.board {
+  display: grid;
+  grid-template-columns: repeat(8, minmax(0, 1fr));
+  width: 100%;
+  aspect-ratio: 1;
+  overflow: hidden;
+  border: 5px solid #34403d;
+  border-radius: 9px;
+  box-shadow: 0 18px 55px #0008;
+  user-select: none;
+}
+
+.square {
+  position: relative;
+  display: grid;
+  place-items: center;
+  min-width: 0;
+  aspect-ratio: 1;
+  padding: 0;
+  border: 0;
+  cursor: pointer;
+}
+
+.square.light { background: var(--light-square); }
+.square.dark { background: var(--dark-square); }
+
+/* Keyboard users get a visible focus outline. */
+.square:focus-visible {
+  z-index: 4;
+  outline: 3px solid white;
+  outline-offset: -4px;
+}
+
+.square.selected {
+  box-shadow: inset 0 0 0 5px var(--highlight);
+}
+
+/* Last move is shaded so players can see what just happened. */
+.square.last-move::before {
+  position: absolute;
+  inset: 0;
+  background: rgba(238, 210, 75, 0.32);
+  content: "";
+}
+
+/* ---------- 4. Chess pieces and move markers ---------- */
+.piece {
+  position: relative;
+  z-index: 1;
+  font-family: "Segoe UI Symbol", "DejaVu Sans", serif;
+  font-size: clamp(28px, 7vw, 70px);
+  line-height: 1;
+  pointer-events: none;
+}
+
+.piece.white {
+  color: #fffdf4;
+  -webkit-text-stroke: 1px #333;
+  text-shadow: 0 1px 2px #0005;
+}
+
+.piece.black {
+  color: #171a1b;
+  -webkit-text-stroke: 0.4px #f5f0e4;
+}
+
+/* Empty legal destination: small dot in the centre of the square. */
+.legal-dot {
+  position: absolute;
+  z-index: 2;
+  width: 22%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: var(--legal-move);
+  pointer-events: none;
+}
+
+/* Legal capture destination: ring around the occupied square. */
+.legal-capture {
+  position: absolute;
+  z-index: 2;
+  inset: 5%;
+  border: 5px solid var(--legal-move);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+/* Rank and file labels are placed inside the board squares. */
+.coordinate {
+  position: absolute;
+  z-index: 3;
+  color: #202624;
+  font: 10px/1 system-ui, sans-serif;
+  opacity: 0.78;
+  pointer-events: none;
+}
+
+.coordinate.rank { top: 4px; left: 5px; }
+.coordinate.file { right: 5px; bottom: 4px; }
+
+/* ---------- 5. Sidebar panels and controls ---------- */
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.panel {
+  padding: 16px;
+  border: 1px solid var(--panel-border);
+  border-radius: 10px;
+  background: var(--panel-background);
+}
+
+.panel-heading {
+  margin: 0 0 10px;
+  font-size: 15px;
+}
+
+.status {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.turn {
+  margin: 4px 0 0;
+  color: var(--muted-text);
+  font-size: 13px;
+}
+
+.button-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-top: 15px;
+}
+
+.control-button,
+.promotion-options button {
+  padding: 10px 12px;
+  border: 1px solid #465452;
+  border-radius: 7px;
+  color: var(--main-text);
+  background: #293332;
+  font: inherit;
+  cursor: pointer;
+}
+
+.control-button:hover,
+.promotion-options button:hover {
+  border-color: #b8d5c2;
+  background: #35413e;
+}
+
+.control-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.4;
+}
+
+/* ---------- 6. Move history ---------- */
+.move-history {
+  display: grid;
+  grid-template-columns: 34px 1fr 1fr;
+  gap: 4px 8px;
+  max-height: 280px;
+  min-height: 45px;
+  overflow: auto;
+  color: var(--muted-text);
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+
+.move-number { color: #82908c; }
+.move-entry { padding: 2px 5px; color: var(--main-text); border-radius: 4px; }
+.move-entry.latest { background: #35463c; }
+.empty-history { grid-column: 1 / -1; margin: 0; color: var(--muted-text); }
+
+.help-panel p {
+  margin: 7px 0 0;
+  color: var(--muted-text);
+  font-size: 13px;
+}
+
+/* ---------- 7. Pawn promotion dialog ---------- */
+.promotion-dialog {
+  position: fixed;
+  z-index: 10;
+  inset: 0;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: #000a;
+}
+
+.promotion-dialog.visible { display: flex; }
+
+.promotion-panel {
+  width: min(350px, 100%);
+  padding: 20px;
+  border: 1px solid #465452;
+  border-radius: 12px;
+  background: var(--panel-background);
+}
+
+.promotion-panel h2 { margin: 0; font-size: 19px; }
+.promotion-panel p { color: var(--muted-text); font-size: 13px; }
+
+.promotion-options {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+
+.promotion-options button {
+  padding: 8px 3px;
+  font-size: 34px;
+}
+
+.promotion-options button span {
+  display: block;
+  color: var(--muted-text);
+  font-size: 11px;
+}
+
+/* ---------- 8. Responsive layout for phones and tablets ---------- */
+@media (max-width: 780px) {
+  body { padding: 18px 10px; }
+  .game-layout { grid-template-columns: 1fr; }
+  .board-area { max-width: 650px; }
+  .sidebar { display: grid; grid-template-columns: 1fr 1fr; }
+  .sidebar .panel:last-child { grid-column: 1 / -1; }
+}
+
+@media (max-width: 470px) {
+  .sidebar { display: flex; }
+  .piece { font-size: 10vw; }
+}

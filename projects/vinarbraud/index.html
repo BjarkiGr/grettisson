@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="is">
+<head>
+<meta charset="UTF-8">
+<title>Vínarbrauðsgreining</title>
+ 
+<style>
+body {
+font-family: Arial, sans-serif;
+text-align: center;
+margin-top: 100px;
+}
+ 
+h1 {
+font-size: 40px;
+}
+ 
+button {
+font-size: 24px;
+padding: 15px 30px;
+margin: 10px;
+cursor: pointer;
+}
+ 
+#svar {
+margin-top: 40px;
+font-size: 32px;
+font-weight: bold;
+}
+</style>
+</head>
+ 
+<body>
+ 
+<h1>Er vínarbrauð á borðinu í dag?</h1>
+ 
+<button onclick="svaraJa()">Já</button>
+<button onclick="svaraNei()">Nei</button>
+ 
+<div id="svar"></div>
+ 
+<script>
+function svaraJa() {
+const erFimmtudagur = new Date().getDay() === 4;
+ 
+document.getElementById("svar").innerHTML =
+erFimmtudagur
+? "✅ Rétt! Það er fimmtudagur og vínarbrauð í dag."
+: "🚨 Nei hvur andskotinn, Hver á afmæli í dag???<br><br> Það er ekki fimmtudagur og því getur ekki verið vínarbrauð í dag.";
+}
+ 
+function svaraNei() {
+const erFimmtudagur = new Date().getDay() === 4;
+ 
+document.getElementById("svar").innerHTML =
+erFimmtudagur
+? "⚠️ Rangt! Það er fimmtudagur og það á að vera vínarbrauð."
+: "✅ Rétt! Það er ekki fimmtudagur og því ekkert vínarbrauð.";
+}
+</script>
+ 
+</body>
+</html>

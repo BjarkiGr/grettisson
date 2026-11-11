@@ -1,63 +1,76 @@
 <!DOCTYPE html>
-<html lang="is">
+<html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>Vínarbrauðsgreining</title>
- 
-<style>
-body {
-font-family: Arial, sans-serif;
-text-align: center;
-margin-top: 100px;
-}
- 
-h1 {
-font-size: 40px;
-}
- 
-button {
-font-size: 24px;
-padding: 15px 30px;
-margin: 10px;
-cursor: pointer;
-}
- 
-#svar {
-margin-top: 40px;
-font-size: 32px;
-font-weight: bold;
-}
-</style>
+  <!-- Document metadata: browser title, character encoding and responsive layout. -->
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chess PvP</title>
+
+  <!-- Keep styling in its own file so the HTML stays focused on structure. -->
+  <link rel="stylesheet" href="style.css">
+
+  <!-- Load the game script after the HTML has been parsed. -->
+  <script type="module" src="script.js"></script>
 </head>
- 
 <body>
- 
-<h1>Er vínarbrauð á borðinu í dag?</h1>
- 
-<button onclick="svaraJa()">Já</button>
-<button onclick="svaraNei()">Nei</button>
- 
-<div id="svar"></div>
- 
-<script>
-function svaraJa() {
-const erFimmtudagur = new Date().getDay() === 4;
- 
-document.getElementById("svar").innerHTML =
-erFimmtudagur
-? "✅ Rétt! Það er fimmtudagur og vínarbrauð í dag."
-: "🚨 Nei hvur andskotinn, Hver á afmæli í dag???<br><br> Það er ekki fimmtudagur og því getur ekki verið vínarbrauð í dag.";
-}
- 
-function svaraNei() {
-const erFimmtudagur = new Date().getDay() === 4;
- 
-document.getElementById("svar").innerHTML =
-erFimmtudagur
-? "⚠️ Rangt! Það er fimmtudagur og það á að vera vínarbrauð."
-: "✅ Rétt! Það er ekki fimmtudagur og því ekkert vínarbrauð.";
-}
-</script>
- 
+  <main class="app">
+    <header class="page-header">
+      <div>
+        <h1>Chess</h1>
+        <p class="subtitle">Local two-player chess</p>
+      </div>
+    </header>
+
+    <div class="game-layout">
+      <!-- The JavaScript creates all 64 interactive squares inside this element. -->
+      <section class="board-area" aria-label="Chess board">
+        <div id="board" class="board"></div>
+      </section>
+
+      <!-- Game information and controls are kept separate from the board. -->
+      <aside class="sidebar">
+        <section class="panel">
+          <h2 class="panel-heading">Game status</h2>
+          <p id="status" class="status" aria-live="polite">Starting game…</p>
+          <p id="turn" class="turn">White to move</p>
+
+          <div class="button-grid">
+            <button id="undo-button" class="control-button" type="button">Undo move</button>
+            <button id="new-game-button" class="control-button" type="button">New game</button>
+            <button id="flip-button" class="control-button" type="button">Flip board</button>
+            <button id="clear-button" class="control-button" type="button">Clear selection</button>
+          </div>
+        </section>
+
+        <section class="panel">
+          <h2 class="panel-heading">Move history</h2>
+          <div id="move-history" class="move-history">
+            <p class="empty-history">No moves yet.</p>
+          </div>
+        </section>
+
+        <section class="panel help-panel">
+          <h2 class="panel-heading">How to play</h2>
+          <p>Select one of your pieces. Legal destination squares will be highlighted. Select a highlighted square to move.</p>
+          <p>Both players use the same device and board.</p>
+        </section>
+      </aside>
+    </div>
+  </main>
+
+  <!-- Promotion dialog: shown when a pawn reaches the final rank. -->
+  <div id="promotion-dialog" class="promotion-dialog" role="dialog"
+       aria-modal="true" aria-labelledby="promotion-heading">
+    <div class="promotion-panel">
+      <h2 id="promotion-heading">Promote your pawn</h2>
+      <p>Choose the piece you want.</p>
+      <div class="promotion-options">
+        <button type="button" data-promotion="q" aria-label="Promote to queen">♕<span>Queen</span></button>
+        <button type="button" data-promotion="r" aria-label="Promote to rook">♖<span>Rook</span></button>
+        <button type="button" data-promotion="b" aria-label="Promote to bishop">♗<span>Bishop</span></button>
+        <button type="button" data-promotion="n" aria-label="Promote to knight">♘<span>Knight</span></button>
+      </div>
+    </div>
+  </div>
 </body>
 </html>
