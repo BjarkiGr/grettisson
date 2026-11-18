@@ -1,0 +1,282 @@
+// Orchestrates everything: bank loading, daily/unlimited runs, the
+// guess -> reveal -> results flow, the growing lengja, milestones, sharing.
+const Game = {
+  mode: 'daily', items: [], idx: 0, guesses: [], phase: 'loading',
+  number: 1, thursday: false, sfx: new Sfx(), lastResult: null,
+  guessValue: 250, el: {}, bannerTimer: null,
+
+  async boot() {
+    const $ = (id) => document.getElementById(id);
+    this.el = {
+      puzzle: $('puzzle-label'), streak: $('streak-label'), cm: $('cm-count'),
+      loading: $('loading'), loadError: $('load-error'),
+      guess: $('guess-phase'), reveal: $('reveal-phase'), results: $('results-phase'),
+      progress: $('progress'), img: $('product-img'), name: $('product-name'),
+      size: $('product-size'), cat: $('product-cat'),
+      slider: $('guess-slider'), readout: $('guess-readout'), ticks: $('slider-ticks'),
+      guessError: $('guess-error'), bake: $('bake-btn'),
+      tierEmoji: $('tier-emoji'), tierName: $('tier-name'), tierCm: $('tier-cm'),
+      rGuess: $('reveal-guess'), rPrice: $('reveal-price'), rError: $('reveal-error'),
+      link: $('product-link'), next: $('next-btn'),
+      rTitle: $('results-title'), rCm: $('results-cm'), rRank: $('results-rank'),
+      receipt: $('results-receipt'), rNote: $('results-note'),
+      share: $('share-btn'), unlimited: $('unlimited-btn'), backDaily: $('back-daily-btn'),
+      tomorrow: $('tomorrow-note'), banner: $('milestone-banner'),
+      howto: $('howto'), snapshot: $('snapshot-date'), mute: $('mute-btn'),
+    };
+    this.el.img.onerror = () => {
+      this.el.img.src = 'data:image/svg+xml;utf8,' + encodeURIComponent(
+        '<svg xmlns="http://www.w3.org/2000/svg" width="160" height="160"><text x="80" y="105" font-size="90" text-anchor="middle">🥐</text></svg>');
+      this.el.img.onerror = null;
+    };
+    Lengja.init($('lengja-scroller'), $('strip'), $('ruler'));
+    this.buildTicks();
+    this.bind();
+    this.updateStreak();
+    try { await loadBank(); } catch (e) {
+      this.el.loading.hidden = true; this.el.loadError.hidden = false; return;
+    }
+    this.el.snapshot.textContent = Bank.snapshotDate;
+    this.el.loading.hidden = true;
+    let seen = false;
+    try { seen = !!localStorage.getItem('verdlaengjan-seen-howto'); } catch (e) { /* ignore */ }
+    if (!seen) this.openHowto();
+    if (Daily.playedToday()) this.showSaved(); else this.startDaily();
+  },
+
+  bind() {
+    this.el.bake.addEventListener('click', () => this.bake());
+    this.el.slider.addEventListener('input', () => {
+      this.guessValue = sliderToPrice(parseInt(this.el.slider.value, 10));
+      this.el.readout.textContent = formatKr(this.guessValue);
+    });
+    this.el.slider.addEventListener('keydown', (e) => { if (e.key === 'Enter') this.bake(); });
+    document.querySelectorAll('.tune-btn').forEach((b) => {
+      b.addEventListener('click', () => this.setGuess(this.guessValue + parseInt(b.dataset.d, 10)));
+    });
+    this.el.next.addEventListener('click', () => this.next());
+    this.el.share.addEventListener('click', () => this.share());
+    this.el.unlimited.addEventListener('click', () => { this.sfx.unlock(); this.startUnlimited(); });
+    this.el.backDaily.addEventListener('click', () => this.showSaved());
+    document.getElementById('retry-btn').addEventListener('click', () => location.reload());
+    document.getElementById('help-btn').addEventListener('click', () => this.openHowto());
+    document.getElementById('howto-close').addEventListener('click', () => this.closeHowto());
+    this.el.mute.addEventListener('click', () => {
+      this.sfx.unlock();
+      const m = this.sfx.toggleMute();
+      this.el.mute.textContent = m ? '🔇' : '🔊';
+      try { localStorage.setItem('verdlaengjan-muted', m ? '1' : '0'); } catch (e) { /* ignore */ }
+    });
+    try {
+      if (localStorage.getItem('verdlaengjan-muted') === '1') {
+        this.sfx.muted = true; this.el.mute.textContent = '🔇';
+      }
+    } catch (e) { /* ignore */ }
+  },
+
+  openHowto() { this.el.howto.hidden = false; },
+  closeHowto() {
+    this.el.howto.hidden = true;
+    try { localStorage.setItem('verdlaengjan-seen-howto', '1'); } catch (e) { /* ignore */ }
+  },
+
+  // Set the guess programmatically (fine-tune buttons, per-item reset):
+  // clamp to the slider range, reposition the thumb, update the readout.
+  setGuess(p) {
+    this.guessValue = clamp(Math.round(p), SLIDER_MIN, SLIDER_MAX);
+    this.el.slider.value = priceToSlider(this.guessValue);
+    this.el.readout.textContent = formatKr(this.guessValue);
+  },
+
+  buildTicks() {
+    const prices = [10, 50, 100, 250, 500, 1000, 2500, 5000, 15000];
+    this.el.ticks.innerHTML = '';
+    for (const p of prices) {
+      const t = document.createElement('span');
+      t.style.left = (priceToSlider(p) / SLIDER_STEPS * 100) + '%';
+      t.textContent = formatKr(p).replace(' kr.', '');
+      this.el.ticks.appendChild(t);
+    }
+  },
+
+  startDaily() {
+    this.mode = 'daily';
+    this.number = Daily.number();
+    this.thursday = isThursday(Daily.today());
+    this.items = buildDailyFive(Bank.products, Daily.today(), this.number);
+    this.el.puzzle.textContent = '#' + this.number + ' · dagleg karfa';
+    this.startRun();
+  },
+
+  startUnlimited() {
+    this.mode = 'unlimited';
+    this.thursday = false;
+    this.items = randomFive(Bank.products);
+    this.el.puzzle.textContent = 'ótakmarkað bakkelsi ∞';
+    this.startRun();
+  },
+
+  startRun() {
+    this.idx = 0; this.guesses = [];
+    Lengja.reset();
+    this.updateCm();
+    this.showGuess();
+  },
+
+  showGuess() {
+    this.phase = 'guess';
+    this.el.guess.hidden = false; this.el.reveal.hidden = true; this.el.results.hidden = true;
+    const p = this.items[this.idx];
+    this.el.progress.textContent = 'Vara ' + (this.idx + 1) + ' af ' + this.items.length;
+    this.el.img.style.display = '';
+    this.el.img.src = p.image;
+    this.el.img.alt = p.name;
+    this.el.name.textContent = p.name;
+    this.el.size.textContent = p.size || '';
+    this.el.cat.textContent = p.category ? (p.size ? ' · ' : '') + p.category : '';
+    this.setGuess(250);
+    this.el.guessError.hidden = true;
+    this.el.slider.focus({ preventScroll: true });
+    if (this.items[this.idx + 1]) { const im = new Image(); im.src = this.items[this.idx + 1].image; }
+  },
+
+  bake() {
+    if (this.phase !== 'guess') return;
+    this.sfx.unlock();
+    const v = this.guessValue;
+    if (!Number.isFinite(v) || v <= 0) return; // slider always yields a valid price
+    const p = this.items[this.idx];
+    const s = scoreGuess(v, p.price);
+    const g = { sku: p.sku, name: p.name, guess: v, price: p.price, tierId: s.tierId, cm: s.cm, error: s.error };
+    this.guesses.push(g);
+    const prev = Lengja.totalCm;
+    Lengja.addSlice(s.cm, s.tierId, true);
+    this.updateCm();
+    this.checkMilestones(prev, Lengja.totalCm);
+    if (s.tierId === 'exact') this.sfx.fanfare();
+    else if (s.tierId === 'miss') this.sfx.sad();
+    else { this.sfx.ding(); this.sfx.puff(); }
+    this.showReveal(g, p);
+  },
+
+  showReveal(g, p) {
+    this.phase = 'reveal';
+    this.el.guess.hidden = true; this.el.reveal.hidden = false;
+    const t = tierById(g.tierId);
+    this.el.tierEmoji.textContent = t.emoji;
+    this.el.tierName.textContent = t.name;
+    this.el.tierCm.textContent = '+' + g.cm + ' cm';
+    this.el.rGuess.textContent = formatKr(g.guess);
+    this.el.rPrice.textContent = formatKr(g.price);
+    this.el.rError.textContent = g.guess === g.price ? '0% — nákvæmt!' : Math.round(g.error * 100) + '%';
+    this.el.link.href = p.url;
+    this.el.next.textContent = this.idx === this.items.length - 1 ? 'Sjá lengjuna →' : 'Næsta vara →';
+    this.el.next.focus({ preventScroll: true });
+  },
+
+  next() {
+    this.idx++;
+    if (this.idx < this.items.length) this.showGuess(); else this.finish();
+  },
+
+  finish() {
+    const bonus = this.thursday && this.mode === 'daily';
+    if (bonus) {
+      const prev = Lengja.totalCm;
+      Lengja.addSlice(THURSDAY_CM, 'thursday', true);
+      this.updateCm();
+      this.checkMilestones(prev, Lengja.totalCm);
+    }
+    const total = totalCm(this.guesses, bonus);
+    const res = {
+      number: this.number, date: Daily.today(), guesses: this.guesses,
+      totalCm: total, thursdayBonus: bonus,
+    };
+    if (this.mode === 'daily') { Daily.recordResult(res); this.updateStreak(); }
+    else Daily.recordUnlimited(total);
+    this.lastResult = res;
+    this.showResults(res);
+  },
+
+  showResults(res) {
+    this.phase = 'results';
+    this.el.guess.hidden = true; this.el.reveal.hidden = true; this.el.results.hidden = false;
+    const daily = this.mode === 'daily';
+    this.el.rTitle.textContent = daily ? 'Lengjan þín er tilbúin!' : 'Ótakmörkuð lengja!';
+    this.el.rCm.textContent = res.totalCm + ' cm';
+    this.el.rRank.textContent = rankFor(res.totalCm);
+    this.el.receipt.innerHTML = '';
+    for (const g of res.guesses) {
+      const t = tierById(g.tierId);
+      const item = document.createElement('div');
+      item.className = 'r-item';
+      const nm = document.createElement('div');
+      nm.className = 'r-name';
+      nm.textContent = t.emoji + ' ' + g.name;
+      const row = document.createElement('div');
+      row.className = 'r-row';
+      const a = document.createElement('span');
+      a.textContent = formatKr(g.guess) + ' → ' + formatKr(g.price);
+      const b = document.createElement('span');
+      b.textContent = '+' + g.cm + ' cm';
+      row.appendChild(a); row.appendChild(b);
+      item.appendChild(nm); item.appendChild(row);
+      this.el.receipt.appendChild(item);
+    }
+    if (res.thursdayBonus) {
+      const bonus = document.createElement('div');
+      bonus.className = 'r-row bonus-row';
+      bonus.innerHTML = '<span>🥐 Fimmtudagsbonus — vínarbrauð í kaffi!</span><span>+' + THURSDAY_CM + ' cm</span>';
+      this.el.receipt.appendChild(bonus);
+    }
+    this.el.rNote.textContent = daily
+      ? 'Verð miðað við verðskrá Krónunnar ' + Bank.snapshotDate + '.'
+      : 'Besta ótakmarkaða lengja: ' + (Daily.load().bestUnlimited || 0) + ' cm.';
+    this.el.share.hidden = !daily;
+    this.el.backDaily.hidden = daily;
+    this.el.tomorrow.textContent = daily ? 'Ný karfa á morgun — komdu aftur! 🔥' : '';
+  },
+
+  // Rebuild today's finished lengja from the saved result (no animations).
+  showSaved() {
+    const res = Daily.todayResult();
+    if (!res) { this.startDaily(); return; }
+    this.mode = 'daily';
+    this.number = res.number;
+    this.el.puzzle.textContent = '#' + res.number + ' · dagleg karfa';
+    Lengja.reset();
+    for (const g of res.guesses) Lengja.addSlice(g.cm, g.tierId, false);
+    if (res.thursdayBonus) Lengja.addSlice(THURSDAY_CM, 'thursday', false);
+    this.updateCm();
+    this.lastResult = res;
+    this.showResults(res);
+  },
+
+  share() {
+    if (!this.lastResult) return;
+    const ok = Daily.copyShare(this.lastResult);
+    if (ok) {
+      this.el.share.textContent = 'Afritað! ✓';
+      setTimeout(() => { this.el.share.textContent = 'Deila 📋'; }, 2000);
+    } else {
+      this.el.rNote.textContent = Daily.shareText(this.lastResult);
+    }
+  },
+
+  checkMilestones(prev, now) {
+    const marks = [[30, '🚩 Heil lengja!'], [60, '🚩 Bakkablöð!'], [100, '🏆 METRALENGJAN!']];
+    const hit = marks.filter(([cm]) => prev < cm && now >= cm).pop();
+    if (!hit) return;
+    this.el.banner.textContent = hit[1];
+    this.el.banner.hidden = false;
+    this.sfx.fanfare();
+    clearTimeout(this.bannerTimer);
+    this.bannerTimer = setTimeout(() => { this.el.banner.hidden = true; }, 2600);
+  },
+
+  updateCm() { this.el.cm.textContent = Lengja.totalCm + ' cm'; },
+  updateStreak() { this.el.streak.textContent = '🔥 bakararöð: ' + Daily.load().streak; },
+};
+
+window.addEventListener('DOMContentLoaded', () => Game.boot());
+

@@ -1,0 +1,1986 @@
+{
+  "snapshotDate": "2026-11-18",
+  "source": "kronan.is JSON-LD",
+  "products": [
+    {
+      "sku": "100273171",
+      "name": "Krónan lífrænt safi appelsínu",
+      "size": "500 ml.",
+      "price": 499,
+      "category": "Ávaxtasafar",
+      "image": "https://media.kronan.is/products/127369",
+      "url": "https://kronan.is/vara/100273171-kronan-lifraent-safi-appelsinu",
+      "fun": false
+    },
+    {
+      "sku": "100273170",
+      "name": "Krónan lífrænt safi epla",
+      "size": "500 ml.",
+      "price": 399,
+      "category": "Ávaxtasafar",
+      "image": "https://media.kronan.is/products/127370",
+      "url": "https://kronan.is/vara/100273170-kronan-lifraent-safi-epla",
+      "fun": false
+    },
+    {
+      "sku": "100273169",
+      "name": "Krónan lífrænt safi lime og engifer",
+      "size": "500 ml.",
+      "price": 499,
+      "category": "Ávaxtasafar",
+      "image": "https://media.kronan.is/products/127383",
+      "url": "https://kronan.is/vara/100273169-kronan-lifraent-safi-lime-og-engifer",
+      "fun": false
+    },
+    {
+      "sku": "100232187",
+      "name": "Grön Balance baby pads 9x11 cm",
+      "size": "40 stk.",
+      "price": 413,
+      "category": "Barnasnyrtivörur",
+      "image": "https://media.kronan.is/products/109699",
+      "url": "https://kronan.is/vara/100232187-gron-balance-baby-pads-9x11-cm",
+      "fun": true
+    },
+    {
+      "sku": "100217526",
+      "name": "Grön Balance baðolía",
+      "size": "150 ml.",
+      "price": 480,
+      "category": "Barnasnyrtivörur",
+      "image": "https://media.kronan.is/products/126297",
+      "url": "https://kronan.is/vara/100217526-gron-balance-badolia",
+      "fun": false
+    },
+    {
+      "sku": "100232188",
+      "name": "Grön Balance barna eyrnapinnar",
+      "size": "56 stk.",
+      "price": 143,
+      "category": "Barnasnyrtivörur",
+      "image": "https://media.kronan.is/products/111076",
+      "url": "https://kronan.is/vara/100232188-gron-balance-barna-eyrnapinnar",
+      "fun": true
+    },
+    {
+      "sku": "100272276",
+      "name": "Krónan lífrænt kjúklingabaunir",
+      "size": "390 gr.",
+      "price": 229,
+      "category": "Baunir og tófú",
+      "image": "https://media.kronan.is/products/127365",
+      "url": "https://kronan.is/vara/100272276-kronan-lifraent-kjuklingabaunir",
+      "fun": false
+    },
+    {
+      "sku": "100272280",
+      "name": "Krónan lífrænt nýrnabaunir",
+      "size": "390 gr.",
+      "price": 229,
+      "category": "Baunir og tófú",
+      "image": "https://media.kronan.is/products/127372",
+      "url": "https://kronan.is/vara/100272280-kronan-lifraent-nyrnabaunir",
+      "fun": false
+    },
+    {
+      "sku": "100272278",
+      "name": "Krónan lífrænt smjörbaunir",
+      "size": "390 gr.",
+      "price": 229,
+      "category": "Baunir og tófú",
+      "image": "https://media.kronan.is/products/127373",
+      "url": "https://kronan.is/vara/100272278-kronan-lifraent-smjorbaunir",
+      "fun": false
+    },
+    {
+      "sku": "100272279",
+      "name": "Krónan lífrænt svartar baunir",
+      "size": "390 gr.",
+      "price": 229,
+      "category": "Baunir og tófú",
+      "image": "https://media.kronan.is/products/127374",
+      "url": "https://kronan.is/vara/100272279-kronan-lifraent-svartar-baunir",
+      "fun": false
+    },
+    {
+      "sku": "00900370",
+      "name": "Rauð vínber",
+      "size": "ca. 1200 gr.",
+      "price": 1476,
+      "category": "Ber",
+      "image": "https://media.kronan.is/products/126674",
+      "url": "https://kronan.is/vara/00900370-raud-vinber",
+      "fun": true
+    },
+    {
+      "sku": "100248708",
+      "name": "Grön Balance blautklútar barna",
+      "size": "100 stk.",
+      "price": 284,
+      "category": "Blautklútar",
+      "image": "https://media.kronan.is/products/105432",
+      "url": "https://kronan.is/vara/100248708-gron-balance-blautklutar-barna",
+      "fun": false
+    },
+    {
+      "sku": "100246153",
+      "name": "Grön Balance blautklútar barna 3x12",
+      "size": "36 stk.",
+      "price": 215,
+      "category": "Blautklútar",
+      "image": "https://media.kronan.is/products/57133",
+      "url": "https://kronan.is/vara/100246153-gron-balance-blautklutar-barna-3x12",
+      "fun": false
+    },
+    {
+      "sku": "100264562",
+      "name": "Grön Balance bleiur buxna nr. 4, 7-14kg",
+      "size": "42 stk.",
+      "price": 1449,
+      "category": "Bleiur",
+      "image": "https://media.kronan.is/products/108466",
+      "url": "https://kronan.is/vara/100264562-gron-balance-bleiur-buxna-nr-4-7-14kg",
+      "fun": false
+    },
+    {
+      "sku": "100232189",
+      "name": "Grön Balance bleiur new born nr. 1,  2-4kg",
+      "size": "28 stk.",
+      "price": 529,
+      "category": "Bleiur",
+      "image": "https://media.kronan.is/products/76750",
+      "url": "https://kronan.is/vara/100232189-gron-balance-bleiur-new-born-nr-1-2-4kg",
+      "fun": false
+    },
+    {
+      "sku": "100234111",
+      "name": "Grön Balance bleiur nr. 3, 5-9kg",
+      "size": "56 stk.",
+      "price": 1273,
+      "category": "Bleiur",
+      "image": "https://media.kronan.is/products/77023",
+      "url": "https://kronan.is/vara/100234111-gron-balance-bleiur-nr-3-5-9kg",
+      "fun": false
+    },
+    {
+      "sku": "100249662",
+      "name": "Taylor & Colledge vanilludropar lífrænir",
+      "size": "50 ml.",
+      "price": 799,
+      "category": "Bökunarkrydd",
+      "image": "https://media.kronan.is/products/75439",
+      "url": "https://kronan.is/vara/100249662-taylor-colledge-vanilludropar-lifraenir",
+      "fun": true
+    },
+    {
+      "sku": "100264587",
+      "name": "Cachet 300g suðusúkkulaði",
+      "size": "300 gr.",
+      "price": 639,
+      "category": "Bökunarsúkkulaði og spænir",
+      "image": "https://media.kronan.is/products/107599",
+      "url": "https://kronan.is/vara/100264587-cachet-300g-sudusukkuladi",
+      "fun": false
+    },
+    {
+      "sku": "100260623",
+      "name": "Freyju lakkrískurl djúpur",
+      "size": "150 gr.",
+      "price": 426,
+      "category": "Bökunarsúkkulaði og spænir",
+      "image": "https://media.kronan.is/products/97830",
+      "url": "https://kronan.is/vara/100260623-freyju-lakkriskurl-djupur",
+      "fun": false
+    },
+    {
+      "sku": "100260618",
+      "name": "Freyju lakkrískurl sterkar djúpur",
+      "size": "150 gr.",
+      "price": 426,
+      "category": "Bökunarsúkkulaði og spænir",
+      "image": "https://media.kronan.is/products/97829",
+      "url": "https://kronan.is/vara/100260618-freyju-lakkriskurl-sterkar-djupur",
+      "fun": false
+    },
+    {
+      "sku": "05007063",
+      "name": "Nóa karamellukurl",
+      "size": "150 gr.",
+      "price": 516,
+      "category": "Bökunarsúkkulaði og spænir",
+      "image": "https://media.kronan.is/products/55447",
+      "url": "https://kronan.is/vara/05007063-noa-karamellukurl",
+      "fun": false
+    },
+    {
+      "sku": "04600376",
+      "name": "Nóa súkkulaðiperlur",
+      "size": "150 gr.",
+      "price": 520,
+      "category": "Bökunarsúkkulaði og spænir",
+      "image": "https://media.kronan.is/products/107241",
+      "url": "https://kronan.is/vara/04600376-noa-sukkuladiperlur",
+      "fun": false
+    },
+    {
+      "sku": "100269136",
+      "name": "Odense dökkir súkkulaðidropar",
+      "size": "150 gr.",
+      "price": 336,
+      "category": "Bökunarsúkkulaði og spænir",
+      "image": "https://media.kronan.is/products/117510",
+      "url": "https://kronan.is/vara/100269136-odense-dokkir-sukkuladidropar",
+      "fun": false
+    },
+    {
+      "sku": "100269137",
+      "name": "Odense hvítir súkkulaðidropar",
+      "size": "150 gr.",
+      "price": 366,
+      "category": "Bökunarsúkkulaði og spænir",
+      "image": "https://media.kronan.is/products/117509",
+      "url": "https://kronan.is/vara/100269137-odense-hvitir-sukkuladidropar",
+      "fun": false
+    },
+    {
+      "sku": "100268411",
+      "name": "Jóladagatal anthon berg",
+      "size": "264 gr.",
+      "price": 1999,
+      "category": "Dagatöl",
+      "image": "https://media.kronan.is/products/119064",
+      "url": "https://kronan.is/vara/100268411-joladagatal-anthon-berg",
+      "fun": true
+    },
+    {
+      "sku": "100274253",
+      "name": "Jóladagatal brushworks",
+      "size": "1 stk.",
+      "price": 11999,
+      "category": "Dagatöl",
+      "image": "https://media.kronan.is/products/129427",
+      "url": "https://kronan.is/vara/100274253-joladagatal-brushworks",
+      "fun": true
+    },
+    {
+      "sku": "100274294",
+      "name": "Jóladagatal Catrice house of gold",
+      "size": "1 stk.",
+      "price": 8900,
+      "category": "Dagatöl",
+      "image": "https://media.kronan.is/products/129391",
+      "url": "https://kronan.is/vara/100274294-joladagatal-catrice-house-of-gold",
+      "fun": true
+    },
+    {
+      "sku": "100249138",
+      "name": "Jóladagatal Chupa chups",
+      "size": "225 gr.",
+      "price": 1550,
+      "category": "Dagatöl",
+      "image": "https://media.kronan.is/products/97488",
+      "url": "https://kronan.is/vara/100249138-joladagatal-chupa-chups",
+      "fun": true
+    },
+    {
+      "sku": "100274293",
+      "name": "Jóladagatal essence baked with love",
+      "size": "1 stk.",
+      "price": 6900,
+      "category": "Dagatöl",
+      "image": "https://media.kronan.is/products/129390",
+      "url": "https://kronan.is/vara/100274293-joladagatal-essence-baked-with-love",
+      "fun": true
+    },
+    {
+      "sku": "100263160",
+      "name": "Jóladagatal ferrero",
+      "size": "259 gr.",
+      "price": 3499,
+      "category": "Dagatöl",
+      "image": "https://media.kronan.is/products/108630",
+      "url": "https://kronan.is/vara/100263160-joladagatal-ferrero",
+      "fun": true
+    },
+    {
+      "sku": "100245851",
+      "name": "Jóladagatal Fruit funk gurra grís",
+      "size": "173 gr.",
+      "price": 1099,
+      "category": "Dagatöl",
+      "image": "https://media.kronan.is/products/128479",
+      "url": "https://kronan.is/vara/100245851-joladagatal-fruit-funk-gurra-gris",
+      "fun": true
+    },
+    {
+      "sku": "100273883",
+      "name": "Jóladagatal Fruit funk hvolpasveit",
+      "size": "173 gr.",
+      "price": 1099,
+      "category": "Dagatöl",
+      "image": "https://media.kronan.is/products/128487",
+      "url": "https://kronan.is/vara/100273883-joladagatal-fruit-funk-hvolpasveit",
+      "fun": true
+    },
+    {
+      "sku": "100263159",
+      "name": "Jóladagatal kinder bueno",
+      "size": "181 gr.",
+      "price": 1830,
+      "category": "Dagatöl",
+      "image": "https://media.kronan.is/products/119156",
+      "url": "https://kronan.is/vara/100263159-joladagatal-kinder-bueno",
+      "fun": true
+    },
+    {
+      "sku": "100263164",
+      "name": "Jóladagatal kinder surprise friends",
+      "size": "370 gr.",
+      "price": 3799,
+      "category": "Dagatöl",
+      "image": "https://media.kronan.is/products/108441",
+      "url": "https://kronan.is/vara/100263164-joladagatal-kinder-surprise-friends",
+      "fun": true
+    },
+    {
+      "sku": "100274303",
+      "name": "Jóladagatal Lego city",
+      "size": "1 stk.",
+      "price": 4999,
+      "category": "Dagatöl",
+      "image": "https://media.kronan.is/products/129461",
+      "url": "https://kronan.is/vara/100274303-joladagatal-lego-city",
+      "fun": true
+    },
+    {
+      "sku": "100274302",
+      "name": "Jóladagatal Lego disney",
+      "size": "1 stk.",
+      "price": 5999,
+      "category": "Dagatöl",
+      "image": "https://media.kronan.is/products/130280",
+      "url": "https://kronan.is/vara/100274302-joladagatal-lego-disney",
+      "fun": true
+    },
+    {
+      "sku": "100274308",
+      "name": "Jóladagatal Lego friends",
+      "size": "1 stk.",
+      "price": 4999,
+      "category": "Dagatöl",
+      "image": "https://media.kronan.is/products/130281",
+      "url": "https://kronan.is/vara/100274308-joladagatal-lego-friends",
+      "fun": true
+    },
+    {
+      "sku": "100274301",
+      "name": "Jóladagatal Lego marvel",
+      "size": "1 stk.",
+      "price": 5999,
+      "category": "Dagatöl",
+      "image": "https://media.kronan.is/products/129459",
+      "url": "https://kronan.is/vara/100274301-joladagatal-lego-marvel",
+      "fun": true
+    },
+    {
+      "sku": "100274306",
+      "name": "Jóladagatal Lego star wars",
+      "size": "1 stk.",
+      "price": 5999,
+      "category": "Dagatöl",
+      "image": "https://media.kronan.is/products/129464",
+      "url": "https://kronan.is/vara/100274306-joladagatal-lego-star-wars",
+      "fun": true
+    },
+    {
+      "sku": "100256463",
+      "name": "Jóladagatal Lindt kúlur",
+      "size": "117 gr.",
+      "price": 1899,
+      "category": "Dagatöl",
+      "image": "https://media.kronan.is/products/108306",
+      "url": "https://kronan.is/vara/100256463-joladagatal-lindt-kulur",
+      "fun": true
+    },
+    {
+      "sku": "100274532",
+      "name": "Jóladagatal Match attax 26/27",
+      "size": "1 stk.",
+      "price": 6999,
+      "category": "Dagatöl",
+      "image": "https://media.kronan.is/products/130107",
+      "url": "https://kronan.is/vara/100274532-joladagatal-match-attax-2627",
+      "fun": true
+    },
+    {
+      "sku": "100274524",
+      "name": "Jóladagatal Playmobil dino",
+      "size": "1 stk.",
+      "price": 5999,
+      "category": "Dagatöl",
+      "image": "https://media.kronan.is/products/129953",
+      "url": "https://kronan.is/vara/100274524-joladagatal-playmobil-dino",
+      "fun": true
+    },
+    {
+      "sku": "100274510",
+      "name": "Jóladagatal Pringles",
+      "size": "990 gr.",
+      "price": 4899,
+      "category": "Dagatöl",
+      "image": "https://media.kronan.is/products/129768",
+      "url": "https://kronan.is/vara/100274510-joladagatal-pringles",
+      "fun": true
+    },
+    {
+      "sku": "100231670",
+      "name": "Jóladagatal súkkulaði 50g",
+      "size": "50 gr.",
+      "price": 379,
+      "category": "Dagatöl",
+      "image": "https://media.kronan.is/products/109021",
+      "url": "https://kronan.is/vara/100231670-joladagatal-sukkuladi-50g",
+      "fun": true
+    },
+    {
+      "sku": "100274304",
+      "name": "Jóladagatal Tölukubbar",
+      "size": "1 stk.",
+      "price": 5599,
+      "category": "Dagatöl",
+      "image": "https://media.kronan.is/products/129462",
+      "url": "https://kronan.is/vara/100274304-joladagatal-tolukubbar",
+      "fun": true
+    },
+    {
+      "sku": "100259191",
+      "name": "Jóladagatal vegan súkkulaði",
+      "size": "75 gr.",
+      "price": 799,
+      "category": "Dagatöl",
+      "image": "https://media.kronan.is/products/105199",
+      "url": "https://kronan.is/vara/100259191-joladagatal-vegan-sukkuladi",
+      "fun": true
+    },
+    {
+      "sku": "100273984",
+      "name": "Jóladagatal Zozole",
+      "size": "374 gr.",
+      "price": 1345,
+      "category": "Dagatöl",
+      "image": "https://media.kronan.is/products/128729",
+      "url": "https://kronan.is/vara/100273984-joladagatal-zozole",
+      "fun": true
+    },
+    {
+      "sku": "02000392",
+      "name": "Kötlu vanilludropar",
+      "size": "1 stk.",
+      "price": 180,
+      "category": "Dropar",
+      "image": "https://media.kronan.is/products/50299",
+      "url": "https://kronan.is/vara/02000392-kotlu-vanilludropar",
+      "fun": true
+    },
+    {
+      "sku": "100250258",
+      "name": "Nesbú hamingjuegg 10stk",
+      "size": "630 gr.",
+      "price": 725,
+      "category": "Egg",
+      "image": "https://media.kronan.is/products/76732",
+      "url": "https://kronan.is/vara/100250258-nesbu-hamingjuegg-10stk",
+      "fun": true
+    },
+    {
+      "sku": "100274210",
+      "name": "Epli bloss",
+      "size": "4 stk.",
+      "price": 599,
+      "category": "Epli",
+      "image": "https://media.kronan.is/products/129940",
+      "url": "https://kronan.is/vara/100274210-epli-bloss",
+      "fun": false
+    },
+    {
+      "sku": "100273973",
+      "name": "epli cosmic crisp",
+      "size": "6 stk.",
+      "price": 699,
+      "category": "Epli",
+      "image": "https://media.kronan.is/products/129759",
+      "url": "https://kronan.is/vara/100273973-epli-cosmic-crisp",
+      "fun": false
+    },
+    {
+      "sku": "100274209",
+      "name": "Epli santana",
+      "size": "4 stk.",
+      "price": 699,
+      "category": "Epli",
+      "image": "https://media.kronan.is/products/129939",
+      "url": "https://kronan.is/vara/100274209-epli-santana",
+      "fun": false
+    },
+    {
+      "sku": "02000432",
+      "name": "Flóru matarsódi",
+      "size": "150 gr.",
+      "price": 197,
+      "category": "Ger, lyftiduft og matarsódi",
+      "image": "https://media.kronan.is/products/49969",
+      "url": "https://kronan.is/vara/02000432-floru-matarsodi",
+      "fun": false
+    },
+    {
+      "sku": "100269276",
+      "name": "Arna grísk jógúrt hrein 1kg",
+      "size": "1 kg.",
+      "price": 1296,
+      "category": "Grísk jógúrt",
+      "image": "https://media.kronan.is/products/128549",
+      "url": "https://kronan.is/vara/100269276-arna-grisk-jogurt-hrein-1kg",
+      "fun": false
+    },
+    {
+      "sku": "100269277",
+      "name": "Arna grísk jógúrt létt 1kg",
+      "size": "1 kg.",
+      "price": 1299,
+      "category": "Grísk jógúrt",
+      "image": "https://media.kronan.is/products/128547",
+      "url": "https://kronan.is/vara/100269277-arna-grisk-jogurt-lett-1kg",
+      "fun": false
+    },
+    {
+      "sku": "100273953",
+      "name": "Arna grísk jógúrt vanillu 1kg",
+      "size": "1 kg.",
+      "price": 1360,
+      "category": "Grísk jógúrt",
+      "image": "https://media.kronan.is/products/128669",
+      "url": "https://kronan.is/vara/100273953-arna-grisk-jogurt-vanillu-1kg",
+      "fun": false
+    },
+    {
+      "sku": "100273794",
+      "name": "Mmm.. grísk jógúrt mangó & chili 180gr",
+      "size": "180 gr.",
+      "price": 360,
+      "category": "Grísk jógúrt",
+      "image": "https://media.kronan.is/products/128640",
+      "url": "https://kronan.is/vara/100273794-mmm-grisk-jogurt-mango-chili-180gr",
+      "fun": false
+    },
+    {
+      "sku": "100251889",
+      "name": "Mmm.. grísk jógúrt með súkkulaðiflögum",
+      "size": "180 gr.",
+      "price": 360,
+      "category": "Grísk jógúrt",
+      "image": "https://media.kronan.is/products/128635",
+      "url": "https://kronan.is/vara/100251889-mmm-grisk-jogurt-med-sukkuladiflogum",
+      "fun": false
+    },
+    {
+      "sku": "100273793",
+      "name": "Mmm.. grísk jógúrt vanilla 1kg",
+      "size": "1 kg.",
+      "price": 1150,
+      "category": "Grísk jógúrt",
+      "image": "https://media.kronan.is/products/128789",
+      "url": "https://kronan.is/vara/100273793-mmm-grisk-jogurt-vanilla-1kg",
+      "fun": false
+    },
+    {
+      "sku": "100148376",
+      "name": "Little Becky litlir sykurpúðar",
+      "size": "280 gr.",
+      "price": 459,
+      "category": "Hlaup",
+      "image": "https://media.kronan.is/products/78413",
+      "url": "https://kronan.is/vara/100148376-little-becky-litlir-sykurpudar",
+      "fun": false
+    },
+    {
+      "sku": "100232857",
+      "name": "Til hamingju pekanhnetur",
+      "size": "100 gr.",
+      "price": 455,
+      "category": "Hnetur og nasl",
+      "image": "https://media.kronan.is/products/70464",
+      "url": "https://kronan.is/vara/100232857-til-hamingju-pekanhnetur",
+      "fun": false
+    },
+    {
+      "sku": "100232703",
+      "name": "Til hamingju hakkaðar möndlur",
+      "size": "100 gr.",
+      "price": 325,
+      "category": "Hnetur, fræ og rúsínur",
+      "image": "https://media.kronan.is/products/63435",
+      "url": "https://kronan.is/vara/100232703-til-hamingju-hakkadar-mondlur",
+      "fun": false
+    },
+    {
+      "sku": "02000347",
+      "name": "Til hamingju möndlur afhýddar",
+      "size": "100 gr.",
+      "price": 285,
+      "category": "Hnetur, fræ og rúsínur",
+      "image": "https://media.kronan.is/products/63397",
+      "url": "https://kronan.is/vara/02000347-til-hamingju-mondlur-afhyddar",
+      "fun": false
+    },
+    {
+      "sku": "100260193",
+      "name": "Monin síróp ginger bread",
+      "size": "250 ml.",
+      "price": 899,
+      "category": "Instant kaffi og kaffirjómi",
+      "image": "https://media.kronan.is/products/97333",
+      "url": "https://kronan.is/vara/100260193-monin-sirop-ginger-bread",
+      "fun": false
+    },
+    {
+      "sku": "100256525",
+      "name": "Krónu smákökudeig m/karamellu",
+      "size": "500 gr.",
+      "price": 1299,
+      "category": "Jólabakstur",
+      "image": "https://media.kronan.is/products/130487",
+      "url": "https://kronan.is/vara/100256525-kronu-smakokudeig-mkaramellu",
+      "fun": false
+    },
+    {
+      "sku": "100256526",
+      "name": "Krónu smákökudeig m/súkkulaðiperlum",
+      "size": "500 gr.",
+      "price": 1299,
+      "category": "Jólabakstur",
+      "image": "https://media.kronan.is/products/130485",
+      "url": "https://kronan.is/vara/100256526-kronu-smakokudeig-msukkuladiperlum",
+      "fun": false
+    },
+    {
+      "sku": "100256527",
+      "name": "Krónu smákökudeig súkkulaðidraumur",
+      "size": "500 gr.",
+      "price": 1299,
+      "category": "Jólabakstur",
+      "image": "https://media.kronan.is/products/130486",
+      "url": "https://kronan.is/vara/100256527-kronu-smakokudeig-sukkuladidraumur",
+      "fun": false
+    },
+    {
+      "sku": "100004985",
+      "name": "Kaffitár jólakaffi grýlukanill",
+      "size": "250 gr.",
+      "price": 1250,
+      "category": "Jólakaffi",
+      "image": "https://media.kronan.is/products/57638",
+      "url": "https://kronan.is/vara/100004985-kaffitar-jolakaffi-grylukanill",
+      "fun": true
+    },
+    {
+      "sku": "100255840",
+      "name": "Nordthy piparkökufígúra f/bolla",
+      "size": "170 gr.",
+      "price": 449,
+      "category": "Jólasmákökur",
+      "image": "https://media.kronan.is/products/88071",
+      "url": "https://kronan.is/vara/100255840-nordthy-piparkokufigura-fbolla",
+      "fun": false
+    },
+    {
+      "sku": "02207288",
+      "name": "Nyakers piparkökuhjörtu",
+      "size": "475 gr.",
+      "price": 739,
+      "category": "Jólasmákökur",
+      "image": "https://media.kronan.is/products/57624",
+      "url": "https://kronan.is/vara/02207288-nyakers-piparkokuhjortu",
+      "fun": false
+    },
+    {
+      "sku": "100248771",
+      "name": "Nyakers piparkökuhús sett",
+      "size": "300 gr.",
+      "price": 619,
+      "category": "Jólasmákökur",
+      "image": "https://media.kronan.is/products/82178",
+      "url": "https://kronan.is/vara/100248771-nyakers-piparkokuhus-sett",
+      "fun": false
+    },
+    {
+      "sku": "100238146",
+      "name": "Nyakers piparkökur",
+      "size": "300 gr.",
+      "price": 448,
+      "category": "Jólasmákökur",
+      "image": "https://media.kronan.is/products/57744",
+      "url": "https://kronan.is/vara/100238146-nyakers-piparkokur",
+      "fun": false
+    },
+    {
+      "sku": "100268515",
+      "name": "Ódýrt piparkökur m/súkkulaðihjúp",
+      "size": "300 gr.",
+      "price": 398,
+      "category": "Jólasmákökur",
+      "image": "https://media.kronan.is/products/117868",
+      "url": "https://kronan.is/vara/100268515-odyrt-piparkokur-msukkuladihjup",
+      "fun": false
+    },
+    {
+      "sku": "100262390",
+      "name": "Ódýrt vanilluhringir",
+      "size": "275 gr.",
+      "price": 373,
+      "category": "Jólasmákökur",
+      "image": "https://media.kronan.is/products/102638",
+      "url": "https://kronan.is/vara/100262390-odyrt-vanilluhringir",
+      "fun": false
+    },
+    {
+      "sku": "100260091",
+      "name": "Til hamingju piparkökukúlur",
+      "size": "250 gr.",
+      "price": 549,
+      "category": "Jólasmákökur",
+      "image": "https://media.kronan.is/products/97323",
+      "url": "https://kronan.is/vara/100260091-til-hamingju-piparkokukulur",
+      "fun": false
+    },
+    {
+      "sku": "100252297",
+      "name": "Kaffitár jólakaffi baunir",
+      "size": "400 gr.",
+      "price": 1348,
+      "category": "Kaffibaunir",
+      "image": "https://media.kronan.is/products/81764",
+      "url": "https://kronan.is/vara/100252297-kaffitar-jolakaffi-baunir",
+      "fun": false
+    },
+    {
+      "sku": "100251712",
+      "name": "Starbucks jólakaffi baunir",
+      "size": "190 gr.",
+      "price": 980,
+      "category": "Kaffibaunir",
+      "image": "https://media.kronan.is/products/80473",
+      "url": "https://kronan.is/vara/100251712-starbucks-jolakaffi-baunir",
+      "fun": false
+    },
+    {
+      "sku": "100162171",
+      "name": "Te og kaffi jólakaffi baunir",
+      "size": "400 gr.",
+      "price": 1320,
+      "category": "Kaffibaunir",
+      "image": "https://media.kronan.is/products/128285",
+      "url": "https://kronan.is/vara/100162171-te-og-kaffi-jolakaffi-baunir",
+      "fun": false
+    },
+    {
+      "sku": "100272806",
+      "name": "Belmio jólakaffi hylki amouretto",
+      "size": "10 stk.",
+      "price": 499,
+      "category": "Kaffihylki og púðar",
+      "image": "https://media.kronan.is/products/125296",
+      "url": "https://kronan.is/vara/100272806-belmio-jolakaffi-hylki-amouretto",
+      "fun": false
+    },
+    {
+      "sku": "100259176",
+      "name": "Jóladagatal Belmio kaffihylki",
+      "size": "24 stk.",
+      "price": 1990,
+      "category": "Kaffihylki og púðar",
+      "image": "https://media.kronan.is/products/122072",
+      "url": "https://kronan.is/vara/100259176-joladagatal-belmio-kaffihylki",
+      "fun": true
+    },
+    {
+      "sku": "100256400",
+      "name": "Jóladagatal l'or kaffihylki",
+      "size": "24 stk.",
+      "price": 1999,
+      "category": "Kaffihylki og púðar",
+      "image": "https://media.kronan.is/products/129980",
+      "url": "https://kronan.is/vara/100256400-joladagatal-lor-kaffihylki",
+      "fun": true
+    },
+    {
+      "sku": "100251711",
+      "name": "Starbucks by nespresso jólakaffi",
+      "size": "10 stk.",
+      "price": 740,
+      "category": "Kaffihylki og púðar",
+      "image": "https://media.kronan.is/products/107927",
+      "url": "https://kronan.is/vara/100251711-starbucks-by-nespresso-jolakaffi",
+      "fun": false
+    },
+    {
+      "sku": "100249044",
+      "name": "Starbucks DG jólakaffi toffee nut latte",
+      "size": "1278 gr.",
+      "price": 1026,
+      "category": "Kaffihylki og púðar",
+      "image": "https://media.kronan.is/products/107928",
+      "url": "https://kronan.is/vara/100249044-starbucks-dg-jolakaffi-toffee-nut-latte",
+      "fun": false
+    },
+    {
+      "sku": "100260653",
+      "name": "Te og kaffi jólakaffi hylki",
+      "size": "10 stk.",
+      "price": 566,
+      "category": "Kaffihylki og púðar",
+      "image": "https://media.kronan.is/products/128287",
+      "url": "https://kronan.is/vara/100260653-te-og-kaffi-jolakaffi-hylki",
+      "fun": false
+    },
+    {
+      "sku": "100251918",
+      "name": "Te og kaffi jólakaffi kaffipúðar",
+      "size": "124 gr.",
+      "price": 680,
+      "category": "Kaffihylki og púðar",
+      "image": "https://media.kronan.is/products/128286",
+      "url": "https://kronan.is/vara/100251918-te-og-kaffi-jolakaffi-kaffipudar",
+      "fun": false
+    },
+    {
+      "sku": "100265331",
+      "name": "Gnaw caramel hot chocolate spoon",
+      "size": "40 gr.",
+      "price": 399,
+      "category": "Kakó",
+      "image": "https://media.kronan.is/products/108990",
+      "url": "https://kronan.is/vara/100265331-gnaw-caramel-hot-chocolate-spoon",
+      "fun": false
+    },
+    {
+      "sku": "100269725",
+      "name": "Gnaw gingerbread hot chocolate sp",
+      "size": "40 gr.",
+      "price": 399,
+      "category": "Kakó",
+      "image": "https://media.kronan.is/products/118754",
+      "url": "https://kronan.is/vara/100269725-gnaw-gingerbread-hot-chocolate-sp",
+      "fun": false
+    },
+    {
+      "sku": "100273555",
+      "name": "Gnaw merry christmas santa",
+      "size": "42 stk.",
+      "price": 399,
+      "category": "Kakó",
+      "image": "https://media.kronan.is/products/130132",
+      "url": "https://kronan.is/vara/100273555-gnaw-merry-christmas-santa",
+      "fun": false
+    },
+    {
+      "sku": "100273554",
+      "name": "Gnaw merry christmas snowman",
+      "size": "42 stk.",
+      "price": 399,
+      "category": "Kakó",
+      "image": "https://media.kronan.is/products/130138",
+      "url": "https://kronan.is/vara/100273554-gnaw-merry-christmas-snowman",
+      "fun": false
+    },
+    {
+      "sku": "100273556",
+      "name": "Gnaw merry christmas tree",
+      "size": "40 stk.",
+      "price": 399,
+      "category": "Kakó",
+      "image": "https://media.kronan.is/products/130139",
+      "url": "https://kronan.is/vara/100273556-gnaw-merry-christmas-tree",
+      "fun": false
+    },
+    {
+      "sku": "100265327",
+      "name": "Gnaw milk hot chocolate spoon",
+      "size": "40 gr.",
+      "price": 399,
+      "category": "Kakó",
+      "image": "https://media.kronan.is/products/108988",
+      "url": "https://kronan.is/vara/100265327-gnaw-milk-hot-chocolate-spoon",
+      "fun": false
+    },
+    {
+      "sku": "100269887",
+      "name": "Gnaw peppermint hot chocolate spoon",
+      "size": "40 gr.",
+      "price": 399,
+      "category": "Kakó",
+      "image": "https://media.kronan.is/products/119080",
+      "url": "https://kronan.is/vara/100269887-gnaw-peppermint-hot-chocolate-spoon",
+      "fun": false
+    },
+    {
+      "sku": "100265332",
+      "name": "Gnaw rocky road hot chocolate spoon",
+      "size": "40 gr.",
+      "price": 399,
+      "category": "Kakó",
+      "image": "https://media.kronan.is/products/108989",
+      "url": "https://kronan.is/vara/100265332-gnaw-rocky-road-hot-chocolate-spoon",
+      "fun": false
+    },
+    {
+      "sku": "100256471",
+      "name": "Jólin sykurpúðar, jólastafur og kakó",
+      "size": "184 gr.",
+      "price": 999,
+      "category": "Kakó",
+      "image": "https://media.kronan.is/products/90764",
+      "url": "https://kronan.is/vara/100256471-jolin-sykurpudar-jolastafur-og-kako",
+      "fun": false
+    },
+    {
+      "sku": "100274327",
+      "name": "Diana Lys riffluð kerti gull",
+      "size": "4 stk.",
+      "price": 1199,
+      "category": "Kerti",
+      "image": "https://media.kronan.is/products/129715",
+      "url": "https://kronan.is/vara/100274327-diana-lys-rifflud-kerti-gull",
+      "fun": false
+    },
+    {
+      "sku": "100274322",
+      "name": "Diana Lys riffluð kerti hvít",
+      "size": "4 stk.",
+      "price": 1199,
+      "category": "Kerti",
+      "image": "https://media.kronan.is/products/129718",
+      "url": "https://kronan.is/vara/100274322-diana-lys-rifflud-kerti-hvit",
+      "fun": false
+    },
+    {
+      "sku": "02207287",
+      "name": "Nyakers piparkökufígúrur",
+      "size": "370 gr.",
+      "price": 698,
+      "category": "Kex og smákökur",
+      "image": "https://media.kronan.is/products/74767",
+      "url": "https://kronan.is/vara/02207287-nyakers-piparkokufigurur",
+      "fun": false
+    },
+    {
+      "sku": "100114765",
+      "name": "Nyakers piparkökuhjörtu lítil",
+      "size": "625 gr.",
+      "price": 758,
+      "category": "Kex og smákökur",
+      "image": "https://media.kronan.is/products/57645",
+      "url": "https://kronan.is/vara/100114765-nyakers-piparkokuhjortu-litil",
+      "fun": false
+    },
+    {
+      "sku": "100273282",
+      "name": "Matseðill kjúklinganúðlur",
+      "size": "450 gr.",
+      "price": 1799,
+      "category": "Kjúklingur",
+      "image": "https://media.kronan.is/products/128290",
+      "url": "https://kronan.is/vara/100273282-matsedill-kjuklinganudlur",
+      "fun": false
+    },
+    {
+      "sku": "100273284",
+      "name": "Matseðill kjúklingur í pestó",
+      "size": "450 gr.",
+      "price": 1799,
+      "category": "Kjúklingur",
+      "image": "https://media.kronan.is/products/127922",
+      "url": "https://kronan.is/vara/100273284-matsedill-kjuklingur-i-pesto",
+      "fun": false
+    },
+    {
+      "sku": "02000431",
+      "name": "Flóru kanill",
+      "size": "70 gr.",
+      "price": 288,
+      "category": "Krydd",
+      "image": "https://media.kronan.is/products/49967",
+      "url": "https://kronan.is/vara/02000431-floru-kanill",
+      "fun": true
+    },
+    {
+      "sku": "100264420",
+      "name": "Nóa smá kropp",
+      "size": "150 gr.",
+      "price": 570,
+      "category": "Kúlur",
+      "image": "https://media.kronan.is/products/107230",
+      "url": "https://kronan.is/vara/100264420-noa-sma-kropp",
+      "fun": false
+    },
+    {
+      "sku": "100269692",
+      "name": "Til hamingju sykurpúðar",
+      "size": "40 gr.",
+      "price": 289,
+      "category": "Kökuskraut og matarlitur",
+      "image": "https://media.kronan.is/products/118691",
+      "url": "https://kronan.is/vara/100269692-til-hamingju-sykurpudar",
+      "fun": false
+    },
+    {
+      "sku": "01000633",
+      "name": "Rauðlaukur",
+      "size": "ca. 160 gr.",
+      "price": 37,
+      "category": "Laukur",
+      "image": "https://media.kronan.is/products/57157",
+      "url": "https://kronan.is/vara/01000633-raudlaukur",
+      "fun": false
+    },
+    {
+      "sku": "100252298",
+      "name": "Kaffitár jólakaffi malað",
+      "size": "400 gr.",
+      "price": 1348,
+      "category": "Malað kaffi",
+      "image": "https://media.kronan.is/products/81767",
+      "url": "https://kronan.is/vara/100252298-kaffitar-jolakaffi-malad",
+      "fun": false
+    },
+    {
+      "sku": "100251710",
+      "name": "Starbucks jólakaffi malað",
+      "size": "190 gr.",
+      "price": 980,
+      "category": "Malað kaffi",
+      "image": "https://media.kronan.is/products/80475",
+      "url": "https://kronan.is/vara/100251710-starbucks-jolakaffi-malad",
+      "fun": false
+    },
+    {
+      "sku": "100162170",
+      "name": "Te og kaffi jólakaffi malað",
+      "size": "400 gr.",
+      "price": 1320,
+      "category": "Malað kaffi",
+      "image": "https://media.kronan.is/products/128284",
+      "url": "https://kronan.is/vara/100162170-te-og-kaffi-jolakaffi-malad",
+      "fun": false
+    },
+    {
+      "sku": "100224740",
+      "name": "Banderos guacamole ídýfa",
+      "size": "300 gr.",
+      "price": 359,
+      "category": "Mexíkó",
+      "image": "https://media.kronan.is/products/119690",
+      "url": "https://kronan.is/vara/100224740-banderos-guacamole-idyfa",
+      "fun": false
+    },
+    {
+      "sku": "100236781",
+      "name": "Banderos ostasósa",
+      "size": "300 gr.",
+      "price": 299,
+      "category": "Mexíkó",
+      "image": "https://media.kronan.is/products/119685",
+      "url": "https://kronan.is/vara/100236781-banderos-ostasosa",
+      "fun": false
+    },
+    {
+      "sku": "100224744",
+      "name": "Banderos taco sósa medium",
+      "size": "230 gr.",
+      "price": 195,
+      "category": "Mexíkó",
+      "image": "https://media.kronan.is/products/111426",
+      "url": "https://kronan.is/vara/100224744-banderos-taco-sosa-medium",
+      "fun": true
+    },
+    {
+      "sku": "100224745",
+      "name": "Banderos taco sósa mild",
+      "size": "230 gr.",
+      "price": 195,
+      "category": "Mexíkó",
+      "image": "https://media.kronan.is/products/119689",
+      "url": "https://kronan.is/vara/100224745-banderos-taco-sosa-mild",
+      "fun": true
+    },
+    {
+      "sku": "100224738",
+      "name": "Banderos taco spice mix",
+      "size": "40 gr.",
+      "price": 115,
+      "category": "Mexíkó",
+      "image": "https://media.kronan.is/products/104207",
+      "url": "https://kronan.is/vara/100224738-banderos-taco-spice-mix",
+      "fun": true
+    },
+    {
+      "sku": "100224735",
+      "name": "Banderos tortilla chips",
+      "size": "200 gr.",
+      "price": 299,
+      "category": "Mexíkó",
+      "image": "https://media.kronan.is/products/103397",
+      "url": "https://kronan.is/vara/100224735-banderos-tortilla-chips",
+      "fun": false
+    },
+    {
+      "sku": "100224732",
+      "name": "Banderos tortilla vefjur medium",
+      "size": "320 gr.",
+      "price": 299,
+      "category": "Mexíkó",
+      "image": "https://media.kronan.is/products/103132",
+      "url": "https://kronan.is/vara/100224732-banderos-tortilla-vefjur-medium",
+      "fun": false
+    },
+    {
+      "sku": "100247537",
+      "name": "Banderos tortilla vefjur mini",
+      "size": "200 gr.",
+      "price": 299,
+      "category": "Mexíkó",
+      "image": "https://media.kronan.is/products/103029",
+      "url": "https://kronan.is/vara/100247537-banderos-tortilla-vefjur-mini",
+      "fun": false
+    },
+    {
+      "sku": "100224736",
+      "name": "Banderos tortilla vefjur stórar",
+      "size": "370 gr.",
+      "price": 359,
+      "category": "Mexíkó",
+      "image": "https://media.kronan.is/products/103787",
+      "url": "https://kronan.is/vara/100224736-banderos-tortilla-vefjur-storar",
+      "fun": false
+    },
+    {
+      "sku": "100271489",
+      "name": "Broken Taco  authentic taco spice mix",
+      "size": "25 gr.",
+      "price": 195,
+      "category": "Mexíkó",
+      "image": "https://media.kronan.is/products/126404",
+      "url": "https://kronan.is/vara/100271489-broken-taco-authentic-taco-spice-mix",
+      "fun": true
+    },
+    {
+      "sku": "100271485",
+      "name": "Broken Taco almost illegal salsa",
+      "size": "240 gr.",
+      "price": 389,
+      "category": "Mexíkó",
+      "image": "https://media.kronan.is/products/122724",
+      "url": "https://kronan.is/vara/100271485-broken-taco-almost-illegal-salsa",
+      "fun": true
+    },
+    {
+      "sku": "100271484",
+      "name": "Broken Taco chipotle mayo",
+      "size": "200 ml.",
+      "price": 579,
+      "category": "Mexíkó",
+      "image": "https://media.kronan.is/products/122722",
+      "url": "https://kronan.is/vara/100271484-broken-taco-chipotle-mayo",
+      "fun": true
+    },
+    {
+      "sku": "100271483",
+      "name": "Broken Taco flour tortilla vefjur stórar 6stk",
+      "size": "370 gr.",
+      "price": 369,
+      "category": "Mexíkó",
+      "image": "https://media.kronan.is/products/122727",
+      "url": "https://kronan.is/vara/100271483-broken-taco-flour-tortilla-vefjur-storar-6stk",
+      "fun": true
+    },
+    {
+      "sku": "100271492",
+      "name": "Broken Taco green sauce",
+      "size": "200 ml.",
+      "price": 579,
+      "category": "Mexíkó",
+      "image": "https://media.kronan.is/products/122726",
+      "url": "https://kronan.is/vara/100271492-broken-taco-green-sauce",
+      "fun": true
+    },
+    {
+      "sku": "100273054",
+      "name": "Broken Taco jammed jalapeno jazz",
+      "size": "240 gr.",
+      "price": 439,
+      "category": "Mexíkó",
+      "image": "https://media.kronan.is/products/129992",
+      "url": "https://kronan.is/vara/100273054-broken-taco-jammed-jalapeno-jazz",
+      "fun": true
+    },
+    {
+      "sku": "100273055",
+      "name": "Broken Taco lime pickled onion",
+      "size": "235 gr.",
+      "price": 439,
+      "category": "Mexíkó",
+      "image": "https://media.kronan.is/products/125934",
+      "url": "https://kronan.is/vara/100273055-broken-taco-lime-pickled-onion",
+      "fun": true
+    },
+    {
+      "sku": "100271486",
+      "name": "Broken Taco pineapple rain sósa",
+      "size": "200 ml.",
+      "price": 579,
+      "category": "Mexíkó",
+      "image": "https://media.kronan.is/products/122721",
+      "url": "https://kronan.is/vara/100271486-broken-taco-pineapple-rain-sosa",
+      "fun": true
+    },
+    {
+      "sku": "100273870",
+      "name": "Broken Taco sriracha chips",
+      "size": "150 gr.",
+      "price": 499,
+      "category": "Mexíkó",
+      "image": "https://media.kronan.is/products/128459",
+      "url": "https://kronan.is/vara/100273870-broken-taco-sriracha-chips",
+      "fun": true
+    },
+    {
+      "sku": "100273053",
+      "name": "Broken Taco sweet n hot banana peppers",
+      "size": "230 gr.",
+      "price": 439,
+      "category": "Mexíkó",
+      "image": "https://media.kronan.is/products/130000",
+      "url": "https://kronan.is/vara/100273053-broken-taco-sweet-n-hot-banana-peppers",
+      "fun": true
+    },
+    {
+      "sku": "100271491",
+      "name": "Broken Taco sweet taco topping sósa",
+      "size": "200 ml.",
+      "price": 579,
+      "category": "Mexíkó",
+      "image": "https://media.kronan.is/products/126017",
+      "url": "https://kronan.is/vara/100271491-broken-taco-sweet-taco-topping-sosa",
+      "fun": true
+    },
+    {
+      "sku": "100271490",
+      "name": "Broken Taco taco tuesday spice mix",
+      "size": "25 gr.",
+      "price": 195,
+      "category": "Mexíkó",
+      "image": "https://media.kronan.is/products/126405",
+      "url": "https://kronan.is/vara/100271490-broken-taco-taco-tuesday-spice-mix",
+      "fun": true
+    },
+    {
+      "sku": "100271494",
+      "name": "Broken Taco tijuana tornado",
+      "size": "200 ml.",
+      "price": 579,
+      "category": "Mexíkó",
+      "image": "https://media.kronan.is/products/122719",
+      "url": "https://kronan.is/vara/100271494-broken-taco-tijuana-tornado",
+      "fun": true
+    },
+    {
+      "sku": "100271487",
+      "name": "Broken Taco tortilla vefjur mini 10stk",
+      "size": "160 gr.",
+      "price": 289,
+      "category": "Mexíkó",
+      "image": "https://media.kronan.is/products/122720",
+      "url": "https://kronan.is/vara/100271487-broken-taco-tortilla-vefjur-mini-10stk",
+      "fun": true
+    },
+    {
+      "sku": "100271488",
+      "name": "Broken Taco tropical ghost salsa",
+      "size": "240 gr.",
+      "price": 389,
+      "category": "Mexíkó",
+      "image": "https://media.kronan.is/products/122723",
+      "url": "https://kronan.is/vara/100271488-broken-taco-tropical-ghost-salsa",
+      "fun": true
+    },
+    {
+      "sku": "100273869",
+      "name": "Broken Taco white corn chips",
+      "size": "150 gr.",
+      "price": 499,
+      "category": "Mexíkó",
+      "image": "https://media.kronan.is/products/128460",
+      "url": "https://kronan.is/vara/100273869-broken-taco-white-corn-chips",
+      "fun": true
+    },
+    {
+      "sku": "100260045",
+      "name": "El Taco Truck cheezy sauce",
+      "size": "200 ml.",
+      "price": 479,
+      "category": "Mexíkó",
+      "image": "https://media.kronan.is/products/127012",
+      "url": "https://kronan.is/vara/100260045-el-taco-truck-cheezy-sauce",
+      "fun": true
+    },
+    {
+      "sku": "100260048",
+      "name": "El Taco Truck chili mayo",
+      "size": "200 ml.",
+      "price": 479,
+      "category": "Mexíkó",
+      "image": "https://media.kronan.is/products/128606",
+      "url": "https://kronan.is/vara/100260048-el-taco-truck-chili-mayo",
+      "fun": true
+    },
+    {
+      "sku": "100255820",
+      "name": "El Taco Truck jalapeno lime mayo",
+      "size": "200 ml.",
+      "price": 479,
+      "category": "Mexíkó",
+      "image": "https://media.kronan.is/products/87979",
+      "url": "https://kronan.is/vara/100255820-el-taco-truck-jalapeno-lime-mayo",
+      "fun": true
+    },
+    {
+      "sku": "100268389",
+      "name": "El Taco Truck salsa roasted garlic & guajillo",
+      "size": "215 gr.",
+      "price": 420,
+      "category": "Mexíkó",
+      "image": "https://media.kronan.is/products/115665",
+      "url": "https://kronan.is/vara/100268389-el-taco-truck-salsa-roasted-garlic-guajillo",
+      "fun": true
+    },
+    {
+      "sku": "100257625",
+      "name": "El Taco Truck snakk blue corn",
+      "size": "185 gr.",
+      "price": 450,
+      "category": "Mexíkó",
+      "image": "https://media.kronan.is/products/127010",
+      "url": "https://kronan.is/vara/100257625-el-taco-truck-snakk-blue-corn",
+      "fun": true
+    },
+    {
+      "sku": "100266268",
+      "name": "El Taco Truck street wheat tortilla vefjur mini",
+      "size": "8 stk.",
+      "price": 325,
+      "category": "Mexíkó",
+      "image": "https://media.kronan.is/products/110819",
+      "url": "https://kronan.is/vara/100266268-el-taco-truck-street-wheat-tortilla-vefjur-mini",
+      "fun": true
+    },
+    {
+      "sku": "100268751",
+      "name": "Mississippi Belle salsa con queso",
+      "size": "425 gr.",
+      "price": 589,
+      "category": "Mexíkó",
+      "image": "https://media.kronan.is/products/117456",
+      "url": "https://kronan.is/vara/100268751-mississippi-belle-salsa-con-queso",
+      "fun": false
+    },
+    {
+      "sku": "100230672",
+      "name": "Arna léttmjólk",
+      "size": "1 ltr.",
+      "price": 360,
+      "category": "Mjólk",
+      "image": "https://media.kronan.is/products/128010",
+      "url": "https://kronan.is/vara/100230672-arna-lettmjolk",
+      "fun": false
+    },
+    {
+      "sku": "100230671",
+      "name": "Arna nýmjólk",
+      "size": "1 ltr.",
+      "price": 360,
+      "category": "Mjólk",
+      "image": "https://media.kronan.is/products/128009",
+      "url": "https://kronan.is/vara/100230671-arna-nymjolk",
+      "fun": false
+    },
+    {
+      "sku": "100269791",
+      "name": "Krónan lífrænt granóla m/kakó og súkkulaði",
+      "size": "300 gr.",
+      "price": 699,
+      "category": "Múslí",
+      "image": "https://media.kronan.is/products/128173",
+      "url": "https://kronan.is/vara/100269791-kronan-lifraent-granola-mkako-og-sukkuladi",
+      "fun": false
+    },
+    {
+      "sku": "100269789",
+      "name": "Krónan lífrænt granóla m/möndlusmjöri",
+      "size": "300 gr.",
+      "price": 699,
+      "category": "Múslí",
+      "image": "https://media.kronan.is/products/128170",
+      "url": "https://kronan.is/vara/100269789-kronan-lifraent-granola-mmondlusmjori",
+      "fun": false
+    },
+    {
+      "sku": "100269792",
+      "name": "Krónan lífrænt granóla m/súkkulaði og kókos",
+      "size": "300 gr.",
+      "price": 699,
+      "category": "Múslí",
+      "image": "https://media.kronan.is/products/128171",
+      "url": "https://kronan.is/vara/100269792-kronan-lifraent-granola-msukkuladi-og-kokos",
+      "fun": false
+    },
+    {
+      "sku": "100269790",
+      "name": "Krónan lífrænt granóla m/þurrkuðum berjum",
+      "size": "300 gr.",
+      "price": 699,
+      "category": "Múslí",
+      "image": "https://media.kronan.is/products/128172",
+      "url": "https://kronan.is/vara/100269790-kronan-lifraent-granola-mthurrkudum-berjum",
+      "fun": false
+    },
+    {
+      "sku": "100245414",
+      "name": "Til hamingju möndluflögur",
+      "size": "80 gr.",
+      "price": 225,
+      "category": "Möndlur, fræ og þurrkaðir ávextir",
+      "image": "https://media.kronan.is/products/70469",
+      "url": "https://kronan.is/vara/100245414-til-hamingju-mondluflogur",
+      "fun": false
+    },
+    {
+      "sku": "100245415",
+      "name": "Til hamingju valhnetukjarnar",
+      "size": "90 gr.",
+      "price": 215,
+      "category": "Möndlur, fræ og þurrkaðir ávextir",
+      "image": "https://media.kronan.is/products/70470",
+      "url": "https://kronan.is/vara/100245415-til-hamingju-valhnetukjarnar",
+      "fun": false
+    },
+    {
+      "sku": "100267435",
+      "name": "Ódýrt blandað hakk 60/40",
+      "size": "500 gr.",
+      "price": 1199,
+      "category": "Nautakjöt",
+      "image": "https://media.kronan.is/products/114282",
+      "url": "https://kronan.is/vara/100267435-odyrt-blandad-hakk-6040",
+      "fun": false
+    },
+    {
+      "sku": "100272374",
+      "name": "Krónan lífrænt avókadóolía",
+      "size": "500 ml.",
+      "price": 1699,
+      "category": "Olía",
+      "image": "https://media.kronan.is/products/127368",
+      "url": "https://kronan.is/vara/100272374-kronan-lifraent-avokadoolia",
+      "fun": false
+    },
+    {
+      "sku": "100272373",
+      "name": "Krónan lífrænt hörfræolía",
+      "size": "250 ml.",
+      "price": 599,
+      "category": "Olía",
+      "image": "https://media.kronan.is/products/127371",
+      "url": "https://kronan.is/vara/100272373-kronan-lifraent-horfraeolia",
+      "fun": false
+    },
+    {
+      "sku": "100272282",
+      "name": "Krónan lífrænt jómfrúarolía",
+      "size": "500 ml.",
+      "price": 1399,
+      "category": "Olía",
+      "image": "https://media.kronan.is/products/127378",
+      "url": "https://kronan.is/vara/100272282-kronan-lifraent-jomfruarolia",
+      "fun": false
+    },
+    {
+      "sku": "100274333",
+      "name": "Nano próteinstykki xmas speculoos",
+      "size": "55 gr.",
+      "price": 370,
+      "category": "Orkustangir",
+      "image": "https://media.kronan.is/products/130449",
+      "url": "https://kronan.is/vara/100274333-nano-proteinstykki-xmas-speculoos",
+      "fun": true
+    },
+    {
+      "sku": "100253123",
+      "name": "paprika orange",
+      "size": "215 gr.",
+      "price": 207,
+      "category": "Paprika",
+      "image": "https://media.kronan.is/products/83248",
+      "url": "https://kronan.is/vara/100253123-paprika-orange",
+      "fun": false
+    },
+    {
+      "sku": "100253122",
+      "name": "paprika rauð",
+      "size": "230 gr.",
+      "price": 207,
+      "category": "Paprika",
+      "image": "https://media.kronan.is/products/83247",
+      "url": "https://kronan.is/vara/100253122-paprika-raud",
+      "fun": false
+    },
+    {
+      "sku": "100271446",
+      "name": "Krónan lífrænt fusilli",
+      "size": "500 gr.",
+      "price": 349,
+      "category": "Pasta",
+      "image": "https://media.kronan.is/products/127381",
+      "url": "https://kronan.is/vara/100271446-kronan-lifraent-fusilli",
+      "fun": false
+    },
+    {
+      "sku": "100272283",
+      "name": "Krónan lífrænt pastasósa basil",
+      "size": "250 gr.",
+      "price": 399,
+      "category": "Pasta",
+      "image": "https://media.kronan.is/products/127379",
+      "url": "https://kronan.is/vara/100272283-kronan-lifraent-pastasosa-basil",
+      "fun": false
+    },
+    {
+      "sku": "100272284",
+      "name": "Krónan lífrænt pastasósa marinara",
+      "size": "250 gr.",
+      "price": 399,
+      "category": "Pasta",
+      "image": "https://media.kronan.is/products/127380",
+      "url": "https://kronan.is/vara/100272284-kronan-lifraent-pastasosa-marinara",
+      "fun": false
+    },
+    {
+      "sku": "100271445",
+      "name": "Krónan lífrænt spaghetti",
+      "size": "500 gr.",
+      "price": 349,
+      "category": "Pasta",
+      "image": "https://media.kronan.is/products/127376",
+      "url": "https://kronan.is/vara/100271445-kronan-lifraent-spaghetti",
+      "fun": false
+    },
+    {
+      "sku": "100262591",
+      "name": "Cachet 300g dökkt súkkulaði 70%",
+      "size": "300 gr.",
+      "price": 699,
+      "category": "Plötur",
+      "image": "https://media.kronan.is/products/103587",
+      "url": "https://kronan.is/vara/100262591-cachet-300g-dokkt-sukkuladi-70",
+      "fun": false
+    },
+    {
+      "sku": "100259841",
+      "name": "Cachet 300g karamella & sjávarsalt",
+      "size": "300 gr.",
+      "price": 599,
+      "category": "Plötur",
+      "image": "https://media.kronan.is/products/118332",
+      "url": "https://kronan.is/vara/100259841-cachet-300g-karamella-sjavarsalt",
+      "fun": false
+    },
+    {
+      "sku": "100260911",
+      "name": "Cachet 300g mjólkursúkkulaði",
+      "size": "300 gr.",
+      "price": 599,
+      "category": "Plötur",
+      "image": "https://media.kronan.is/products/100832",
+      "url": "https://kronan.is/vara/100260911-cachet-300g-mjolkursukkuladi",
+      "fun": false
+    },
+    {
+      "sku": "100260903",
+      "name": "Cachet 300g mjólkursúkkulaði heslihnetu",
+      "size": "300 gr.",
+      "price": 599,
+      "category": "Plötur",
+      "image": "https://media.kronan.is/products/100833",
+      "url": "https://kronan.is/vara/100260903-cachet-300g-mjolkursukkuladi-heslihnetu",
+      "fun": false
+    },
+    {
+      "sku": "100259741",
+      "name": "Cachet dökkt kirsuberja",
+      "size": "100 gr.",
+      "price": 299,
+      "category": "Plötur",
+      "image": "https://media.kronan.is/products/97374",
+      "url": "https://kronan.is/vara/100259741-cachet-dokkt-kirsuberja",
+      "fun": false
+    },
+    {
+      "sku": "100259743",
+      "name": "Cachet dökkt möndlu & appelsínu",
+      "size": "100 gr.",
+      "price": 299,
+      "category": "Plötur",
+      "image": "https://media.kronan.is/products/97380",
+      "url": "https://kronan.is/vara/100259743-cachet-dokkt-mondlu-appelsinu",
+      "fun": false
+    },
+    {
+      "sku": "100259070",
+      "name": "Cachet súkkulaði 70%",
+      "size": "100 gr.",
+      "price": 299,
+      "category": "Plötur",
+      "image": "https://media.kronan.is/products/97372",
+      "url": "https://kronan.is/vara/100259070-cachet-sukkuladi-70",
+      "fun": false
+    },
+    {
+      "sku": "100259742",
+      "name": "Cachet súkkulaði 70% sjávarsalt",
+      "size": "100 gr.",
+      "price": 299,
+      "category": "Plötur",
+      "image": "https://media.kronan.is/products/97378",
+      "url": "https://kronan.is/vara/100259742-cachet-sukkuladi-70-sjavarsalt",
+      "fun": false
+    },
+    {
+      "sku": "100259069",
+      "name": "Cachet súkkulaði 90%",
+      "size": "100 gr.",
+      "price": 349,
+      "category": "Plötur",
+      "image": "https://media.kronan.is/products/97377",
+      "url": "https://kronan.is/vara/100259069-cachet-sukkuladi-90",
+      "fun": false
+    },
+    {
+      "sku": "100274535",
+      "name": "Arla pizzatoppur",
+      "size": "200 gr.",
+      "price": 379,
+      "category": "Rifinn",
+      "image": "https://media.kronan.is/products/129991",
+      "url": "https://kronan.is/vara/100274535-arla-pizzatoppur",
+      "fun": false
+    },
+    {
+      "sku": "100214966",
+      "name": "Arna rjómi 36%",
+      "size": "500 ml.",
+      "price": 788,
+      "category": "Rjómi",
+      "image": "https://media.kronan.is/products/128023",
+      "url": "https://kronan.is/vara/100214966-arna-rjomi-36",
+      "fun": false
+    },
+    {
+      "sku": "100159922",
+      "name": "Fljótshóla gulrætur",
+      "size": "600 gr.",
+      "price": 689,
+      "category": "Rótargrænmeti",
+      "image": "https://media.kronan.is/products/54618",
+      "url": "https://kronan.is/vara/100159922-fljotshola-gulraetur",
+      "fun": false
+    },
+    {
+      "sku": "100235140",
+      "name": "Grön Balance Rótargrænmeti 1 kg",
+      "size": "1 kg.",
+      "price": 429,
+      "category": "Rótargrænmeti",
+      "image": "https://media.kronan.is/products/62827",
+      "url": "https://kronan.is/vara/100235140-gron-balance-rotargraenmeti-1-kg",
+      "fun": false
+    },
+    {
+      "sku": "100274501",
+      "name": "Omhu klementínur",
+      "size": "950 gr.",
+      "price": 699,
+      "category": "Sítrusávextir",
+      "image": "https://media.kronan.is/products/130013",
+      "url": "https://kronan.is/vara/100274501-omhu-klementinur",
+      "fun": false
+    },
+    {
+      "sku": "100274044",
+      "name": "Elvital hárnæring glycolic gloss",
+      "size": "200 ml.",
+      "price": 699,
+      "category": "Sjampó og hárnæring",
+      "image": "https://media.kronan.is/products/128924",
+      "url": "https://kronan.is/vara/100274044-elvital-harnaering-glycolic-gloss",
+      "fun": false
+    },
+    {
+      "sku": "100274133",
+      "name": "Arna skyr bláberja",
+      "size": "500 gr.",
+      "price": 646,
+      "category": "Skyr",
+      "image": "https://media.kronan.is/products/129104",
+      "url": "https://kronan.is/vara/100274133-arna-skyr-blaberja",
+      "fun": false
+    },
+    {
+      "sku": "100236270",
+      "name": "Arna skyr ferskju",
+      "size": "170 gr.",
+      "price": 299,
+      "category": "Skyr",
+      "image": "https://media.kronan.is/products/129479",
+      "url": "https://kronan.is/vara/100236270-arna-skyr-ferskju",
+      "fun": false
+    },
+    {
+      "sku": "100274128",
+      "name": "Arna skyr hreint",
+      "size": "500 gr.",
+      "price": 540,
+      "category": "Skyr",
+      "image": "https://media.kronan.is/products/129477",
+      "url": "https://kronan.is/vara/100274128-arna-skyr-hreint",
+      "fun": false
+    },
+    {
+      "sku": "100274132",
+      "name": "Arna skyr jarðarber og bláber",
+      "size": "170 gr.",
+      "price": 299,
+      "category": "Skyr",
+      "image": "https://media.kronan.is/products/129478",
+      "url": "https://kronan.is/vara/100274132-arna-skyr-jardarber-og-blaber",
+      "fun": false
+    },
+    {
+      "sku": "100274134",
+      "name": "Arna skyr suðrænir ávextir",
+      "size": "170 gr.",
+      "price": 299,
+      "category": "Skyr",
+      "image": "https://media.kronan.is/products/129476",
+      "url": "https://kronan.is/vara/100274134-arna-skyr-sudraenir-avextir",
+      "fun": false
+    },
+    {
+      "sku": "02400069",
+      "name": "MS smjör 500gr",
+      "size": "500 gr.",
+      "price": 849,
+      "category": "Smjör",
+      "image": "https://media.kronan.is/products/130094",
+      "url": "https://kronan.is/vara/02400069-ms-smjor-500gr",
+      "fun": false
+    },
+    {
+      "sku": "100273960",
+      "name": "Óðals búri sneiðar",
+      "size": "200 gr.",
+      "price": 820,
+      "category": "Sneiðar",
+      "image": "https://media.kronan.is/products/128728",
+      "url": "https://kronan.is/vara/100273960-odals-buri-sneidar",
+      "fun": true
+    },
+    {
+      "sku": "100268047",
+      "name": "Grön Balance sólarvörn barna spf50",
+      "size": "150 ml.",
+      "price": 1529,
+      "category": "Sólarvörur",
+      "image": "https://media.kronan.is/products/116906",
+      "url": "https://kronan.is/vara/100268047-gron-balance-solarvorn-barna-spf50",
+      "fun": false
+    },
+    {
+      "sku": "100251658",
+      "name": "Grön Balance sólarvörn barna sprey spf30",
+      "size": "150 ml.",
+      "price": 1199,
+      "category": "Sólarvörur",
+      "image": "https://media.kronan.is/products/84618",
+      "url": "https://kronan.is/vara/100251658-gron-balance-solarvorn-barna-sprey-spf30",
+      "fun": false
+    },
+    {
+      "sku": "100274546",
+      "name": "Eat me avócado 4stk",
+      "size": "4 stk.",
+      "price": 849,
+      "category": "Steinaldin",
+      "image": "https://media.kronan.is/products/130021",
+      "url": "https://kronan.is/vara/100274546-eat-me-avocado-4stk",
+      "fun": true
+    },
+    {
+      "sku": "100251342",
+      "name": "Krónu döðlur ferskar",
+      "size": "600 gr.",
+      "price": 649,
+      "category": "Suðrænir ávextir",
+      "image": "https://media.kronan.is/products/106855",
+      "url": "https://kronan.is/vara/100251342-kronu-dodlur-ferskar",
+      "fun": true
+    },
+    {
+      "sku": "100274518",
+      "name": "Helvítis jólasultan",
+      "size": "200 gr.",
+      "price": 1499,
+      "category": "Sulta",
+      "image": "https://media.kronan.is/products/129923",
+      "url": "https://kronan.is/vara/100274518-helvitis-jolasultan",
+      "fun": true
+    },
+    {
+      "sku": "100273286",
+      "name": "Matseðill sveitasúpa",
+      "size": "1 kg.",
+      "price": 1799,
+      "category": "Súpur og sósur",
+      "image": "https://media.kronan.is/products/127314",
+      "url": "https://kronan.is/vara/100273286-matsedill-sveitasupa",
+      "fun": false
+    },
+    {
+      "sku": "100273285",
+      "name": "Matseðill tómat- og basilsúpa",
+      "size": "1 kg.",
+      "price": 1799,
+      "category": "Súpur og sósur",
+      "image": "https://media.kronan.is/products/127317",
+      "url": "https://kronan.is/vara/100273285-matsedill-tomat-og-basilsupa",
+      "fun": false
+    },
+    {
+      "sku": "100228940",
+      "name": "First Price sykur",
+      "size": "1 kg.",
+      "price": 156,
+      "category": "Sykur og sæta",
+      "image": "https://media.kronan.is/products/71706",
+      "url": "https://kronan.is/vara/100228940-first-price-sykur",
+      "fun": false
+    },
+    {
+      "sku": "100252197",
+      "name": "Jóladagatal Yogi te",
+      "size": "24 stk.",
+      "price": 1599,
+      "category": "Te",
+      "image": "https://media.kronan.is/products/128490",
+      "url": "https://kronan.is/vara/100252197-joladagatal-yogi-te",
+      "fun": true
+    },
+    {
+      "sku": "100273757",
+      "name": "Te og kaffi jólaglögg",
+      "size": "100 gr.",
+      "price": 1399,
+      "category": "Te",
+      "image": "https://media.kronan.is/products/128738",
+      "url": "https://kronan.is/vara/100273757-te-og-kaffi-jolaglogg",
+      "fun": true
+    },
+    {
+      "sku": "100273755",
+      "name": "Te og kaffi jólate grisjur",
+      "size": "42 gr.",
+      "price": 750,
+      "category": "Te",
+      "image": "https://media.kronan.is/products/128852",
+      "url": "https://kronan.is/vara/100273755-te-og-kaffi-jolate-grisjur",
+      "fun": true
+    },
+    {
+      "sku": "100273758",
+      "name": "Te og kaffi jólate laufte",
+      "size": "100 gr.",
+      "price": 1349,
+      "category": "Te",
+      "image": "https://media.kronan.is/products/128739",
+      "url": "https://kronan.is/vara/100273758-te-og-kaffi-jolate-laufte",
+      "fun": true
+    },
+    {
+      "sku": "100151295",
+      "name": "Sólskins smátómatar",
+      "size": "200 gr.",
+      "price": 589,
+      "category": "Tómatar",
+      "image": "https://media.kronan.is/products/116650",
+      "url": "https://kronan.is/vara/100151295-solskins-smatomatar",
+      "fun": true
+    },
+    {
+      "sku": "100272281",
+      "name": "Krónan lífrænt passata",
+      "size": "420 gr.",
+      "price": 449,
+      "category": "Tómatvörur",
+      "image": "https://media.kronan.is/products/127377",
+      "url": "https://kronan.is/vara/100272281-kronan-lifraent-passata",
+      "fun": false
+    },
+    {
+      "sku": "100272277",
+      "name": "Krónan lífrænt tómatar maukaðir",
+      "size": "390 gr.",
+      "price": 229,
+      "category": "Tómatvörur",
+      "image": "https://media.kronan.is/products/127375",
+      "url": "https://kronan.is/vara/100272277-kronan-lifraent-tomatar-maukadir",
+      "fun": false
+    },
+    {
+      "sku": "100274286",
+      "name": "Guli miðinn þarahylki",
+      "size": "60 stk.",
+      "price": 899,
+      "category": "Vítamín og steinefni",
+      "image": "https://media.kronan.is/products/129382",
+      "url": "https://kronan.is/vara/100274286-guli-midinn-tharahylki",
+      "fun": true
+    },
+    {
+      "sku": "04700406",
+      "name": "Til hamingju döðlur",
+      "size": "250 gr.",
+      "price": 215,
+      "category": "Þurrkaðir ávextir",
+      "image": "https://media.kronan.is/products/69723",
+      "url": "https://kronan.is/vara/04700406-til-hamingju-dodlur",
+      "fun": false
+    },
+    {
+      "sku": "100237610",
+      "name": "Til hamingju saxaðar döðlur",
+      "size": "250 gr.",
+      "price": 245,
+      "category": "Þurrkaðir ávextir",
+      "image": "https://media.kronan.is/products/70468",
+      "url": "https://kronan.is/vara/100237610-til-hamingju-saxadar-dodlur",
+      "fun": false
+    }
+  ]
+}

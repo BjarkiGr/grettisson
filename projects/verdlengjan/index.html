@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="is">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Verðlengjan — hvað kostar dæmið?</title>
+  <meta name="description" content="Daglegur verðgátuleikur: giskaðu á verð úr Krónunni og bakaðu vínarbrauðslengju. Því nákvæmari gisk, því lengri lengja.">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="page">
+    <header class="top">
+      <div class="top-row">
+        <h1>🥐 Verðlengjan</h1>
+        <div class="top-buttons">
+          <button id="help-btn" class="icon-btn" title="Hvernig á að spila" aria-label="Hvernig á að spila">?</button>
+          <button id="mute-btn" class="icon-btn" title="Hljóð af/á" aria-label="Hljóð af/á">🔊</button>
+        </div>
+      </div>
+      <div class="sub-row">
+        <span id="puzzle-label">dagleg karfa</span>
+        <span id="streak-label">🔥 bakararöð: 0</span>
+      </div>
+    </header>
+
+    <section class="lengja-band" aria-label="Vínarbrauðslengjan">
+      <div class="lengja-head">
+        <span>Vínarbrauðslengjan þín</span>
+        <strong id="cm-count">2 cm</strong>
+      </div>
+      <div class="lengja-scroller" id="lengja-scroller">
+        <div class="lengja-inner">
+          <div class="strip" id="strip"></div>
+          <div class="ruler" id="ruler"></div>
+        </div>
+      </div>
+      <div id="milestone-banner" class="milestone-banner" hidden></div>
+    </section>
+
+    <main class="card">
+      <div id="loading">Sæki verðskrá Krónunnar… 🥐</div>
+      <div id="load-error" hidden>
+        <p>Gat ekki sótt verðskrána.</p>
+        <button class="primary" id="retry-btn">Reyna aftur</button>
+      </div>
+
+      <div id="guess-phase" hidden>
+        <div class="progress" id="progress">Vara 1 af 5</div>
+        <div class="product">
+          <div class="img-wrap"><img id="product-img" alt="Vörumynd"></div>
+          <h2 id="product-name"></h2>
+          <p class="meta"><span id="product-size"></span><span id="product-cat"></span></p>
+        </div>
+        <label class="guess-label" for="guess-slider">Hvað kostar þetta í Krónunni?</label>
+        <div class="slider-block">
+          <div class="guess-readout" id="guess-readout">250 kr.</div>
+          <input type="range" id="guess-slider" min="0" max="1000" step="1" value="437"
+                 aria-label="Giska á verð í krónum">
+          <div class="slider-ticks" id="slider-ticks"></div>
+          <div class="tune-row">
+            <button type="button" class="tune-btn" data-d="-10" aria-label="Lækka um 10 krónur">−10</button>
+            <button type="button" class="tune-btn" data-d="-1" aria-label="Lækka um 1 krónu">−1</button>
+            <button type="button" class="tune-btn" data-d="1" aria-label="Hækka um 1 krónu">+1</button>
+            <button type="button" class="tune-btn" data-d="10" aria-label="Hækka um 10 krónur">+10</button>
+          </div>
+        </div>
+        <p class="hint" id="guess-error" hidden></p>
+        <button class="primary" id="bake-btn">BAKA 🥐</button>
+      </div>
+
+      <div id="reveal-phase" hidden>
+        <div class="tier-line">
+          <span id="tier-emoji"></span>
+          <strong id="tier-name"></strong>
+          <span id="tier-cm" class="tier-cm"></span>
+        </div>
+        <div class="receipt">
+          <div class="r-row"><span>Þú giskaðir</span><span id="reveal-guess"></span></div>
+          <div class="r-row"><span>Raunverð</span><span id="reveal-price"></span></div>
+          <div class="r-row"><span>Frávik</span><span id="reveal-error"></span></div>
+        </div>
+        <a id="product-link" class="product-link" href="#" target="_blank" rel="noopener">Sjá vöruna í Krónunni ↗</a>
+        <button class="primary" id="next-btn">Næsta vara →</button>
+      </div>
+
+      <div id="results-phase" hidden>
+        <h2 id="results-title">Lengjan þín er tilbúin!</h2>
+        <div class="total-line">
+          <strong id="results-cm"></strong>
+          <span id="results-rank" class="rank"></span>
+        </div>
+        <div class="receipt" id="results-receipt"></div>
+        <p class="snapshot-note" id="results-note"></p>
+        <div class="btn-row">
+          <button class="primary" id="share-btn">Deila 📋</button>
+          <button id="unlimited-btn">Ótakmarkað bakkelsi ∞</button>
+          <button id="back-daily-btn" hidden>Til baka í daglegu 🥐</button>
+        </div>
+        <p class="tomorrow" id="tomorrow-note"></p>
+      </div>
+    </main>
+
+    <footer class="foot">
+      <p>Verð og vörumyndir: <a href="https://kronan.is" target="_blank" rel="noopener">Krónan</a> ·
+        verðskrá frá <span id="snapshot-date"></span>. Ótengt Krónunni.</p>
+      <p><a href="/">← grettisson.is</a> · <a href="/projects/vinarbraud/">Er vínarbrauð á borðinu í dag?</a></p>
+    </footer>
+  </div>
+
+  <div class="modal" id="howto" hidden>
+    <div class="modal-box">
+      <h2>Hvernig á að spila 🥐</h2>
+      <p>Á hverjum degi færðu <strong>5 vörur úr Krónunni</strong> — sömu vörurnar og allir aðrir.
+        Þú sérð mynd, nafn og stærð en <em>ekki verðið</em>. Dragðu sleðann til að giska á verðið
+        og fínstilltu með ±1 hnöppunum.</p>
+      <p>Hver giskur bakar sneið ofan á vínarbrauðslengjuna þína. <strong>Því nákvæmari gisk, því lengri sneið</strong>
+        — hámarks vöxtur ef þú hittir á nagann, og <strong>enginn vöxtur</strong> ef þú ert meira en 100% frá:</p>
+      <table class="tier-table">
+        <tr><td>🎯</td><td>Nákvæmt verð — <strong>Á nagann!</strong></td><td>20 cm</td></tr>
+        <tr><td>🟩</td><td>Innan ±5% — mjög nálægt</td><td>16 cm</td></tr>
+        <tr><td>🟨</td><td>Innan ±15% — nálægt</td><td>12 cm</td></tr>
+        <tr><td>🟧</td><td>Innan ±35% — sæmilegt</td><td>8 cm</td></tr>
+        <tr><td>🟥</td><td>Innan ±100% — fjarri lagi</td><td>4 cm</td></tr>
+        <tr><td>⬛</td><td>Meira en 100% frá — <strong>ekkert!</strong></td><td>0 cm</td></tr>
+      </table>
+      <p>100 cm = <strong>Metralengjan</strong> 🏆. Á fimmtudögum færðu aukasneið — vínarbrauð í kaffi!
+        Ein dagleg lengja á dag; ótakmarkað bakkelsi eins og þig lystir.</p>
+      <button class="primary" id="howto-close">Hefja bakstur!</button>
+    </div>
+  </div>
+
+  <script src="src/util.js"></script>
+  <script src="src/data.js"></script>
+  <script src="src/daily.js"></script>
+  <script src="src/lengja.js"></script>
+  <script src="src/audio.js"></script>
+  <script src="src/game.js"></script>
+</body>
+</html>
