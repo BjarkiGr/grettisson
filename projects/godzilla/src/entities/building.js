@@ -12,7 +12,7 @@ class Building {
     this.color = pick(BUILDING_COLORS);
     this.collapseT = 0;
     this.collapseDur = 0.6;
-    this.tiltDir = Math.random() < 0.5 ? -1 : 1;
+    this.tiltDir = rnd() < 0.5 ? -1 : 1;
     this.scareT = 0; // window flicker timer after a nearby roar
     this.cracks = [];
     this.roofType = randInt(0, 2); // 0 flat, 1 antenna, 2 water tank
@@ -21,7 +21,7 @@ class Building {
     this.rows = Math.max(1, Math.floor((this.h - 34) / 36));
     for (let r = 0; r < this.rows; r++) {
       for (let c = 0; c < this.cols; c++) {
-        this.windows.push({ c, r, lit: Math.random() < 0.65, broken: false });
+        this.windows.push({ c, r, lit: rnd() < 0.65, broken: false });
       }
     }
     // Deterministic rubble mounds so the pile does not shimmer between frames.

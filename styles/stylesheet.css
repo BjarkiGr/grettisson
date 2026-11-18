@@ -63,3 +63,79 @@ body {
   color: black;
   font-weight: bold;
 }
+
+/* --- Homepage (grettisson.is) --- */
+body.home {
+  display: block;
+  height: auto;
+  min-height: 100vh;
+  background-color: #f0f0f0;
+}
+
+.home-header {
+  text-align: center;
+  padding: 60px 20px 30px;
+}
+
+.home-header h1 {
+  font-size: 48px;
+  margin: 0 0 10px;
+  color: #333;
+}
+
+.home-header p {
+  font-size: 18px;
+  color: #666;
+  margin: 0;
+}
+
+.projects {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px;
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 20px 20px 60px;
+}
+
+.project-card {
+  display: block;
+  background-color: #fff;
+  border: 2px solid #333;
+  border-radius: 5px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  padding: 24px;
+  text-decoration: none;
+  color: #333;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.project-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.18);
+}
+
+.project-card .project-icon {
+  font-size: 36px;
+  display: block;
+  margin-bottom: 12px;
+}
+
+.project-card h2 {
+  font-size: 22px;
+  margin: 0 0 8px;
+}
+
+.project-card p {
+  font-size: 15px;
+  line-height: 1.5;
+  color: #555;
+  margin: 0;
+}
+
+.home-footer {
+  text-align: center;
+  padding: 0 20px 40px;
+  color: #888;
+  font-size: 14px;
+}

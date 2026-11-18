@@ -65,4 +65,21 @@ class Sfx {
     this.tone(75, 45, 0.9, 'square', 0.2);
     this.noise(0.9, 700, 0.2, 'bandpass', 2);
   }
+  jump() { this.tone(180, 420, 0.18, 'sine', 0.25); }
+  land() { this.tone(70, 30, 0.25, 'sine', 0.8); this.noise(0.18, 200, 0.3); }
+  splash() { this.noise(0.45, 700, 0.35, 'bandpass', 0.7); this.noise(0.3, 1600, 0.12, 'highpass'); }
+  beamStart() { this.tone(120, 640, 0.3, 'sawtooth', 0.22); }
+  beam() { this.tone(320, 90, 0.16, 'sawtooth', 0.14); this.noise(0.14, 2400, 0.09, 'bandpass', 3); }
+  boatHit() { this.noise(0.12, 900, 0.3, 'bandpass', 1); this.tone(220, 90, 0.1, 'square', 0.15); }
+  boatSink() {
+    this.noise(0.6, 500, 0.4);
+    this.tone(160, 40, 0.5, 'sine', 0.3);
+    this.noise(0.5, 900, 0.15, 'bandpass', 0.8);
+  }
+  shellHit() { this.noise(0.2, 300, 0.5); this.tone(140, 50, 0.2, 'square', 0.3); }
+  finish() {
+    this.tone(330, 330, 0.15, 'square', 0.18);
+    this.tone(440, 440, 0.15, 'square', 0.18);
+    this.tone(660, 660, 0.35, 'square', 0.2);
+  }
 }

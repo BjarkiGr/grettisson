@@ -53,6 +53,36 @@ Detailed build plan. Items are ticked off once implemented AND verified.
 - [x] Headless smoke test: boot, start, walk, smash, roar, combo, score (test/smoke.js)
 - [x] Final review of all files
 
+## Phase 9 - Auto-walk, jump and atomic breath
+- [x] Auto-walk forward; LEFT/A brake, RIGHT/D sprint (src/entities/godzilla.js)
+- [x] Jump (UP/W) with gravity; landing shockwave damages nearby buildings
+- [x] Airborne SPACE = body slam (fast fall + bigger shockwave)
+- [x] Pink atomic beam (hold F/K): 700px piercing ray, damage ticks
+- [x] Beam energy meter: drains while firing, regen + bonus per smash
+- [x] Pink dorsal-plate glow, beam core/halo rendering, sparks, synth SFX
+
+## Phase 10 - Swim sections
+- [x] World segments: 100m city / 50m water at 50px = 1m (src/world.js)
+- [x] Buildings only in city stretches; water gradient, waves, moon glints
+- [x] Swimming: auto-forward, UP/DOWN depth control, submerged rendering
+- [x] Navy boats (src/entities/boat.js): arcing shells, dive to dodge
+- [x] Shell hit: -150 pts, combo reset, brief stun; swipe disabled in water
+- [x] Beam-only combat vs boats (+300 per kill), splash/bubble particles
+
+## Phase 11 - Daily Rampage (score attack, no backend)
+- [x] Seeded RNG: date string -> xmur3 -> mulberry32 (src/util.js setSeed)
+- [x] All gameplay randomness seeded; cosmetic randomness isolated (crand)
+- [x] Daily: fixed 500m course (4 city + 3 swim), finish line, time bonus
+- [x] One scored run/day; streaks + history + unlimited best in localStorage (src/daily.js)
+- [x] Title screen mode select: ENTER daily / U unlimited; results screen
+- [x] Wordle-style emoji share grid copied to clipboard (C or click)
+
+## Phase 12 - Validation (expansion)
+- [x] Syntax-check every JS file (node --check)
+- [x] Smoke test: auto-walk, brake, jump, beam, swim, dive, boats, daily
+      finish, share copy, streak, unlimited, one-run-per-day (test/smoke.js)
+- [x] Determinism check: same date seed => identical city + boat layout
+
 ## How to run
 Open index.html in a browser (no server or build step needed),
 or serve the folder: `npx serve .` / `python -m http.server`.

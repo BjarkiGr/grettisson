@@ -3,24 +3,65 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Grettisson</title>
-    <link rel="stylesheet" href="styles/stylesheet.css">
-    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <title>Grettisson — Projects</title>
+    <link rel="stylesheet" href="/styles/stylesheet.css">
 </head>
-<body>
-    <div class="post-it" style="cursor:pointer" onclick="window.location='/projects/stickynotes'">
-        <img src="resources/postit.png" alt="Post-it Note">
+<body class="home">
+    <div class="post-it" style="cursor:pointer" onclick="window.location='/projects/stickynotes/'">
+        <img src="/resources/postit.png" alt="Post-it Note">
     </div>
-    <!--
-    <div id="info-container">
-        <h1>Your IP Address & Location:</h1>
-        <div id="ip">Loading IP...</div>
-        <div id="location">Loading location...</div>
-        <div id="weather">Loading weather...</div>
-    </div>
-    <div id="map"></div>
--->
-    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
-    <script src="script.js"></script>
+
+    <header class="home-header">
+        <h1>Grettisson</h1>
+        <p>Small projects, games and experiments — all in one place.</p>
+    </header>
+
+    <main class="projects">
+        <a class="project-card" href="/projects/godzilla/">
+            <span class="project-icon">🦖</span>
+            <h2>Godzilla — City Rampage</h2>
+            <p>Auto-walking city smasher with swim sections, jumps and a pink atomic beam. Same seeded city for everyone in the daily challenge — one run per day, Wordle-style sharing.</p>
+        </a>
+
+        <a class="project-card" href="/projects/chessbot/">
+            <span class="project-icon">♟️</span>
+            <h2>Chess</h2>
+            <p>Play against a minimax engine with alpha-beta pruning, or switch to local two-player mode. Three difficulty levels.</p>
+        </a>
+
+        <a class="project-card" href="/projects/stickynotes/">
+            <span class="project-icon">📝</span>
+            <h2>Sticky Notes</h2>
+            <p>Markdown-enabled sticky notes right in your browser. Jot things down and keep them on your board.</p>
+        </a>
+
+        <a class="project-card" href="/projects/fibonacci/">
+            <span class="project-icon">🔢</span>
+            <h2>Fibonacci Generator</h2>
+            <p>Calculate the n-th number in the Fibonacci sequence, with a short introduction to the mathematics behind it.</p>
+        </a>
+
+        <a class="project-card" href="/projects/vinarbraud/">
+            <span class="project-icon">🥐</span>
+            <h2>Vínarbrauðsgreining</h2>
+            <p>Er vínarbrauð á borðinu í dag? The essential Thursday pastry check.</p>
+        </a>
+
+        <a class="project-card" href="/projects/katrin/">
+            <span class="project-icon">🎬</span>
+            <h2>EgMunVinna</h2>
+            <p>Katrín Leifsdóttir's personal page. Hæ, ég heiti Katrín Leifsdóttir.</p>
+        </a>
+
+        <a class="project-card" href="/projects/todolist/">
+            <span class="project-icon">✅</span>
+            <h2>To Do List</h2>
+            <p>A simple to-do list app. Coming soon — work in progress.</p>
+        </a>
+    </main>
+
+    <footer class="home-footer">
+        <p>grettisson.is</p>
+    </footer>
 </body>
 </html>
