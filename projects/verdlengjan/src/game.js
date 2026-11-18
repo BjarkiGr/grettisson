@@ -264,7 +264,7 @@ const Game = {
   },
 
   checkMilestones(prev, now) {
-    const marks = [[30, '🚩 Heil lengja!'], [60, '🚩 Bakkablöð!'], [100, '🏆 METRALENGJAN!']];
+    const marks = [[30, '🚩 Kaffitíminn!'], [60, '🚩 Afmæli!'], [100, '🏆 Veisla!']];
     const hit = marks.filter(([cm]) => prev < cm && now >= cm).pop();
     if (!hit) return;
     this.el.banner.textContent = hit[1];

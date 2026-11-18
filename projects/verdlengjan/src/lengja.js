@@ -62,7 +62,7 @@ const Lengja = {
         r.appendChild(lab);
       }
     }
-    const marks = [[30, '🚩', 'heil lengja'], [60, '🚩', 'bakkablöð'], [100, '🏆', 'Metralengjan']];
+    const marks = [[30, '🚩', 'Kaffitíminn'], [60, '🚩', 'Afmæli'], [100, '🏆', 'Veisla!']];
     for (const [cm, icon, label] of marks) {
       const m = document.createElement('div');
       m.className = 'milestone';

@@ -14,12 +14,12 @@ async function loadBank() {
 // Scoring tiers, best first. cm = physical length baked onto the lengja.
 // Exact price = max growth (20 cm); more than 100% off = no growth at all.
 const TIERS = [
-  { id: 'exact',  name: 'Á nagann!',   cm: 20, emoji: '🎯', maxError: 0 },
-  { id: 'close',  name: 'Mjög nálægt', cm: 16, emoji: '🟩', maxError: 0.05 },
-  { id: 'near',   name: 'Nálægt',      cm: 12, emoji: '🟨', maxError: 0.15 },
-  { id: 'decent', name: 'Sæmilegt',    cm: 8,  emoji: '🟧', maxError: 0.35 },
-  { id: 'far',    name: 'Fjarri lagi', cm: 4,  emoji: '🟥', maxError: 1.0 },
-  { id: 'miss',   name: 'Ekkert!',     cm: 0,  emoji: '⬛', maxError: Infinity },
+  { id: 'exact',  name: 'Vínarbrauð!',   cm: 20, emoji: '🎯', maxError: 0 },
+  { id: 'close',  name: 'Stór sneið', cm: 16, emoji: '🟩', maxError: 0.05 },
+  { id: 'near',   name: 'Sæmileg sneið',      cm: 12, emoji: '🟨', maxError: 0.15 },
+  { id: 'decent', name: 'Meðal sneið',    cm: 8,  emoji: '🟧', maxError: 0.35 },
+  { id: 'far',    name: 'Lítil sneið', cm: 4,  emoji: '🟥', maxError: 1.0 },
+  { id: 'miss',   name: 'Engin sneið!',     cm: 0,  emoji: '⬛', maxError: Infinity },
 ];
 function tierById(id) { return TIERS.find((t) => t.id === id) || TIERS[TIERS.length - 1]; }
 
@@ -47,7 +47,7 @@ function rankFor(cm) {
   if (cm >= 75) return 'Bakari';
   if (cm >= 50) return 'Lærlingur';
   if (cm >= 25) return 'Bakarasveinn';
-  return 'Aumingja bakari';
+  return 'Alls ekki bakari';
 }
 
 // Seeded Fisher-Yates using the current rnd() stream.
