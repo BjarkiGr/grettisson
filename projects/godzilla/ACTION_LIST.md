@@ -1,4 +1,4 @@
-﻿# Godzilla - City Rampage: Action List
+# Godzilla - City Rampage: Action List
 
 Detailed build plan. Items are ticked off once implemented AND verified.
 
@@ -82,6 +82,16 @@ Detailed build plan. Items are ticked off once implemented AND verified.
 - [x] Smoke test: auto-walk, brake, jump, beam, swim, dive, boats, daily
       finish, share copy, streak, unlimited, one-run-per-day (test/smoke.js)
 - [x] Determinism check: same date seed => identical city + boat layout
+
+## Phase 13 - Mobile / touch
+- [x] Synthetic key press/release in Input; touch buttons reuse keyboard mappings (src/input.js)
+- [x] DOM touch controls on coarse-pointer devices: brake/sprint, smash/jump/beam/roar, dive/up in water, mute + end run (src/touch.js)
+- [x] Menu buttons synced to title/results screens; held keys released on screen change
+- [x] Audio unlock inside the touch gesture (iOS requirement)
+- [x] DPR-aware canvas backing store (capped at 2) for crisp rendering (src/main.js)
+- [x] Scaled world view on small screens (~900x540 logical minimum), compact HUD, touch-aware menu text, portrait rotate hint (src/game.js)
+- [x] Safe-area aware button layout, no zoom/scroll/selection (style.css, index.html viewport)
+- [x] Smoke test: touch buttons drive gameplay, water swap, menus, key cleanup, DPR + phone resize (test/smoke.js)
 
 ## How to run
 Open index.html in a browser (no server or build step needed),
