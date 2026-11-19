@@ -71,7 +71,7 @@ check('totalCm = 2 + 20+16+12+8+0', evalIn('totalCm(' + JSON.stringify(guesses) 
 check('thursday adds 5cm', evalIn('totalCm(' + JSON.stringify(guesses) + ', true)') === 63);
 check('2026-11-19 is thursday', evalIn('isThursday("2026-11-19")') === true);
 check('2026-11-18 is not thursday', evalIn('isThursday("2026-11-18")') === false);
-check('rank thresholds', evalIn('rankFor(107)') === 'Meistarabakari 🏆' && evalIn('rankFor(10)') === 'Aumingja bakari');
+check('rank thresholds', evalIn('rankFor(107)') === 'Meistarabakari 🏆' && evalIn('rankFor(10)') === 'Alls ekki bakari');
 
 // --- daily determinism ---
 const fiveA = evalIn('buildDailyFive(Bank.products, "2026-11-18", 1).map(p=>p.sku).join(",")');
@@ -104,7 +104,7 @@ check('unlimited best keeps max', evalIn('Daily.load().bestUnlimited') === 70);
 const share = evalIn('Daily.shareText(__res)');
 check('share header', /^🥐 Verðlengjan #1 — 58 cm\n/.test(share));
 check('share emoji row', share.split('\n')[1] === '🎯🟩🟨🟧⬛');
-check('share link', share.includes('grettisson.is/projects/verdlaengjan/'));
+check('share link', share.includes('grettisson.is/projects/verdlengjan/'));
 check('clipboard copy', evalIn('Daily.copyShare(__res)') === true && clipboardText === share);
 const shareThu = evalIn('Daily.shareText(Object.assign({}, __res, { thursdayBonus: true }))');
 check('thursday bonus in share', shareThu.includes('fimmtudagsbonus'));

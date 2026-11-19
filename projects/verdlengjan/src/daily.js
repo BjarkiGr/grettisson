@@ -3,7 +3,7 @@
 // Pattern adapted from projects/godzilla/src/daily.js.
 const Daily = {
   EPOCH: Date.UTC(2026, 10, 18), // launch day = puzzle #1
-  KEY: 'verdlaengjan-daily-v2', // v2: pixel-art era - new tiers, slider, zero-growth misses
+  KEY: 'verdlengjan-daily-v2', // v2: pixel-art era - new tiers, slider, zero-growth misses
 
   today() { return new Date().toISOString().slice(0, 10); },
 
@@ -50,7 +50,7 @@ const Daily = {
     const row = res.guesses.map((g) => tierById(g.tierId).emoji).join('');
     return '🥐 Verðlengjan #' + res.number + ' — ' + res.totalCm + ' cm\n' +
       row + (res.thursdayBonus ? ' + 🥐 fimmtudagsbonus!' : '') + '\n' +
-      'grettisson.is/projects/verdlaengjan/';
+      'grettisson.is/projects/verdlengjan/';
   },
 
   copyShare(res) {

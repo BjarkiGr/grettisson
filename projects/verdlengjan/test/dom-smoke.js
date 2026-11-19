@@ -1,6 +1,7 @@
 // Headless DOM smoke test: stubs a minimal DOM/storage/fetch, loads ALL game
-// scripts, boots the game and plays full rounds through the real UI wiring:
-// invalid input, five exact guesses, results, share, saved-reload, unlimited.
+// scripts, boots to the start screen, clicks start and plays full rounds
+// through the real UI wiring: five exact guesses, results, share,
+// saved-reload, unlimited. Thursday-aware (the +5 cm bonus applies on Thu).
 // Run with: node test/dom-smoke.js
 const fs = require('fs');
 const path = require('path');
@@ -54,15 +55,23 @@ function check(name, cond) {
   else { failures++; console.log('FAIL  ' + name); }
 }
 const strip = () => sandbox.document.getElementById('strip');
+const svgCount = () => (strip().innerHTML.match(/<svg/g) || []).length;
 
 (async () => {
   // boot (DOMContentLoaded handler returns the boot promise)
   await winListeners.DOMContentLoaded[0]();
-  check('boots into guess phase', evalIn('Game.phase') === 'guess');
-  check('bank loaded', evalIn('Bank.products.length') > 100);
+  check('boots into start screen', evalIn('Game.phase') === 'start');
+  check('start screen visible', sandbox.document.getElementById('start-phase').hidden === false);
+  check('bank loaded', evalIn('Bank.products.length') >= 101);
+  check('start button invites to bake', sandbox.document.getElementById('start-btn').textContent.includes('Búa til vínarbrauð dagsins'));
+  sandbox.document.getElementById('start-btn').listeners.click[0]();
+  check('start enters guess phase', evalIn('Game.phase') === 'guess');
   check('howto shown on first visit', sandbox.document.getElementById('howto').hidden === false);
   evalIn('Game.closeHowto()');
-  check('start slice on strip (endinn)', strip().children.length === 1);
+  check('endinn on the strip (2 cm)', evalIn('Lengja.totalCm') === 2 && strip().innerHTML.includes('<svg'));
+  check('lengja is one seamless svg', svgCount() === 1);
+  check('ruler is fixed 0-100 cm', evalIn('Lengja.ruler.style.width') === '520px');
+  check('loaf fits the band', evalIn('Lengja.layout().loafW') <= 520);
   check('cm counter starts at 2', evalIn('Game.el.cm.textContent') === '2 cm');
 
   // slider clamps and updates the readout
@@ -73,7 +82,9 @@ const strip = () => sandbox.document.getElementById('strip');
   evalIn('Game.setGuess(849)');
   check('readout shows formatted guess', evalIn('Game.el.readout.textContent') === '849 kr.');
 
-  // play five exact guesses -> all exact tier
+  // play five exact guesses => all exact tier (thursday adds +5 cm)
+  const bonus = evalIn('Game.thursday') ? 5 : 0;
+  const perfect = 102 + bonus;
   const prices = evalIn('Game.items.map(p => p.price)');
   for (const price of prices) {
     evalIn('Game.setGuess(' + price + '); Game.bake();');
@@ -82,41 +93,41 @@ const strip = () => sandbox.document.getElementById('strip');
   }
   check('results phase after five', evalIn('Game.phase') === 'results');
   check('all five exact = exact tier', evalIn('Game.guesses.every(g => g.tierId === "exact")'));
-  check('lengja = endinn + 5 slices', strip().children.length === 6);
-  check('perfect score 102 cm', evalIn('Game.el.cm.textContent') === '102 cm');
+  check('lengja still one seamless svg', svgCount() === 1);
+  check('perfect score ' + perfect + ' cm', evalIn('Game.el.cm.textContent') === perfect + ' cm');
   check('metralengjan banner fired', sandbox.document.getElementById('milestone-banner').textContent.includes('METRALENGJAN'));
   check('daily recorded', evalIn('Daily.playedToday()') === true);
   check('rank is meistarabakari', evalIn('Game.el.rRank.textContent') === 'Meistarabakari 🏆');
 
   // share
   evalIn('Game.share()');
-  check('share copied with 102 cm', clipboardText && clipboardText.includes('102 cm') && clipboardText.includes('🎯🎯🎯🎯🎯'));
+  check('share copied with ' + perfect + ' cm', clipboardText && clipboardText.includes(perfect + ' cm') && clipboardText.includes('🎯🎯🎯🎯🎯'));
 
-  // saved reload rebuilds the same lengja
+  // saved reload rebuilds the same loaf
   evalIn('Game.showSaved()');
-  check('saved reload rebuilds 6 slices', strip().children.length === 6);
-  check('saved reload shows results', evalIn('Game.phase') === 'results' && evalIn('Game.el.cm.textContent') === '102 cm');
+  check('saved reload rebuilds the loaf', evalIn('Lengja.totalCm') === perfect && svgCount() === 1);
+  check('saved reload shows results', evalIn('Game.phase') === 'results' && evalIn('Game.el.cm.textContent') === perfect + ' cm');
 
   // unlimited: worst reachable guess (3x price, capped at slider max).
-  // Cheap items -> miss (zero growth); very expensive items can't exceed
+  // Cheap items => miss (zero growth); very expensive items can't exceed
   // 100% error within the slider range, so compute expectations per item.
   evalIn('Game.startUnlimited()');
-  check('unlimited resets strip', strip().children.length === 1);
+  check('unlimited resets loaf', evalIn('Lengja.totalCm') === 2);
   const uPrices = evalIn('Game.items.map(p => p.price)');
-  let expCm = 0, expSlices = 0, misses = 0;
+  let expCm = 0, misses = 0;
   for (const price of uPrices) {
     const guess = Math.min(price * 3, 15000);
     const s = evalIn('scoreGuess(' + guess + ', ' + price + ')');
     expCm += s.cm;
-    if (s.cm > 0) expSlices++; else misses++;
+    if (s.cm === 0) misses++;
     evalIn('Game.setGuess(' + guess + '); Game.bake(); Game.next();');
   }
   check('worst guesses score as expected', evalIn('Game.lastResult.totalCm') === 2 + expCm);
-  check('zero-growth misses add no slice', strip().children.length === 1 + expSlices);
+  check('zero-growth misses add no length', evalIn('Lengja.totalCm') === 2 + expCm);
   check('cheap items are misses', misses >= 1);
   check('unlimited best saved', evalIn('Daily.load().bestUnlimited') === 2 + expCm);
   check('share hidden in unlimited', evalIn('Game.el.share.hidden') === true);
-  check('daily result untouched by unlimited', evalIn('Daily.todayResult().totalCm') === 102);
+  check('daily result untouched by unlimited', evalIn('Daily.todayResult().totalCm') === perfect);
 
   console.log(failures === 0 ? '\nAll DOM checks passed.' : '\n' + failures + ' FAILURES');
   process.exit(failures === 0 ? 0 : 1);

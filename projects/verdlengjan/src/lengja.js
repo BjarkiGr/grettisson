@@ -1,186 +1,179 @@
-// The vínarbrauðslengja: a 16-bit pixel-art pastry strip that grows by the
-// exact number of cm each answer earns. Each slice is a sprite drawn on a
-// 4px pixel grid (8px per cm, so widths always align), rendered as SVG rects
-// with crispEdges - no gradients, no anti-aliasing, chunky SNES-era palette.
+// The vínarbrauðslengja: ONE seamless 16-bit pixel-art pastry that grows by
+// the exact number of cm each answer earns. The whole loaf is a single SVG
+// sprite on a 4px pixel grid (8px per cm). The ruler is a fixed 0-100 cm
+// scale: the loaf fills its share of the band - no scrolling, no zooming.
+// Look: brown puff pastry, a yellow vanilla line down the center, toasted
+// almonds on one half, chocolate + pink frosting on the other.
 // All randomness here is cosmetic (hash1/crand) - never the seeded stream.
 const Lengja = {
   PX_PER_CM: 8,
-  P: 4,          // pixel size
-  H: 64,         // 16 pixel rows
-  MAX_CM: 110,   // ruler scale: 2 start + 5x20 + 5 thursday = 107 max
+  P: 4,              // pixel size
+  H: 64,             // 16 pixel rows
+  MAX_CM: 100,       // fixed ruler scale: 0-100 cm, 100 = completely full
+  BAND_H: 110,       // loaf display height in px (big at any length)
   scroller: null, strip: null, ruler: null,
-  totalCm: 0,
+  totalCm: 0, loafW: 0, loafH: 0,
   reduced: false,
   PAL: {
-    O: '#4a2c12', // outline
+    O: '#2a1608', // outline (deep bake)
     H: '#f8e0a0', // top highlight
     L: '#f0c060', // light crust
     M: '#d89030', // mid crust
     D: '#a06028', // dark crust
-    G: '#f8d878', // golden body (exact hit)
-    g: '#e8b830', // golden shadow
-    J: '#c02828', // jam
-    j: '#e85040', // jam shine
-    I: '#f8f8f0', // icing
-    i: '#d8d0c0', // icing shadow
-    A: '#f0e0b0', // almond
-    a: '#c8b080', // almond shadow
-    R: '#503060', // raisin
-    r: '#8060a0', // raisin shine
-    F: '#e03030', // flag
-    S: 'rgba(74,44,18,0.25)', // ground shadow
+    C: '#f8d848', // vanilla custard line
+    c: '#d8a820', // custard shadow
+    K: '#5a3018', // chocolate frosting
+    k: '#7a4828', // chocolate highlight
+    P: '#f088b8', // pink frosting
+    p: '#d06898', // pink shadow
+    A: '#e8c890', // toasted almond
+    a: '#b8863c', // almond toast
+    S: 'rgba(0,0,0,0.35)', // ground shadow
   },
 
   init(scrollerEl, stripEl, rulerEl) {
     this.scroller = scrollerEl; this.strip = stripEl; this.ruler = rulerEl;
     this.reduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    this.buildRuler();
+    window.addEventListener('resize', () => this.render(false));
     this.reset();
   },
 
   reset() {
-    this.strip.innerHTML = '';
     this.totalCm = 0;
     this.addSlice(START_CM, 'endi', false); // endinn á lengjunni
   },
 
-  buildRuler() {
+  addSlice(cm, tierId, animate) {
+    if (cm <= 0) return; // more than 100% off: the lengja does not grow
+    this.totalCm += cm;
+    this.render(animate && !this.reduced);
+    if (animate && !this.reduced) {
+      this.steam();
+      if (tierId === 'exact') this.sparkle();
+    }
+  },
+
+  // Fixed 0-100 cm scale: the loaf fills its share of the band, no scrolling.
+  layout() {
+    const W = (this.scroller && this.scroller.clientWidth) || 520;
+    const scale = W / (this.MAX_CM * this.PX_PER_CM);
+    const shownCm = Math.min(this.totalCm, this.MAX_CM);
+    return {
+      scale,
+      loafW: shownCm * this.PX_PER_CM * scale,
+      loafH: this.BAND_H,
+    };
+  },
+
+  render(animate) {
+    const L = this.layout();
+    this.loafW = L.loafW; this.loafH = L.loafH;
+    this.strip.innerHTML = this.svg(L.loafW, L.loafH);
+    const sv = this.strip.firstElementChild;
+    if (animate && sv && sv.classList) sv.classList.add('baking');
+    this.buildRuler(L);
+  },
+
+  buildRuler(L) {
     const r = this.ruler;
     r.innerHTML = '';
-    r.style.width = (this.MAX_CM * this.PX_PER_CM) + 'px';
+    r.style.width = (this.MAX_CM * this.PX_PER_CM * L.scale) + 'px';
     for (let cm = 0; cm <= this.MAX_CM; cm += 5) {
       const major = cm % 10 === 0;
       const tick = document.createElement('div');
       tick.className = 'tick' + (major ? ' major' : '');
-      tick.style.left = (cm * this.PX_PER_CM) + 'px';
+      tick.style.left = (cm * this.PX_PER_CM * L.scale) + 'px';
       r.appendChild(tick);
       if (major) {
         const lab = document.createElement('span');
         lab.className = 'tick-label';
-        lab.style.left = (cm * this.PX_PER_CM) + 'px';
+        lab.style.left = (cm * this.PX_PER_CM * L.scale) + 'px';
         lab.textContent = cm;
         r.appendChild(lab);
       }
     }
-    const marks = [[30, '🚩', 'Kaffitíminn'], [60, '🚩', 'Afmæli'], [100, '🏆', 'Veisla!']];
-    for (const [cm, icon, label] of marks) {
-      const m = document.createElement('div');
-      m.className = 'milestone';
-      m.style.left = (cm * this.PX_PER_CM) + 'px';
-      m.innerHTML = '<span class="m-icon">' + icon + '</span><span class="m-label">' + label + '</span>';
-      r.appendChild(m);
-    }
   },
 
-  addSlice(cm, tierId, animate) {
-    if (cm <= 0) return null; // more than 100% off: the lengja does not grow
-    const w = cm * this.PX_PER_CM;
-    const wrap = document.createElement('div');
-    wrap.className = 'slice' + (animate && !this.reduced ? ' baking' : '');
-    wrap.style.width = w + 'px';
-    wrap.innerHTML = this.svg(w, tierId);
-    this.strip.appendChild(wrap);
-    this.totalCm += cm;
-    if (animate && !this.reduced) {
-      this.steam(wrap);
-      if (tierId === 'exact') this.sparkle(wrap);
-    }
-    if (this.scroller) this.scroller.scrollLeft = this.scroller.scrollWidth;
-    return wrap;
-  },
-
-  steam(wrap) {
+  steam() {
     for (let i = 0; i < 3; i++) {
       const s = document.createElement('span');
       s.className = 'steam';
-      s.style.left = (30 + crand(-18, 18)) + '%';
+      s.style.left = Math.max(4, this.loafW - 30 + crand(-14, 14)) + 'px';
+      s.style.bottom = (this.loafH - 8) + 'px';
       s.style.animationDelay = (i * 0.15) + 's';
-      wrap.appendChild(s);
+      this.strip.appendChild(s);
       s.addEventListener('animationend', () => s.remove());
     }
   },
 
-  sparkle(wrap) {
+  sparkle() {
     for (let i = 0; i < 3; i++) {
       const s = document.createElement('span');
       s.className = 'sparkle';
       s.textContent = '✨';
-      s.style.left = (20 + i * 25) + '%';
+      s.style.left = Math.max(4, this.loafW - 46 + i * 16) + 'px';
+      s.style.bottom = (this.loafH + 2) + 'px';
       s.style.animationDelay = (i * 0.12) + 's';
-      wrap.appendChild(s);
+      this.strip.appendChild(s);
       s.addEventListener('animationend', () => s.remove());
     }
   },
 
-  // Build the slice sprite as a 16-row pixel grid of palette keys ('.' = empty).
-  sprite(cols, tierId) {
+  // The whole loaf as one 16-row pixel grid of palette keys ('.' = empty).
+  sprite(cols) {
     const rows = 16;
     const g = [];
     for (let y = 0; y < rows; y++) g.push(new Array(cols).fill('.'));
-    const exact = tierId === 'exact';
     const set = (x, y, c) => { if (x >= 0 && x < cols && y >= 0 && y < rows) g[y][x] = c; };
+    const mid = Math.floor(cols / 2);
     // ground shadow
     for (let x = 2; x < cols - 2; x++) set(x, 15, 'S');
     // outline, with skipped corner pixels for a rounded 16-bit look
     for (let x = 1; x < cols - 1; x++) { set(x, 4, 'O'); set(x, 14, 'O'); }
     for (let y = 5; y <= 13; y++) { set(0, y, 'O'); set(cols - 1, y, 'O'); }
-    // crust body: highlight top, light/mid/dark bands below
+    // crust body with the yellow vanilla line running down the center
     for (let y = 5; y <= 13; y++) {
       for (let x = 1; x < cols - 1; x++) {
         let c;
         if (y === 5) c = 'H';
-        else if (exact) c = y <= 11 ? 'G' : 'g';
-        else c = y <= 7 ? 'L' : y <= 11 ? 'M' : 'D';
+        else if (y <= 8) c = y <= 6 ? 'L' : 'M';
+        else if (y === 9) c = 'C';
+        else if (y === 10) c = 'c';
+        else c = y <= 12 ? 'M' : 'D';
         set(x, y, c);
       }
     }
     // flaky layer dashes
-    for (const y of [8, 11]) {
-      for (let x = 1; x < cols - 1; x++) if (x % 4 === 1 || x % 4 === 2) set(x, y, exact ? 'g' : 'D');
+    for (let x = 1; x < cols - 1; x++) if (x % 4 === 1 || x % 4 === 2) set(x, 12, 'D');
+    // darker baked crust on both ends of the loaf
+    for (let y = 5; y <= 13; y++) {
+      if (y !== 9 && y !== 10) { set(1, y, 'D'); set(cols - 2, y, 'D'); }
     }
-    // endinn: darker baked crust on the left edge
-    if (tierId === 'endi') {
-      for (let y = 5; y <= 13; y++) for (let x = 1; x <= Math.min(2, cols - 2); x++) set(x, y, 'D');
+    // left half: chocolate frosting with a pink zigzag drizzle
+    for (let x = 1; x < mid; x++) {
+      set(x, 5, 'k'); set(x, 6, 'K'); set(x, 7, 'K');
+      const py = 5 + (Math.floor(x / 2) % 2);
+      set(x, py, 'P'); set(x, py + 1, 'p');
+      if (hash1(x * 3.7) < 0.18) set(x, 8, 'K'); // chocolate drip
     }
-    // jam stripe
-    if (['decent', 'near', 'close', 'exact', 'thursday'].includes(tierId)) {
-      for (let x = 1; x < cols - 1; x++) { set(x, 9, x % 3 === 0 ? 'j' : 'J'); set(x, 10, 'J'); }
-    }
-    // almond flakes
-    if (['near', 'close', 'exact'].includes(tierId)) {
-      const n = Math.max(2, Math.floor(cols / 4));
+    // right half: toasted almond flakes on the golden crust
+    const half = cols - 2 - mid;
+    if (half > 0) {
+      const n = Math.max(2, Math.floor(half / 2));
       for (let i = 0; i < n; i++) {
-        const x = 1 + Math.floor(hash1(i * 3.1 + cols) * (cols - 2));
-        const y = 6 + Math.floor(hash1(i * 7.7 + cols) * 6);
+        const x = mid + Math.floor(hash1(i * 3.1 + cols) * half);
+        const y = 5 + Math.floor(hash1(i * 7.7 + cols) * 3);
         set(x, y, 'A'); set(x, y + 1, 'a');
       }
-    }
-    // icing zigzag with a drip shadow
-    if (['close', 'exact'].includes(tierId)) {
-      for (let x = 1; x < cols - 1; x++) {
-        const y = 5 + (Math.floor(x / 2) % 2);
-        set(x, y, 'I'); set(x, y + 1, 'i');
-      }
-    }
-    // the raisin on exact hits
-    if (exact && cols >= 4) {
-      const cx = Math.floor(cols / 2);
-      set(cx - 1, 7, 'r'); set(cx, 7, 'R'); set(cx - 1, 8, 'R'); set(cx, 8, 'R');
-    }
-    // thursday flag on a pole
-    if (tierId === 'thursday') {
-      const cx = Math.floor(cols / 2);
-      for (let y = 1; y <= 4; y++) set(cx, y, 'O');
-      set(cx + 1, 1, 'F'); set(cx + 2, 1, 'F'); set(cx + 1, 2, 'F');
     }
     return g;
   },
 
   // Run-length encode each pixel row into crisp SVG rects (one per color run).
-  svg(w, tierId) {
-    const cols = Math.max(Math.round(w / this.P), 3);
-    const g = this.sprite(cols, tierId);
-    let s = '<svg width="' + (cols * this.P) + '" height="' + this.H + '" viewBox="0 0 ' + (cols * this.P) + ' ' + this.H + '" xmlns="http://www.w3.org/2000/svg" shape-rendering="crispEdges">';
+  svg(w, h) {
+    const cols = Math.max(Math.min(this.totalCm, this.MAX_CM) * (this.PX_PER_CM / this.P), 4);
+    const g = this.sprite(cols);
+    let s = '<svg width="' + w + '" height="' + h + '" viewBox="0 0 ' + (cols * this.P) + ' ' + this.H + '" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none" shape-rendering="crispEdges">';
     for (let y = 0; y < g.length; y++) {
       let x = 0;
       while (x < cols) {

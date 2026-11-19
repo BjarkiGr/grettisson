@@ -90,7 +90,7 @@ function pickFive(products, puzzleNumber) {
 
 // Same five for everyone on a given date.
 function buildDailyFive(products, dateStr, puzzleNumber) {
-  setSeed('verdlaengjan:' + dateStr);
+  setSeed('verdlengjan:' + dateStr);
   return pickFive(products, puzzleNumber);
 }
 // Unlimited mode: fresh random five, never seeded.

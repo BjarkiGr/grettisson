@@ -25,7 +25,7 @@ const limitIdx = args.indexOf('--limit');
 const LIMIT = limitIdx >= 0 ? parseInt(args[limitIdx + 1], 10) : Infinity;
 const outIdx = args.indexOf('--out');
 const OUT = outIdx >= 0 ? args[outIdx + 1] : path.join(ROOT, 'data', 'products.json');
-const UA = 'VerdlaengjanSnapshot/1.0 (personal daily game project; grettisson.is)';
+const UA = 'VerdlengjanSnapshot/1.0 (personal daily game project; grettisson.is)';
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 async function get(url, opts = {}) {

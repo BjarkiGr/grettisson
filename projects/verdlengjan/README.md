@@ -1,9 +1,13 @@
 # Verðlengjan 🥐 — hvað kostar dæmið?
 
-Daily Krónan price guesser for grettisson.is. Five products a day (same for
-everyone), aim with the logarithmic price slider (±1/±10 fine-tune buttons),
-and each answer bakes a 16-bit pixel-art slice onto your vínarbrauðslengja.
-Exact price = max growth; more than 100% off = no growth at all:
+Daily Krónan price guesser for grettisson.is, in dark mode. A start screen
+("Búa til vínarbrauð dagsins!") kicks off five products a day (same for
+everyone). Aim with the logarithmic price slider (±1/±10 fine-tune buttons),
+and each answer grows your seamless 16-bit vínarbrauðslengja — one pastry,
+always fully visible on a fixed 0-100 cm scale (no scrolling, no flags).
+Brown crust, a yellow vanilla line down the center, toasted almonds on one
+half, chocolate + pink frosting on the other. Exact price = max growth;
+more than 100% off = no growth at all:
 
 | Tier | Accuracy | cm |
 |---|---|---|
@@ -16,7 +20,7 @@ Exact price = max growth; more than 100% off = no growth at all:
 
 Everyone starts with the 2 cm endinn. 100 cm = Metralengjan 🏆. Thursdays add
 a free 5 cm fimmtudagssneið. One scored run per day (localStorage), unlimited
-mode, streaks, Wordle-style emoji sharing. No backend — fully static.
+mode, Wordle-style emoji sharing. No backend — fully static.
 
 ## Data pipeline (run locally, never ships)
 
@@ -45,8 +49,8 @@ After refreshing, review `data/products.json` (fun flags, junk) and re-run tests
 
 - `node test/smoke.js` — scoring bands, seeded daily-five determinism, cm math,
   persistence, streaks, share format (against the real bank).
-- `node test/dom-smoke.js` — boots the real game with a stub DOM and plays full
-  daily + unlimited rounds through the UI wiring.
+- `node test/dom-smoke.js` — boots the real game with a stub DOM, clicks through
+  the start screen and plays full daily + unlimited rounds (Thursday-aware).
 - `node tools/check-wiring.mjs` — every referenced element ID / script exists.
 
 ## Credits

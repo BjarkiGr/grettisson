@@ -1,5 +1,5 @@
-// Orchestrates everything: bank loading, daily/unlimited runs, the
-// guess -> reveal -> results flow, the growing lengja, milestones, sharing.
+// Orchestrates everything: bank loading, the start screen, daily/unlimited
+// runs, the guess -> reveal -> results flow, the growing lengja, sharing.
 const Game = {
   mode: 'daily', items: [], idx: 0, guesses: [], phase: 'loading',
   number: 1, thursday: false, sfx: new Sfx(), lastResult: null,
@@ -8,7 +8,8 @@ const Game = {
   async boot() {
     const $ = (id) => document.getElementById(id);
     this.el = {
-      puzzle: $('puzzle-label'), streak: $('streak-label'), cm: $('cm-count'),
+      puzzle: $('puzzle-label'), cm: $('cm-count'),
+      start: $('start-phase'), startBtn: $('start-btn'),
       loading: $('loading'), loadError: $('load-error'),
       guess: $('guess-phase'), reveal: $('reveal-phase'), results: $('results-phase'),
       progress: $('progress'), img: $('product-img'), name: $('product-name'),
@@ -32,19 +33,16 @@ const Game = {
     Lengja.init($('lengja-scroller'), $('strip'), $('ruler'));
     this.buildTicks();
     this.bind();
-    this.updateStreak();
     try { await loadBank(); } catch (e) {
       this.el.loading.hidden = true; this.el.loadError.hidden = false; return;
     }
     this.el.snapshot.textContent = Bank.snapshotDate;
     this.el.loading.hidden = true;
-    let seen = false;
-    try { seen = !!localStorage.getItem('verdlaengjan-seen-howto'); } catch (e) { /* ignore */ }
-    if (!seen) this.openHowto();
-    if (Daily.playedToday()) this.showSaved(); else this.startDaily();
+    this.showStart();
   },
 
   bind() {
+    this.el.startBtn.addEventListener('click', () => this.start());
     this.el.bake.addEventListener('click', () => this.bake());
     this.el.slider.addEventListener('input', () => {
       this.guessValue = sliderToPrice(parseInt(this.el.slider.value, 10));
@@ -65,19 +63,39 @@ const Game = {
       this.sfx.unlock();
       const m = this.sfx.toggleMute();
       this.el.mute.textContent = m ? '🔇' : '🔊';
-      try { localStorage.setItem('verdlaengjan-muted', m ? '1' : '0'); } catch (e) { /* ignore */ }
+      try { localStorage.setItem('verdlengjan-muted', m ? '1' : '0'); } catch (e) { /* ignore */ }
     });
     try {
-      if (localStorage.getItem('verdlaengjan-muted') === '1') {
+      if (localStorage.getItem('verdlengjan-muted') === '1') {
         this.sfx.muted = true; this.el.mute.textContent = '🔇';
       }
     } catch (e) { /* ignore */ }
   },
 
+  // The start screen: "Búa til vínarbrauð dagsins!" (or view today's if played).
+  showStart() {
+    this.phase = 'start';
+    this.el.start.hidden = false;
+    this.number = Daily.number();
+    this.el.puzzle.textContent = '#' + this.number + ' · dagleg karfa';
+    this.el.startBtn.textContent = Daily.playedToday()
+      ? 'Sjá vínarbrauð dagsins 🥐'
+      : 'Búa til vínarbrauð dagsins! 🥐';
+  },
+
+  start() {
+    this.sfx.unlock();
+    this.el.start.hidden = true;
+    let seen = false;
+    try { seen = !!localStorage.getItem('verdlengjan-seen-howto'); } catch (e) { /* ignore */ }
+    if (!seen) this.openHowto();
+    if (Daily.playedToday()) this.showSaved(); else this.startDaily();
+  },
+
   openHowto() { this.el.howto.hidden = false; },
   closeHowto() {
     this.el.howto.hidden = true;
-    try { localStorage.setItem('verdlaengjan-seen-howto', '1'); } catch (e) { /* ignore */ }
+    try { localStorage.setItem('verdlengjan-seen-howto', '1'); } catch (e) { /* ignore */ }
   },
 
   // Set the guess programmatically (fine-tune buttons, per-item reset):
@@ -125,6 +143,7 @@ const Game = {
 
   showGuess() {
     this.phase = 'guess';
+    this.el.start.hidden = true;
     this.el.guess.hidden = false; this.el.reveal.hidden = true; this.el.results.hidden = true;
     const p = this.items[this.idx];
     this.el.progress.textContent = 'Vara ' + (this.idx + 1) + ' af ' + this.items.length;
@@ -178,7 +197,6 @@ const Game = {
     this.idx++;
     if (this.idx < this.items.length) this.showGuess(); else this.finish();
   },
-
   finish() {
     const bonus = this.thursday && this.mode === 'daily';
     if (bonus) {
@@ -192,7 +210,7 @@ const Game = {
       number: this.number, date: Daily.today(), guesses: this.guesses,
       totalCm: total, thursdayBonus: bonus,
     };
-    if (this.mode === 'daily') { Daily.recordResult(res); this.updateStreak(); }
+    if (this.mode === 'daily') Daily.recordResult(res);
     else Daily.recordUnlimited(total);
     this.lastResult = res;
     this.showResults(res);
@@ -200,6 +218,7 @@ const Game = {
 
   showResults(res) {
     this.phase = 'results';
+    this.el.start.hidden = true;
     this.el.guess.hidden = true; this.el.reveal.hidden = true; this.el.results.hidden = false;
     const daily = this.mode === 'daily';
     this.el.rTitle.textContent = daily ? 'Lengjan þín er tilbúin!' : 'Ótakmörkuð lengja!';
@@ -263,11 +282,10 @@ const Game = {
     }
   },
 
+  // The one big celebration: 100 cm = Metralengjan. No ruler flags.
   checkMilestones(prev, now) {
-    const marks = [[30, '🚩 Kaffitíminn!'], [60, '🚩 Afmæli!'], [100, '🏆 Veisla!']];
-    const hit = marks.filter(([cm]) => prev < cm && now >= cm).pop();
-    if (!hit) return;
-    this.el.banner.textContent = hit[1];
+    if (!(prev < 100 && now >= 100)) return;
+    this.el.banner.textContent = '🏆 METRALENGJAN! 🏆';
     this.el.banner.hidden = false;
     this.sfx.fanfare();
     clearTimeout(this.bannerTimer);
@@ -275,8 +293,6 @@ const Game = {
   },
 
   updateCm() { this.el.cm.textContent = Lengja.totalCm + ' cm'; },
-  updateStreak() { this.el.streak.textContent = '🔥 bakararöð: ' + Daily.load().streak; },
 };
 
 window.addEventListener('DOMContentLoaded', () => Game.boot());
-

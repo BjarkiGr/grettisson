@@ -19,7 +19,6 @@
       </div>
       <div class="sub-row">
         <span id="puzzle-label">dagleg karfa</span>
-        <span id="streak-label">🔥 bakararöð: 0</span>
       </div>
     </header>
 
@@ -42,6 +41,14 @@
       <div id="load-error" hidden>
         <p>Gat ekki sótt verðskrána.</p>
         <button class="primary" id="retry-btn">Reyna aftur</button>
+      </div>
+
+      <div id="start-phase" hidden>
+        <div class="start-art">🥐</div>
+        <h2 class="start-title">Vínarbrauð dagsins</h2>
+        <p class="start-text">Giskaðu á verð á fimm vörum úr Krónunni og bakaðu vínarbrauðslengjuna þína.
+          Því nákvæmari gisk, því lengri lengja!</p>
+        <button class="primary" id="start-btn">Búa til vínarbrauð dagsins! 🥐</button>
       </div>
 
       <div id="guess-phase" hidden>
@@ -113,7 +120,7 @@
       <p>Á hverjum degi færðu <strong>5 vörur úr Krónunni</strong> — sömu vörurnar og allir aðrir.
         Þú sérð mynd, nafn og stærð en <em>ekki verðið</em>. Dragðu sleðann til að giska á verðið
         og fínstilltu með ±1 hnöppunum.</p>
-      <p>Hver giskur bakar sneið ofan á vínarbrauðslengjuna þína. <strong>Því nákvæmari gisk, því lengri sneið</strong>
+      <p>Hver giskur lengir vínarbrauðslengjuna þína. <strong>Því nákvæmari gisk, því lengri lengja</strong>
         — hámarks vöxtur ef þú hittir á nagann, og <strong>enginn vöxtur</strong> ef þú ert meira en 100% frá:</p>
       <table class="tier-table">
         <tr><td>🎯</td><td>Nákvæmt verð — <strong>Á nagann!</strong></td><td>20 cm</td></tr>
