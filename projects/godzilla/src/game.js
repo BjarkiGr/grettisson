@@ -8,6 +8,7 @@ class Game {
     this.canvas = canvas;
     this.ctx = canvas.getContext('2d');
     this.input = new Input();
+    this.touchUI = null; // set by TouchUI (src/touch.js)
     this.sfx = new Sfx();
     this.particles = new Particles();
     this.world = new World();
@@ -45,11 +46,20 @@ class Game {
     this.segments = Array.from({ length: 7 }, (_, i) => ({ water: i % 2 === 1, smashed: 0, kills: 0 }));
     this.cam = { x: 0, shakeT: 0, shakeDur: 1, shakeMag: 0 };
     this.particles.list.length = 0;
-    this.world.update(0, this.canvas.width);
+    this.world.update(0, this.viewW);
     this.result = null;
   }
 
-  get groundY() { return this.canvas.height - 90; }
+  // View metrics. The backing store is device pixels (canvas.dpr), the HUD
+  // is drawn in CSS pixels, and the world is drawn in logical pixels that
+  // shrink on small screens so ~900x540 of world always stays visible.
+  get dpr() { return this.canvas.dpr || 1; }
+  get cssW() { return this.canvas.width / this.dpr; }
+  get cssH() { return this.canvas.height / this.dpr; }
+  get viewScale() { return this.dpr * Math.min(1, this.cssW / 900, this.cssH / 540); }
+  get viewW() { return this.canvas.width / this.viewScale; }
+  get viewH() { return this.canvas.height / this.viewScale; }
+  get groundY() { return this.viewH - 90; }
 
   segIndexFor(x) {
     const idx = Math.floor(x / CYCLE_LEN) * 2 + (this.world.isWater(x) ? 1 : 0);
@@ -176,10 +186,10 @@ class Game {
       this.comboT -= dt;
       if (this.comboT <= 0) this.combo = 1;
     }
-    this.world.update(this.cam.x, this.canvas.width);
+    this.world.update(this.cam.x, this.viewW);
     this.particles.update(dt, gy);
     // smooth-follow camera
-    const target = g.x - this.canvas.width * 0.38;
+    const target = g.x - this.viewW * 0.38;
     this.cam.x += (target - this.cam.x) * (1 - Math.exp(-5 * dt));
     this.cam.x = Math.max(0, this.cam.x);
     if (this.cam.shakeT > 0) this.cam.shakeT -= dt;
@@ -329,8 +339,9 @@ class Game {
 
   draw() {
     const ctx = this.ctx;
-    const w = this.canvas.width;
-    const h = this.canvas.height;
+    const s = this.viewScale;
+    const w = this.viewW;
+    const h = this.viewH;
     const gy = this.groundY;
     let camX = this.cam.x;
     let oy = 0;
@@ -339,6 +350,8 @@ class Game {
       camX += crand(-k, k);
       oy = crand(-k, k);
     }
+    // world pass in logical pixels (scaled down on small screens)
+    ctx.setTransform(s, 0, 0, s, 0, 0);
     ctx.save();
     ctx.translate(0, oy);
     this.world.draw(ctx, camX, w, h, gy, this.time);
@@ -351,9 +364,13 @@ class Game {
     if (this.mode === 'daily' && this.state === 'playing') this.drawFinish(ctx, camX, w, gy);
     this.particles.draw(ctx, camX);
     ctx.restore();
-    this.drawHud(ctx, w, h);
-    if (this.state === 'title') this.drawTitle(ctx, w, h);
-    if (this.state === 'results') this.drawResults(ctx, w, h);
+    // HUD + menus in CSS pixels so text stays readable on phones
+    const d = this.dpr;
+    ctx.setTransform(d, 0, 0, d, 0, 0);
+    const cw = this.cssW, ch = this.cssH;
+    this.drawHud(ctx, cw, ch);
+    if (this.state === 'title') this.drawTitle(ctx, cw, ch);
+    if (this.state === 'results') this.drawResults(ctx, cw, ch);
   }
 
   drawBeam(ctx, camX, gy) {
@@ -399,133 +416,158 @@ class Game {
   }
   drawHud(ctx, w, h) {
     const g = this.godzilla;
-    const boxH = this.combo > 1 ? 148 : 110;
+    const touch = !!(this.touchUI && this.touchUI.enabled);
+    const u = w < 700 ? 0.72 : 1; // compact HUD on phone-sized screens
+    const boxH = (this.combo > 1 ? 148 : 110) * u;
     ctx.textAlign = 'left';
     ctx.fillStyle = 'rgba(0,0,0,0.35)';
-    ctx.fillRect(14, 14, 250, boxH);
+    ctx.fillRect(14 * u, 14 * u, 250 * u, boxH);
     ctx.fillStyle = '#ffd23e';
-    ctx.font = 'bold 26px monospace';
-    ctx.fillText('SCORE ' + String(this.score).padStart(6, '0'), 26, 46);
+    ctx.font = 'bold ' + Math.round(26 * u) + 'px monospace';
+    ctx.fillText('SCORE ' + String(this.score).padStart(6, '0'), 26 * u, 46 * u);
     ctx.fillStyle = '#e8e8e8';
-    ctx.font = '16px monospace';
+    ctx.font = Math.round(16 * u) + 'px monospace';
     const dist = Math.max(0, Math.round((g.x - this.startX) / METER));
-    ctx.fillText('SMASHED ' + this.smashed + '   ' + dist + ' m', 26, 72);
+    ctx.fillText('SMASHED ' + this.smashed + '   ' + dist + ' m', 26 * u, 72 * u);
     // atomic energy bar
     ctx.fillStyle = 'rgba(255,95,162,0.25)';
-    ctx.fillRect(26, 82, 200, 10);
+    ctx.fillRect(26 * u, 82 * u, 200 * u, 10 * u);
     ctx.fillStyle = '#ff5fa2';
-    ctx.fillRect(26, 82, 200 * clamp(g.energy / 100, 0, 1), 10);
+    ctx.fillRect(26 * u, 82 * u, 200 * u * clamp(g.energy / 100, 0, 1), 10 * u);
     ctx.fillStyle = 'rgba(255,255,255,0.6)';
-    ctx.font = '11px monospace';
-    ctx.fillText('ATOMIC BREATH [F]', 26, 104);
+    ctx.font = Math.round(11 * u) + 'px monospace';
+    ctx.fillText(touch ? 'ATOMIC BREATH' : 'ATOMIC BREATH [F]', 26 * u, 104 * u);
     if (this.combo > 1) {
       ctx.fillStyle = '#ff7b54';
-      ctx.font = 'bold 18px monospace';
-      ctx.fillText('COMBO x' + this.combo, 26, 126);
+      ctx.font = 'bold ' + Math.round(18 * u) + 'px monospace';
+      ctx.fillText('COMBO x' + this.combo, 26 * u, 126 * u);
       ctx.fillStyle = 'rgba(255,123,84,0.35)';
-      ctx.fillRect(150, 114, 100, 12);
+      ctx.fillRect(150 * u, 114 * u, 100 * u, 12 * u);
       ctx.fillStyle = '#ff7b54';
-      ctx.fillRect(150, 114, 100 * clamp(this.comboT / 3, 0, 1), 12);
+      ctx.fillRect(150 * u, 114 * u, 100 * u * clamp(this.comboT / 3, 0, 1), 12 * u);
     }
     // mode panel (top right)
     ctx.fillStyle = 'rgba(0,0,0,0.35)';
-    ctx.fillRect(w - 214, 14, 200, 84);
-    ctx.font = 'bold 18px monospace';
+    ctx.fillRect(w - 214 * u, 14 * u, 200 * u, 84 * u);
+    ctx.font = 'bold ' + Math.round(18 * u) + 'px monospace';
     if (this.mode === 'daily') {
       ctx.fillStyle = '#ff5fa2';
-      ctx.fillText('DAILY #' + Daily.number(), w - 202, 40);
+      ctx.fillText('DAILY #' + Daily.number(), w - 202 * u, 40 * u);
       ctx.fillStyle = '#e8e8e8';
-      ctx.font = '15px monospace';
-      ctx.fillText(dist + 'm / ' + Math.round(DAILY_LEN / METER) + 'm', w - 202, 62);
-      ctx.fillText('TIME ' + this.fmtTime(this.elapsed), w - 202, 82);
+      ctx.font = Math.round(15 * u) + 'px monospace';
+      ctx.fillText(dist + 'm / ' + Math.round(DAILY_LEN / METER) + 'm', w - 202 * u, 62 * u);
+      ctx.fillText('TIME ' + this.fmtTime(this.elapsed), w - 202 * u, 82 * u);
     } else {
       ctx.fillStyle = '#7fe7ff';
-      ctx.fillText('UNLIMITED', w - 202, 40);
+      ctx.fillText('UNLIMITED', w - 202 * u, 40 * u);
       ctx.fillStyle = '#e8e8e8';
-      ctx.font = '15px monospace';
-      ctx.fillText('BEST ' + (this.dailyData.bestUnlimited || 0), w - 202, 62);
-      ctx.fillText('ESC to finish', w - 202, 82);
+      ctx.font = Math.round(15 * u) + 'px monospace';
+      ctx.fillText('BEST ' + (this.dailyData.bestUnlimited || 0), w - 202 * u, 62 * u);
+      ctx.fillText(touch ? '✕ to finish' : 'ESC to finish', w - 202 * u, 82 * u);
     }
-    // controls hint
-    ctx.fillStyle = 'rgba(255,255,255,0.55)';
-    ctx.font = '13px monospace';
-    ctx.textAlign = 'center';
-    const inWater = this.world.isWater(g.x);
-    let hint = inWater
-      ? 'SWIM: UP/DOWN dive & surface    F beam (near surface)    LEFT brake    dodging shells saves points'
-      : 'AUTO-WALK    LEFT brake    RIGHT sprint    UP jump    SPACE smash    F beam    R roar    M mute';
-    if (this.sfx.muted) hint += '    [MUTED]';
-    ctx.fillText(hint, w / 2, h - 16);
+    // controls hint (keyboard only - the touch buttons are self-labeled)
+    if (!touch) {
+      ctx.fillStyle = 'rgba(255,255,255,0.55)';
+      ctx.font = '13px monospace';
+      ctx.textAlign = 'center';
+      const inWater = this.world.isWater(g.x);
+      let hint = inWater
+        ? 'SWIM: UP/DOWN dive & surface    F beam (near surface)    LEFT brake    dodging shells saves points'
+        : 'AUTO-WALK    LEFT brake    RIGHT sprint    UP jump    SPACE smash    F beam    R roar    M mute';
+      if (this.sfx.muted) hint += '    [MUTED]';
+      ctx.fillText(hint, w / 2, h - 16);
+    }
     ctx.textAlign = 'left';
   }
 
   drawTitle(ctx, w, h) {
+    const touch = !!(this.touchUI && this.touchUI.enabled);
+    const u = clamp(w / 900, 0.42, 1); // scale text down on small screens
     ctx.fillStyle = 'rgba(8,6,18,0.55)';
     ctx.fillRect(0, 0, w, h);
     ctx.textAlign = 'center';
     ctx.fillStyle = '#e63946';
-    ctx.font = 'bold 88px monospace';
+    ctx.font = 'bold ' + Math.round(88 * u) + 'px monospace';
     ctx.fillText('GODZILLA', w / 2, h * 0.26);
     ctx.fillStyle = '#ffd23e';
-    ctx.font = 'bold 30px monospace';
-    ctx.fillText('C I T Y   R A M P A G E', w / 2, h * 0.26 + 46);
+    ctx.font = 'bold ' + Math.round(30 * u) + 'px monospace';
+    ctx.fillText('C I T Y   R A M P A G E', w / 2, h * 0.26 + 46 * u);
     const played = Daily.playedToday();
     if (Math.sin(this.time * 4) > -0.2) {
       ctx.fillStyle = '#ff5fa2';
-      ctx.font = 'bold 24px monospace';
+      ctx.font = 'bold ' + Math.round(24 * u) + 'px monospace';
       ctx.fillText(played
-        ? 'DAILY DONE — ENTER TO VIEW RESULT'
-        : 'ENTER — DAILY RAMPAGE #' + Daily.number(), w / 2, h * 0.52);
+        ? (touch ? 'DAILY DONE — VIEW RESULT BELOW' : 'DAILY DONE — ENTER TO VIEW RESULT')
+        : (touch ? 'TAP BELOW' : 'ENTER') + ' — DAILY RAMPAGE #' + Daily.number(), w / 2, h * 0.52);
     }
-    ctx.fillStyle = '#7fe7ff';
-    ctx.font = 'bold 20px monospace';
-    ctx.fillText('U — UNLIMITED RAMPAGE', w / 2, h * 0.52 + 38);
-    ctx.fillStyle = 'rgba(255,255,255,0.75)';
-    ctx.font = '16px monospace';
     const today = Daily.todayResult();
     let status = 'STREAK ' + (this.dailyData.streak || 0) + '   BEST UNLIMITED ' + (this.dailyData.bestUnlimited || 0);
     if (today) status += '   TODAY ' + today.score + ' pts';
-    ctx.fillText(status, w / 2, h * 0.52 + 74);
-    ctx.fillStyle = 'rgba(255,255,255,0.6)';
-    ctx.fillText('Auto-walk. Smash the city. Swim the straits. Pink beam everything.', w / 2, h * 0.52 + 108);
-    ctx.fillText('Same city for everyone each day — one scored run. Chain smashes for combos.', w / 2, h * 0.52 + 132);
+    if (touch) {
+      // menu buttons at the bottom replace the keyboard instructions
+      ctx.fillStyle = 'rgba(255,255,255,0.75)';
+      ctx.font = Math.round(16 * u) + 'px monospace';
+      ctx.fillText(status, w / 2, h * 0.52 + 40 * u);
+      if (h > w) {
+        ctx.fillStyle = 'rgba(255,255,255,0.45)';
+        ctx.font = Math.round(14 * u) + 'px monospace';
+        ctx.fillText('ROTATE FOR A WIDER VIEW', w / 2, h * 0.52 + 68 * u);
+      }
+    } else {
+      ctx.fillStyle = '#7fe7ff';
+      ctx.font = 'bold 20px monospace';
+      ctx.fillText('U — UNLIMITED RAMPAGE', w / 2, h * 0.52 + 38);
+      ctx.fillStyle = 'rgba(255,255,255,0.75)';
+      ctx.font = '16px monospace';
+      ctx.fillText(status, w / 2, h * 0.52 + 74);
+      ctx.fillStyle = 'rgba(255,255,255,0.6)';
+      ctx.fillText('Auto-walk. Smash the city. Swim the straits. Pink beam everything.', w / 2, h * 0.52 + 108);
+      ctx.fillText('Same city for everyone each day — one scored run. Chain smashes for combos.', w / 2, h * 0.52 + 132);
+    }
     ctx.textAlign = 'left';
   }
   drawResults(ctx, w, h) {
     const r = this.result;
     if (!r) return;
+    const touch = !!(this.touchUI && this.touchUI.enabled);
+    const u = clamp(w / 900, 0.42, 1); // scale text down on small screens
     ctx.fillStyle = 'rgba(8,6,18,0.72)';
     ctx.fillRect(0, 0, w, h);
     ctx.textAlign = 'center';
     ctx.fillStyle = '#ff5fa2';
-    ctx.font = 'bold 38px monospace';
+    ctx.font = 'bold ' + Math.round(38 * u) + 'px monospace';
     ctx.fillText('DAILY RAMPAGE #' + r.number, w / 2, h * 0.18);
     ctx.fillStyle = '#ffd23e';
-    ctx.font = 'bold 64px monospace';
+    ctx.font = 'bold ' + Math.round(64 * u) + 'px monospace';
     ctx.fillText(String(r.score) + ' PTS', w / 2, h * 0.30);
     ctx.fillStyle = '#e8e8e8';
-    ctx.font = '18px monospace';
+    ctx.font = Math.round(18 * u) + 'px monospace';
     const beamPct = r.beamTicks > 0 ? Math.round((100 * r.beamHits) / r.beamTicks) : 0;
     ctx.fillText('SMASHED ' + r.smashed + '    BOATS SUNK ' + r.boatKills + '    MAX COMBO x' + r.maxCombo, w / 2, h * 0.40);
-    ctx.fillText('TIME ' + this.fmtTime(r.time) + '  (+' + r.timeBonus + ' speed bonus)    BEAM ' + beamPct + '% on target', w / 2, h * 0.40 + 30);
+    ctx.fillText('TIME ' + this.fmtTime(r.time) + '  (+' + r.timeBonus + ' speed bonus)    BEAM ' + beamPct + '% on target', w / 2, h * 0.40 + 30 * u);
     // segment grid, Wordle style
     const segs = r.segments.map((s) =>
       s.water ? (s.kills > 0 ? '🚤' : '🌊')
               : (s.smashed >= 3 ? '💥' : s.smashed > 0 ? '🏙️' : '⬛')
     ).join(' ');
-    ctx.font = '30px monospace';
+    ctx.font = Math.round(30 * u) + 'px monospace';
     ctx.fillText(segs, w / 2, h * 0.55);
     ctx.fillStyle = '#ff7b54';
-    ctx.font = 'bold 20px monospace';
+    ctx.font = 'bold ' + Math.round(20 * u) + 'px monospace';
     ctx.fillText('STREAK ' + (this.dailyData.streak || 0), w / 2, h * 0.62);
     ctx.fillStyle = 'rgba(255,255,255,0.75)';
-    ctx.font = '16px monospace';
-    ctx.fillText('C — COPY RESULT    U — UNLIMITED    ESC — TITLE', w / 2, h * 0.72);
-    ctx.fillText('Come back tomorrow for a new city!', w / 2, h * 0.72 + 28);
+    ctx.font = Math.round(16 * u) + 'px monospace';
+    if (touch) {
+      // menu buttons at the bottom replace the keyboard instructions
+      ctx.fillText('Come back tomorrow for a new city!', w / 2, h * 0.72);
+    } else {
+      ctx.fillText('C — COPY RESULT    U — UNLIMITED    ESC — TITLE', w / 2, h * 0.72);
+      ctx.fillText('Come back tomorrow for a new city!', w / 2, h * 0.72 + 28);
+    }
     if (this.shareCopiedT > 0) {
       ctx.fillStyle = '#7fe77f';
-      ctx.font = 'bold 22px monospace';
-      ctx.fillText('COPIED TO CLIPBOARD!', w / 2, h * 0.82);
+      ctx.font = 'bold ' + Math.round(22 * u) + 'px monospace';
+      ctx.fillText('COPIED TO CLIPBOARD!', w / 2, touch ? h * 0.72 + 26 * u : h * 0.82);
     }
     ctx.textAlign = 'left';
   }

@@ -9,7 +9,7 @@ const vm = require('vm');
 const files = [
   'util', 'input', 'audio',
   'entities/particle', 'entities/building', 'entities/boat', 'entities/godzilla',
-  'world', 'daily', 'game', 'main',
+  'world', 'daily', 'game', 'touch', 'main',
 ];
 
 const listeners = {};
@@ -29,7 +29,26 @@ const ctxStub = new Proxy({}, {
   set(t, prop, v) { t[prop] = v; return true; },
 });
 
-const canvas = { width: 1280, height: 720, getContext: () => ctxStub };
+const canvas = { width: 1280, height: 720, style: {}, getContext: () => ctxStub };
+
+// Minimal DOM element stub for the touch UI (src/touch.js). fire() invokes
+// the registered pointer handlers the way a real touch would.
+function makeEl(tag) {
+  return {
+    tag, style: {}, children: [], handlers: {}, textContent: '', className: '', id: '',
+    classList: {
+      _s: new Set(),
+      add(c) { this._s.add(c); },
+      remove(c) { this._s.delete(c); },
+    },
+    appendChild(c) { this.children.push(c); return c; },
+    addEventListener(ev, fn) { (this.handlers[ev] = this.handlers[ev] || []).push(fn); },
+    setPointerCapture() {},
+    fire(ev) {
+      for (const fn of this.handlers[ev] || []) fn({ preventDefault() {}, pointerId: 1 });
+    },
+  };
+}
 
 // localStorage + clipboard stubs
 const store = {};
@@ -40,9 +59,15 @@ const sandbox = {
   window: {
     innerWidth: 1280,
     innerHeight: 720,
+    devicePixelRatio: 1,
+    matchMedia: () => ({ matches: true }), // simulate a coarse-pointer (touch) device
     addEventListener: (ev, fn) => { (listeners[ev] = listeners[ev] || []).push(fn); },
   },
-  document: { getElementById: () => canvas },
+  document: {
+    getElementById: () => canvas,
+    createElement: makeEl,
+    body: makeEl('body'),
+  },
   requestAnimationFrame: (fn) => { rafCb = fn; },
   localStorage: {
     getItem: (k) => (k in store ? store[k] : null),
@@ -80,6 +105,8 @@ function check(name, cond) {
 frame();
 check('boots to title screen', evalIn('game.state') === 'title');
 check('city pre-generated', evalIn('game.world.buildings.length') > 3);
+check('touch UI enabled on coarse pointer', evalIn('touch.enabled') === true);
+check('touch menu visible on title', evalIn('touch.menuRow.style.display') === '');
 
 // --- start daily ---
 key('Enter'); frame(); key('Enter', false);
@@ -203,6 +230,74 @@ key('ArrowLeft');
 for (let i = 0; i < 120; i++) frame();
 check('idle frames stable while braking', evalIn('game.godzilla.state') === 'idle');
 key('ArrowLeft', false);
+
+// --- touch controls: DOM buttons inject the same keys as the keyboard ---
+check('play buttons visible while playing', evalIn('touch.brake.style.display') === '');
+const tBrake = evalIn('touch.brake');
+tBrake.fire('pointerdown');
+const xTouch = evalIn('game.godzilla.x');
+for (let i = 0; i < 60; i++) frame();
+check('touch BRAKE holds position', Math.abs(evalIn('game.godzilla.x') - xTouch) < 1);
+tBrake.fire('pointerup');
+const tJump = evalIn('touch.jump');
+tJump.fire('pointerdown'); tJump.fire('pointerup');
+for (let i = 0; i < 5; i++) frame();
+check('touch JUMP leaves the ground', evalIn('game.godzilla.y') > 0);
+for (let i = 0; i < 90; i++) frame(); // land again
+const tBeam = evalIn('touch.beam');
+tBeam.fire('pointerdown'); frame();
+check('touch BEAM fires while held', evalIn('game.godzilla.beamOn') === true);
+tBeam.fire('pointerup'); frame();
+check('touch BEAM stops on release', evalIn('game.godzilla.beamOn') === false);
+
+// --- water swaps SMASH/JUMP for DIVE/UP ---
+evalIn('game.godzilla.x = 5600; game.cam.x = 5200; game.godzilla.swimDepth = 0;');
+for (let i = 0; i < 5; i++) frame();
+check('water swaps SMASH for DIVE', evalIn('touch.dive.style.display') === '' && evalIn('touch.smash.style.display') === 'none');
+check('JUMP relabels to UP in water', evalIn('touch.jump.textContent') === 'UP');
+const tDive = evalIn('touch.dive');
+tDive.fire('pointerdown');
+for (let i = 0; i < 60; i++) frame();
+tDive.fire('pointerup');
+check('touch DIVE increases depth', evalIn('game.godzilla.swimDepth') > 60);
+
+// --- touch exit releases held keys; menu buttons drive the screens ---
+tBeam.fire('pointerdown'); frame(); // hold a gameplay key across the screen change
+const tExit = evalIn('touch.exit');
+tExit.fire('pointerdown'); frame(); tExit.fire('pointerup');
+check('touch exit ends the run', evalIn('game.state') === 'title');
+check('held gameplay keys released on screen change', evalIn("game.input.down('f')") === false);
+check('menu shown, play buttons hidden on title', evalIn('touch.menuRow.style.display') === '' && evalIn('touch.brake.style.display') === 'none');
+check('daily button offers result after playing', evalIn('touch.menuDaily.textContent') === 'VIEW RESULT');
+const tDaily = evalIn('touch.menuDaily');
+tDaily.fire('pointerdown'); frame(); tDaily.fire('pointerup');
+check('menu button opens results', evalIn('game.state') === 'results');
+clipboardText = null;
+const tCopy = evalIn('touch.menuCopy');
+tCopy.fire('pointerdown'); frame(); tCopy.fire('pointerup');
+check('menu COPY copies share text', clipboardText !== null && clipboardText.includes('Daily Rampage #'));
+const tTitle = evalIn('touch.menuTitle');
+tTitle.fire('pointerdown'); frame(); tTitle.fire('pointerup');
+check('menu TITLE returns to title', evalIn('game.state') === 'title');
+const tUnlimited = evalIn('touch.menuUnlimited');
+tUnlimited.fire('pointerdown'); frame(); tUnlimited.fire('pointerup');
+check('menu UNLIMITED starts a run', evalIn('game.state') === 'playing' && evalIn('game.mode') === 'unlimited');
+
+// --- responsive view: DPR backing store + scaled world on small screens ---
+function doResize() { for (const fn of listeners['resize'] || []) fn(); }
+sandbox.window.devicePixelRatio = 2;
+doResize();
+check('DPR doubles the backing store', canvas.width === 2560 && canvas.height === 1440);
+check('logical view unchanged at DPR 2', evalIn('game.viewW') === 1280 && evalIn('game.groundY') === 630);
+sandbox.window.innerWidth = 390; sandbox.window.innerHeight = 844;
+doResize();
+check('phone portrait keeps 900px of world visible', Math.abs(evalIn('game.viewW') - 900) < 0.01);
+check('phone world scaled down', evalIn('game.viewScale') < 1);
+frame(); // draw at phone size without errors
+sandbox.window.devicePixelRatio = 1; sandbox.window.innerWidth = 1280; sandbox.window.innerHeight = 720;
+doResize();
+check('resize back to desktop restores 1:1 view', evalIn('game.viewW') === 1280 && evalIn('game.viewScale') === 1);
+frame();
 
 console.log(failures === 0 ? '\nALL CHECKS PASSED' : '\n' + failures + ' CHECK(S) FAILED');
 process.exit(failures === 0 ? 0 : 1);

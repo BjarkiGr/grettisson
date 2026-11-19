@@ -1,13 +1,119 @@
-﻿html, body {
+html, body {
   margin: 0;
   padding: 0;
   overflow: hidden;
   background: #0b0d14;
   height: 100%;
+  overscroll-behavior: none;
 }
 
 canvas#game {
   display: block;
   width: 100vw;
   height: 100vh;
+  touch-action: none;
+  -webkit-tap-highlight-color: transparent;
 }
+
+/* --- touch controls (src/touch.js, coarse-pointer devices only) --- */
+#touch-ui {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 10;
+}
+
+.touch-btn {
+  position: fixed;
+  pointer-events: auto;
+  width: 68px;
+  height: 68px;
+  border-radius: 16px;
+  background: rgba(10, 12, 20, 0.55);
+  border: 2px solid rgba(255, 255, 255, 0.35);
+  color: #e8e8e8;
+  font: bold 12px monospace;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.touch-btn.held { background: rgba(255, 255, 255, 0.25); }
+
+/* left cluster: brake / sprint */
+.touch-btn.brake {
+  left: calc(14px + env(safe-area-inset-left));
+  bottom: calc(18px + env(safe-area-inset-bottom));
+  border-color: #7fe7ff;
+  color: #7fe7ff;
+}
+.touch-btn.sprint {
+  left: calc(94px + env(safe-area-inset-left));
+  bottom: calc(18px + env(safe-area-inset-bottom));
+  border-color: #7fe7ff;
+  color: #7fe7ff;
+}
+
+/* right cluster: smash (dive in water) / jump, roar / beam above */
+.touch-btn.smash, .touch-btn.dive {
+  right: calc(94px + env(safe-area-inset-right));
+  bottom: calc(18px + env(safe-area-inset-bottom));
+}
+.touch-btn.smash { border-color: #ffd23e; color: #ffd23e; }
+.touch-btn.dive { border-color: #7fe7ff; color: #7fe7ff; }
+.touch-btn.jump {
+  right: calc(14px + env(safe-area-inset-right));
+  bottom: calc(18px + env(safe-area-inset-bottom));
+  border-color: #7fe7ff;
+  color: #7fe7ff;
+}
+.touch-btn.roar {
+  right: calc(94px + env(safe-area-inset-right));
+  bottom: calc(98px + env(safe-area-inset-bottom));
+  border-color: #ffd23e;
+  color: #ffd23e;
+}
+.touch-btn.beam {
+  right: calc(14px + env(safe-area-inset-right));
+  bottom: calc(98px + env(safe-area-inset-bottom));
+  border-color: #ff5fa2;
+  color: #ff5fa2;
+}
+
+/* system buttons: below the top-right mode panel */
+.touch-btn.sys {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  font-size: 16px;
+  top: calc(110px + env(safe-area-inset-top));
+}
+.touch-btn.exit { right: calc(14px + env(safe-area-inset-right)); }
+.touch-btn.mute { right: calc(68px + env(safe-area-inset-right)); }
+
+/* menu buttons: centered row on title / results screens */
+.touch-menu {
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: calc(18px + env(safe-area-inset-bottom));
+  display: flex;
+  gap: 12px;
+  pointer-events: none;
+}
+.touch-menu .touch-btn {
+  position: static;
+  width: auto;
+  height: 54px;
+  padding: 0 14px;
+  font-size: 13px;
+  border-color: #ff5fa2;
+  color: #ff5fa2;
+}
+.touch-menu .touch-btn.unlimited { border-color: #7fe7ff; color: #7fe7ff; }
+.touch-menu .touch-btn.title { border-color: rgba(255, 255, 255, 0.5); color: #e8e8e8; }
