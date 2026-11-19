@@ -97,7 +97,7 @@ const svgCount = () => (strip().innerHTML.match(/<svg/g) || []).length;
   check('perfect score ' + perfect + ' cm', evalIn('Game.el.cm.textContent') === perfect + ' cm');
   check('metralengjan banner fired', sandbox.document.getElementById('milestone-banner').textContent.includes('METRALENGJAN'));
   check('daily recorded', evalIn('Daily.playedToday()') === true);
-  check('rank is meistarabakari', evalIn('Game.el.rRank.textContent') === 'Meistarabakari 🏆');
+  check('rank is frábært', evalIn('Game.el.rRank.textContent') === 'Frábært! 🏆');
 
   // share
   evalIn('Game.share()');

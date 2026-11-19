@@ -11,7 +11,7 @@ more than 100% off = no growth at all:
 
 | Tier | Accuracy | cm |
 |---|---|---|
-| 🎯 Á nagann! | exact price | 20 |
+| 🎯 Rétt verð! | exact price | 20 |
 | 🟩 Mjög nálægt | ±5% | 16 |
 | 🟨 Nálægt | ±15% | 12 |
 | 🟧 Sæmilegt | ±35% | 8 |

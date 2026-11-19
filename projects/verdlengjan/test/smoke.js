@@ -71,7 +71,7 @@ check('totalCm = 2 + 20+16+12+8+0', evalIn('totalCm(' + JSON.stringify(guesses) 
 check('thursday adds 5cm', evalIn('totalCm(' + JSON.stringify(guesses) + ', true)') === 63);
 check('2026-11-19 is thursday', evalIn('isThursday("2026-11-19")') === true);
 check('2026-11-18 is not thursday', evalIn('isThursday("2026-11-18")') === false);
-check('rank thresholds', evalIn('rankFor(107)') === 'Meistarabakari 🏆' && evalIn('rankFor(10)') === 'Alls ekki bakari');
+check('rank thresholds', evalIn('rankFor(107)') === 'Frábært! 🏆' && evalIn('rankFor(10)') === 'Slakt');
 
 // --- daily determinism ---
 const fiveA = evalIn('buildDailyFive(Bank.products, "2026-11-18", 1).map(p=>p.sku).join(",")');
