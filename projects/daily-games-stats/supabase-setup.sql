@@ -136,8 +136,8 @@ begin
     raise exception 'Óþekktur leikur.';
   end if;
 
-  -- Hámark per leik: Krillion ekkert fast hámark; Verðlengjan 102 + 5 fimmtudagsbonus.
-  v_max := case v_game when 'sizeitup' then 500 when 'skuggabaldur' then 700 when 'verdlengjan' then 107 else null end;
+  -- Hámark per leik: Size It Up 500, Skuggabaldur 700, Krillion 700, Verðlengjan 102 + 5 fimmtudagsbonus.
+  v_max := case v_game when 'sizeitup' then 500 when 'skuggabaldur' then 700 when 'krillion' then 700 when 'verdlengjan' then 107 else null end;
 
   if p_puzzle is null or p_puzzle <= 0 or p_score is null or p_score < 0
      or (v_max is not null and p_score > v_max) then

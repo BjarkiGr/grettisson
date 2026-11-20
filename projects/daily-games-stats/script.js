@@ -11,12 +11,12 @@ const SUPABASE_ANON_KEY = 'sb_publishable_ehl5_wRvgnzsG7bZeFVZLA_4yjbJfT0';
 // Þolið ef /rest/v1 eða skástrika eru límd með URL-inu — við bætum þeim við sjálf.
 const API_BASE = SUPABASE_URL.trim().replace(/\/+$/, '').replace(/\/rest\/v1$/, '');
 
-// Leikirnir. max: null = ekkert fast hámark (Krillion).
+// Leikirnir. max: null = ekkert fast hámark (enginn leikur eins og er).
 // Verðlengjan: 102 cm hámark + 5 cm fimmtudagsbonus (gagnagrunnur leyfir 107).
 const GAMES = {
   sizeitup:     { label: 'Size It Up',   icon: '📏', max: 500,  url: 'https://magnitudle.com/size-it-up' },
   skuggabaldur: { label: 'Skuggabaldur', icon: '🌑', max: 700,  url: 'https://skuggabaldur.is' },
-  krillion:     { label: 'Krillion',     icon: '🦐', max: null, url: 'https://krillion.io' },
+  krillion:     { label: 'Krillion',     icon: '🦐', max: 700,  url: 'https://krillion.io' },
   verdlengjan:  { label: 'Verðlengjan',  icon: '🥐', max: 102, unit: ' cm', url: 'https://grettisson.is/projects/verdlengjan/' }
 };
 
@@ -243,7 +243,7 @@ function renderTable(list) {
 
   const isDaily = state.mode === 'daily';
   const max = gameMax();
-  // Krillion hefur ekkert fast hámark — miðum við efsta skor í staðinn.
+  // Ef leikur hefur ekkert fast hámark miðum við efsta skor í staðinn.
   const scale = max || (list.length ? list[0].primaryScore : 0) || 1;
   container.innerHTML = `
     <table>

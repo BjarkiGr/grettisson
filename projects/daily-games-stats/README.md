@@ -18,6 +18,7 @@ with no server and no database to manage.
 - `supabase-setup.sql` — one-time backend setup (tables, security, API functions)
 - `supabase-migration-games.sql` — upgrades an older single-game setup to multi-game
 - `supabase-migration-verdlengjan.sql` — adds Verðlengjan to an existing multi-game setup
+- `supabase-migration-krillion-max.sql` — sets Krillion's max score to 700
 - `test/smoke.mjs` — syntax, wiring and share-text parser checks (`node test/smoke.mjs`)
 
 ## Setup (one time, ~5 minutes)
@@ -26,9 +27,8 @@ with no server and no database to manage.
    (any name/region, generate a database password — you will not need it again).
 2. Open **SQL Editor** in the project dashboard, paste the entire contents of
    `supabase-setup.sql` and press **Run**. (Already ran the older single-game
-   version? Run `supabase-migration-games.sql` instead — it upgrades in place
-   and keeps all existing scores; then run `supabase-migration-verdlengjan.sql`
-   to add Verðlengjan.)
+   version? Run the `supabase-migration-*.sql` files in order instead — they
+   upgrade in place and keep all existing scores.)
 3. Collect these two values (they live on different pages in the dashboard):
    - the **Project URL** (`https://<project-ref>.supabase.co`). The API Keys
      page does NOT show it — use the **Connect** button at the top of the
@@ -57,11 +57,10 @@ Until step 4 is done the page shows a setup notice instead of the table.
 |---|---|---|
 | 📏 Size It Up | 500 | `#103` + `Score: 314/500` + square grid |
 | 🌑 Skuggabaldur | 700 | `Skuggabaldur #37 🌑 380/700` + animal grid |
-| 🦐 Krillion | no fixed max | `Krillion #128 🦐` + score line + sea grid |
+| 🦐 Krillion | 700 | `Krillion #128 🦐` + score line + sea grid |
 | 🥐 Verðlengjan | 102 cm (+5 Thursday) | `🥐 Verðlengjan #3 — 74 cm` + tier row |
 
-The paste box auto-detects the game from the share text. Krillion has no
-fixed maximum, so its score bars are scaled against the current top score.
+The paste box auto-detects the game from the share text.
 Verðlengjan scores are pastry centimetres; Thursdays allow up to 107 cm.
 
 ## Security notes
