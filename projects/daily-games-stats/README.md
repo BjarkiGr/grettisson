@@ -1,7 +1,8 @@
-﻿# fossberg-stats — Fossberg Stats stigatafla
+﻿# daily-games-stats — Daily Games Stats stigatafla
 
-Static leaderboard for three daily games: [Size It Up](https://magnitudle.com/size-it-up),
-[Skuggabaldur](https://skuggabaldur.is) and [Krillion](https://krillion.io).
+Static leaderboard for four daily games: [Size It Up](https://magnitudle.com/size-it-up),
+[Skuggabaldur](https://skuggabaldur.is), [Krillion](https://krillion.io) and
+[Verðlengjan](https://grettisson.is/projects/verdlengjan/) (our own Krónan price guesser).
 Register with a name + 4-digit PIN, paste your Share text (the game is
 detected automatically), and compare
 scores with friends (daily standings + overall averages).
@@ -16,6 +17,7 @@ with no server and no database to manage.
 - `index.html`, `style.css`, `script.js` — the static frontend
 - `supabase-setup.sql` — one-time backend setup (tables, security, API functions)
 - `supabase-migration-games.sql` — upgrades an older single-game setup to multi-game
+- `supabase-migration-verdlengjan.sql` — adds Verðlengjan to an existing multi-game setup
 - `test/smoke.mjs` — syntax, wiring and share-text parser checks (`node test/smoke.mjs`)
 
 ## Setup (one time, ~5 minutes)
@@ -25,7 +27,8 @@ with no server and no database to manage.
 2. Open **SQL Editor** in the project dashboard, paste the entire contents of
    `supabase-setup.sql` and press **Run**. (Already ran the older single-game
    version? Run `supabase-migration-games.sql` instead — it upgrades in place
-   and keeps all existing scores.)
+   and keeps all existing scores; then run `supabase-migration-verdlengjan.sql`
+   to add Verðlengjan.)
 3. Collect these two values (they live on different pages in the dashboard):
    - the **Project URL** (`https://<project-ref>.supabase.co`). The API Keys
      page does NOT show it — use the **Connect** button at the top of the
@@ -55,9 +58,11 @@ Until step 4 is done the page shows a setup notice instead of the table.
 | 📏 Size It Up | 500 | `#103` + `Score: 314/500` + square grid |
 | 🌑 Skuggabaldur | 700 | `Skuggabaldur #37 🌑 380/700` + animal grid |
 | 🦐 Krillion | no fixed max | `Krillion #128 🦐` + score line + sea grid |
+| 🥐 Verðlengjan | 102 cm (+5 Thursday) | `🥐 Verðlengjan #3 — 74 cm` + tier row |
 
 The paste box auto-detects the game from the share text. Krillion has no
 fixed maximum, so its score bars are scaled against the current top score.
+Verðlengjan scores are pastry centimetres; Thursdays allow up to 107 cm.
 
 ## Security notes
 

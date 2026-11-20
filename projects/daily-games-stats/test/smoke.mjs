@@ -1,5 +1,5 @@
-﻿// Smoke test for the static Fossberg Stats leaderboard (3 games).
-// Run: node projects/fossberg-stats/test/smoke.mjs
+﻿// Smoke test for the static Daily Games Stats leaderboard (4 games).
+// Run: node projects/daily-games-stats/test/smoke.mjs
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -36,7 +36,7 @@ const ids = [...new Set([...js.matchAll(/getElementById\('([^']+)'\)/g)].map(m =
 for (const id of ids) {
   check(`#${id} in index.html`, html.includes(`id="${id}"`));
 }
-for (const g of ['sizeitup', 'skuggabaldur', 'krillion']) {
+for (const g of ['sizeitup', 'skuggabaldur', 'krillion', 'verdlengjan']) {
   check(`#gameTab-${g} in index.html`, html.includes(`id="gameTab-${g}"`));
 }
 
@@ -76,6 +76,20 @@ check('Krillion: detected', p3 !== null && p3.game === 'krillion');
 check('Krillion: puzzle', p3 !== null && p3.puzzle === 128);
 check('Krillion: score', p3 !== null && p3.score === 265);
 check('Krillion: grid', p3 !== null && p3.grid === '🫧🫧🫧🦑🦑🐟🏮');
+
+const verdSample = [
+  '🥐 Verðlengjan #3 — 74 cm',
+  '🎯🟩🟨🟧🟥',
+  'grettisson.is/projects/verdlengjan/'
+].join('\n');
+const p4 = parseShareText(verdSample);
+check('Verðlengjan: detected', p4 !== null && p4.game === 'verdlengjan');
+check('Verðlengjan: puzzle', p4 !== null && p4.puzzle === 3);
+check('Verðlengjan: score', p4 !== null && p4.score === 74);
+check('Verðlengjan: grid', p4 !== null && p4.grid === '🎯🟩🟨🟧🟥');
+const verdThu = parseShareText('🥐 Verðlengjan #4 — 107 cm\n🎯🎯🎯🎯🎯 + 🥐 fimmtudagsbonus!\ngrettisson.is/projects/verdlengjan/');
+check('Verðlengjan: Thursday 107 cm', verdThu !== null && verdThu.score === 107 && verdThu.grid.includes('fimmtudagsbonus'));
+check('rejects Verðlengjan without cm', parseShareText('🥐 Verðlengjan #3') === null);
 
 check('rejects invalid text', parseShareText('hello world') === null);
 check('rejects Skuggabaldur without score', parseShareText('Skuggabaldur #37 🌑') === null);

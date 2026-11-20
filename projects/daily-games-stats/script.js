@@ -1,5 +1,5 @@
 ﻿// ============================================================================
-// Fossberg Stats — Stigatafla fyrir Size It Up, Skuggabaldur og Krillion
+// Daily Games Stats — Stigatafla fyrir Size It Up, Skuggabaldur, Krillion og Verðlengjan
 // Static frontend sem talar við Supabase (sjá README.md fyrir uppsetningu).
 // Límdu inn þín gildi hér að neðan: Project Settings → API Keys í Supabase.
 // Notaðu PUBLISHABLE-lykilinn (sb_publishable_...) eða eldri anon-lykilinn.
@@ -12,10 +12,12 @@ const SUPABASE_ANON_KEY = 'sb_publishable_ehl5_wRvgnzsG7bZeFVZLA_4yjbJfT0';
 const API_BASE = SUPABASE_URL.trim().replace(/\/+$/, '').replace(/\/rest\/v1$/, '');
 
 // Leikirnir. max: null = ekkert fast hámark (Krillion).
+// Verðlengjan: 102 cm hámark + 5 cm fimmtudagsbonus (gagnagrunnur leyfir 107).
 const GAMES = {
   sizeitup:     { label: 'Size It Up',   icon: '📏', max: 500,  url: 'https://magnitudle.com/size-it-up' },
   skuggabaldur: { label: 'Skuggabaldur', icon: '🌑', max: 700,  url: 'https://skuggabaldur.is' },
-  krillion:     { label: 'Krillion',     icon: '🦐', max: null, url: 'https://krillion.io' }
+  krillion:     { label: 'Krillion',     icon: '🦐', max: null, url: 'https://krillion.io' },
+  verdlengjan:  { label: 'Verðlengjan',  icon: '🥐', max: 102, unit: ' cm', url: 'https://grettisson.is/projects/verdlengjan/' }
 };
 
 function isConfigured() {
@@ -222,7 +224,7 @@ function renderPodium(list) {
       <div class="podium-slot slot-${slot.rank}" style="cursor:pointer;" onclick="openPlayerHistory('${escAttr(slot.item.name)}')">
         <div class="avatar">${esc(initials)}</div>
         <div class="podium-name">${esc(slot.item.name)}</div>
-        <div class="podium-score">${esc(slot.item.displayScore)} <span style="font-size:0.75rem;color:var(--muted);font-weight:600;">${max ? '/' + max : ''}</span></div>
+        <div class="podium-score">${esc(slot.item.displayScore)} <span style="font-size:0.75rem;color:var(--muted);font-weight:600;">${max ? '/' + max : ''}${GAMES[state.game].unit || ''}</span></div>
         <div class="pedestal">
           <span class="medal">${slot.medal}</span>
           <div class="mini-grid">${esc(slot.item.grid)}</div>
@@ -267,7 +269,7 @@ function renderTable(list) {
                 <div style="font-size:0.76rem;color:var(--muted);">${esc(row.subLabel)}</div>
               </td>
               <td>
-                <div style="font-weight:800;font-size:1.05rem;">${esc(row.displayScore)} <span style="font-size:0.78rem;color:var(--muted);font-weight:500;">${max ? '/ ' + max : ''}</span></div>
+                <div style="font-weight:800;font-size:1.05rem;">${esc(row.displayScore)} <span style="font-size:0.78rem;color:var(--muted);font-weight:500;">${max ? '/ ' + max : ''}${GAMES[state.game].unit || ''}</span></div>
                 <div class="bar-wrap"><div class="bar-fill" style="width:${pct}%;background:${color};"></div></div>
               </td>
               <td class="hide-mobile">
@@ -336,6 +338,7 @@ function logout() {
 function parseShareText(raw) {
   if (/skuggabaldur/i.test(raw)) return parseSkuggabaldur(raw);
   if (/krillion/i.test(raw)) return parseKrillion(raw);
+  if (/verðlengjan/i.test(raw)) return parseVerdlengjan(raw);
   return parseSizeItUp(raw);
 }
 
@@ -391,6 +394,20 @@ function parseKrillion(raw) {
   };
 }
 
+function parseVerdlengjan(raw) {
+  const m = raw.match(/Verðlengjan\s*#(\d+)\s*[—–-]\s*(\d+)\s*cm/i);
+  if (!m) return null;
+  const lines = raw.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+  const roundLines = lines.filter(l => /[🎯🟩🟨🟧🟥⬛]/.test(l));
+  return {
+    game: 'verdlengjan',
+    puzzle: parseInt(m[1], 10),
+    score: parseInt(m[2], 10),
+    rounds: [],
+    grid: roundLines.join('\n')
+  };
+}
+
 function openSubmitModal() {
   if (!state.currentUser) {
     openAuthModal('login');
@@ -409,12 +426,12 @@ function updateParsePreview() {
   const parsed = parseShareText(document.getElementById('shareInput').value);
   const box = document.getElementById('parsePreview');
   if (!parsed) {
-    box.innerHTML = 'Bíð eftir gildum Share-texta frá Size It Up, Skuggabaldur eða Krillion...';
+    box.innerHTML = 'Bíð eftir gildum Share-texta frá Size It Up, Skuggabaldur, Krillion eða Verðlengjan...';
     return;
   }
   const g = GAMES[parsed.game];
   const roundsInfo = parsed.rounds.length ? ` (${parsed.rounds.length} umferðir)` : '';
-  box.innerHTML = `✅ Greint: ${g.icon} <strong>${g.label} #${parsed.puzzle}</strong> · <strong>${parsed.score}${g.max ? ' / ' + g.max : ''} stig</strong>${roundsInfo}`;
+  box.innerHTML = `✅ Greint: ${g.icon} <strong>${g.label} #${parsed.puzzle}</strong> · <strong>${parsed.score}${g.max ? ' / ' + g.max : ''}${g.unit || ' stig'}</strong>${roundsInfo}`;
 }
 
 async function submitScore() {
@@ -491,7 +508,7 @@ function openPlayerHistory(playerName) {
             ${entries.map(e => `
               <tr>
                 <td><strong>#${e.puzzle}</strong></td>
-                <td><strong>${e.score}</strong>${g.max ? ' / ' + g.max : ''}</td>
+                <td><strong>${e.score}</strong>${g.max ? ' / ' + g.max : ''}${g.unit || ''}</td>
                 <td><div class="grid-inline">${esc(e.grid)}</div></td>
               </tr>
             `).join('')}

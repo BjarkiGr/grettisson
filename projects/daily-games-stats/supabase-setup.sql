@@ -1,5 +1,5 @@
 ﻿-- ============================================================================
--- Fossberg Stats — Supabase uppsetning (Size It Up, Skuggabaldur, Krillion)
+-- Daily Games Stats — Supabase uppsetning (Size It Up, Skuggabaldur, Krillion, Verðlengjan)
 -- Límdu allt þetta í SQL Editor í Supabase og ýttu á Run (sjá README.md).
 -- ATH: Ef þú keyrðir eldri útgáfu af þessari skriptu skaltu keyra
 -- supabase-migration-games.sql í staðinn (hún uppfærir núverandi gögn).
@@ -19,7 +19,7 @@ create unique index if not exists players_name_lower_idx on public.players (lowe
 create table if not exists public.scores (
   id         bigint generated always as identity primary key,
   name       text not null references public.players (name) on update cascade on delete cascade,
-  game       text not null default 'sizeitup' check (game in ('sizeitup', 'skuggabaldur', 'krillion')),
+  game       text not null default 'sizeitup' check (game in ('sizeitup', 'skuggabaldur', 'krillion', 'verdlengjan')),
   puzzle     integer not null check (puzzle > 0),
   score      integer not null check (score >= 0),
   rounds     jsonb not null default '[]'::jsonb,
@@ -132,12 +132,12 @@ begin
     raise exception 'Innskráning rann út. Skráðu þig inn aftur.';
   end if;
 
-  if v_game not in ('sizeitup', 'skuggabaldur', 'krillion') then
+  if v_game not in ('sizeitup', 'skuggabaldur', 'krillion', 'verdlengjan') then
     raise exception 'Óþekktur leikur.';
   end if;
 
-  -- Hámark per leik: Krillion hefur ekkert fast hámark.
-  v_max := case v_game when 'sizeitup' then 500 when 'skuggabaldur' then 700 else null end;
+  -- Hámark per leik: Krillion ekkert fast hámark; Verðlengjan 102 + 5 fimmtudagsbonus.
+  v_max := case v_game when 'sizeitup' then 500 when 'skuggabaldur' then 700 when 'verdlengjan' then 107 else null end;
 
   if p_puzzle is null or p_puzzle <= 0 or p_score is null or p_score < 0
      or (v_max is not null and p_score > v_max) then

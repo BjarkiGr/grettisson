@@ -1,5 +1,5 @@
 ﻿-- ============================================================================
--- Fossberg Stats — MIGRATION: bætir Skuggabaldur og Krillion við
+-- Daily Games Stats — MIGRATION: bætir Skuggabaldur og Krillion við
 -- Keyrðu þetta EINU SINNI í SQL Editor ef þú keyrðir eldri supabase-setup.sql.
 -- Öruggt að keyra aftur (idempotent). Núverandi skor fá game = sizeitup.
 -- ============================================================================
