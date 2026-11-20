@@ -1,0 +1,112 @@
+﻿<!DOCTYPE html>
+<html lang="is">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Size It Up — Stigatafla</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="app">
+    <!-- Top Navigation -->
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-icon">📏</div>
+        <div>
+          <h1>Size It Up</h1>
+          <span>Stigatafla &amp; Meðaltöl</span>
+        </div>
+      </div>
+
+      <div class="nav-actions">
+        <a class="btn btn-secondary" href="https://magnitudle.com/size-it-up" target="_blank">Spila leikinn ↗</a>
+        <div id="authArea"></div>
+        <button class="btn-primary" onclick="openSubmitModal()">+ Skrá skor</button>
+      </div>
+    </header>
+
+    <!-- View Mode & Puzzle Selector -->
+    <div class="controls-bar">
+      <div class="tabs">
+        <button class="tab active" id="tabDaily" onclick="switchMode('daily')">Dagleg staða</button>
+        <button class="tab" id="tabAverage" onclick="switchMode('average')">Heildarmeðaltal</button>
+      </div>
+
+      <div id="puzzleFilterWrap">
+        <select id="puzzleSelect" onchange="renderAll()"></select>
+      </div>
+    </div>
+
+    <!-- Top 3 Podium -->
+    <section class="podium-wrapper">
+      <div class="podium-title" id="podiumHeading">Efstu 3 sætin</div>
+      <div class="podium" id="podiumContainer"></div>
+    </section>
+
+    <!-- Full Standings Table -->
+    <section class="card">
+      <div id="tableContainer"></div>
+    </section>
+  </div>
+
+  <!-- Auth Modal (Login / Register with 4-digit PIN) -->
+  <div class="modal-backdrop" id="authModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 id="authModalTitle">Innskráning</h2>
+        <button class="close-btn" onclick="closeModals()">✕</button>
+      </div>
+
+      <div class="tabs" style="width:100%; margin-bottom:16px;">
+        <button class="tab active" id="authTabLogin" style="flex:1;" onclick="setAuthTab('login')">Skrá inn</button>
+        <button class="tab" id="authTabRegister" style="flex:1;" onclick="setAuthTab('register')">Nýr aðgangur</button>
+      </div>
+
+      <div class="field">
+        <label for="authName">Nafn</label>
+        <input type="text" id="authName" placeholder="T.d. Jón" maxlength="25" />
+      </div>
+
+      <div class="field">
+        <label for="authPin">4 tölustafa PIN-númer</label>
+        <input type="password" id="authPin" class="pin-input" inputmode="numeric" pattern="[0-9]*" maxlength="4" placeholder="••••" />
+      </div>
+
+      <button class="btn-primary" style="width:100%; justify-content:center;" id="authSubmitBtn" onclick="handleAuth()">Skrá inn</button>
+      <div class="msg" id="authMsg"></div>
+    </div>
+  </div>
+
+  <!-- Submit Score Modal -->
+  <div class="modal-backdrop" id="submitModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h2>Skrá dagsins skor</h2>
+        <button class="close-btn" onclick="closeModals()">✕</button>
+      </div>
+      <div class="field">
+        <label for="shareInput">Límdu niðurstöðuna úr Size It Up (Share)</label>
+        <textarea id="shareInput" oninput="updateParsePreview()" placeholder="Size It Up&#10;#103&#10;&#10;Score: 314/500&#10;&#10;⬜⬜⬜⬜⬜ 9&#10;🟥🟥🟥🟥⬜ 83&#10;..."></textarea>
+      </div>
+
+      <div class="preview-box" id="parsePreview">Límdu textann hér að ofan til að forskoða stigin.</div>
+
+      <button class="btn-primary" style="width:100%; justify-content:center;" onclick="submitScore()">Vista á stigatöflu</button>
+      <div class="msg" id="submitMsg"></div>
+    </div>
+  </div>
+
+  <!-- Player History Modal -->
+  <div class="modal-backdrop" id="playerModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 id="playerModalTitle">Saga leikmanns</h2>
+        <button class="close-btn" onclick="closeModals()">✕</button>
+      </div>
+      <div id="playerHistoryBody"></div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
