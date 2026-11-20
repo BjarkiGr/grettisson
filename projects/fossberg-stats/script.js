@@ -1,5 +1,5 @@
 ﻿// ============================================================================
-// Size It Up — Stigatafla
+// Fossberg Stats — Stigatafla fyrir Size It Up, Skuggabaldur og Krillion
 // Static frontend sem talar við Supabase (sjá README.md fyrir uppsetningu).
 // Límdu inn þín gildi hér að neðan: Project Settings → API Keys í Supabase.
 // Notaðu PUBLISHABLE-lykilinn (sb_publishable_...) eða eldri anon-lykilinn.
@@ -11,12 +11,18 @@ const SUPABASE_ANON_KEY = 'sb_publishable_ehl5_wRvgnzsG7bZeFVZLA_4yjbJfT0';
 // Þolið ef /rest/v1 eða skástrika eru límd með URL-inu — við bætum þeim við sjálf.
 const API_BASE = SUPABASE_URL.trim().replace(/\/+$/, '').replace(/\/rest\/v1$/, '');
 
+// Leikirnir. max: null = ekkert fast hámark (Krillion).
+const GAMES = {
+  sizeitup:     { label: 'Size It Up',   icon: '📏', max: 500,  url: 'https://magnitudle.com/size-it-up' },
+  skuggabaldur: { label: 'Skuggabaldur', icon: '🌑', max: 700,  url: 'https://skuggabaldur.is' },
+  krillion:     { label: 'Krillion',     icon: '🦐', max: null, url: 'https://krillion.io' }
+};
+
 function isConfigured() {
   return !SUPABASE_URL.includes('YOUR-PROJECT') && !SUPABASE_ANON_KEY.includes('YOUR-ANON-KEY');
 }
 
 // Þunnur API-lagi: kall í Postgres-föll gegnum Supabase REST (PostgREST).
-// Kemur í staðinn fyrir ?api=... köllin í PHP-útgáfunni.
 async function api(fn, args = {}) {
   if (!isConfigured()) {
     throw new Error('Supabase er ekki uppsett. Fylgdu README.md og uppfærðu efst í script.js.');
@@ -42,8 +48,13 @@ let state = {
   scores: [],
   mode: 'daily',
   authMode: 'login',
+  game: 'sizeitup',
   currentUser: JSON.parse(localStorage.getItem('sizeitup_session') || 'null')
 };
+
+function gameMax() {
+  return GAMES[state.game].max;
+}
 
 async function fetchData() {
   if (!isConfigured()) {
@@ -80,7 +91,11 @@ function renderAuthHeader() {
 function populatePuzzleDropdown() {
   const select = document.getElementById('puzzleSelect');
   const prev = select.value;
-  const puzzles = [...new Set(state.scores.map(s => Number(s.puzzle)))].sort((a, b) => b - a);
+  const puzzles = [...new Set(
+    state.scores
+      .filter(s => (s.game || 'sizeitup') === state.game)
+      .map(s => Number(s.puzzle))
+  )].sort((a, b) => b - a);
 
   select.innerHTML = '';
   if (puzzles.length === 0) {
@@ -100,6 +115,16 @@ function populatePuzzleDropdown() {
   }
 }
 
+function switchGame(game) {
+  state.game = game;
+  Object.keys(GAMES).forEach(g => {
+    document.getElementById('gameTab-' + g).classList.toggle('active', g === game);
+  });
+  document.getElementById('playLink').href = GAMES[game].url;
+  populatePuzzleDropdown();
+  renderAll();
+}
+
 function switchMode(mode) {
   state.mode = mode;
   document.getElementById('tabDaily').classList.toggle('active', mode === 'daily');
@@ -109,10 +134,12 @@ function switchMode(mode) {
 }
 
 function getStandings() {
+  const gameScores = state.scores.filter(s => (s.game || 'sizeitup') === state.game);
+
   if (state.mode === 'daily') {
     const puzzle = Number(document.getElementById('puzzleSelect').value);
     if (!puzzle) return [];
-    return state.scores
+    return gameScores
       .filter(s => Number(s.puzzle) === puzzle)
       .sort((a, b) => b.score - a.score)
       .map(s => ({
@@ -125,7 +152,7 @@ function getStandings() {
       }));
   } else {
     const map = {};
-    state.scores.forEach(s => {
+    gameScores.forEach(s => {
       const key = s.name.toLowerCase();
       if (!map[key]) {
         map[key] = { name: s.name, total: 0, count: 0, best: 0 };
@@ -163,6 +190,7 @@ function renderPodium(list) {
   const container = document.getElementById('podiumContainer');
   const heading = document.getElementById('podiumHeading');
   const puzzle = document.getElementById('puzzleSelect').value;
+  const max = gameMax();
 
   heading.textContent = state.mode === 'daily'
     ? (puzzle ? `Efstu 3 sætin — Þraut #${puzzle}` : 'Efstu 3 sætin')
@@ -194,7 +222,7 @@ function renderPodium(list) {
       <div class="podium-slot slot-${slot.rank}" style="cursor:pointer;" onclick="openPlayerHistory('${escAttr(slot.item.name)}')">
         <div class="avatar">${esc(initials)}</div>
         <div class="podium-name">${esc(slot.item.name)}</div>
-        <div class="podium-score">${esc(slot.item.displayScore)} <span style="font-size:0.75rem;color:var(--muted);font-weight:600;">/500</span></div>
+        <div class="podium-score">${esc(slot.item.displayScore)} <span style="font-size:0.75rem;color:var(--muted);font-weight:600;">${max ? '/' + max : ''}</span></div>
         <div class="pedestal">
           <span class="medal">${slot.medal}</span>
           <div class="mini-grid">${esc(slot.item.grid)}</div>
@@ -212,6 +240,9 @@ function renderTable(list) {
   }
 
   const isDaily = state.mode === 'daily';
+  const max = gameMax();
+  // Krillion hefur ekkert fast hámark — miðum við efsta skor í staðinn.
+  const scale = max || (list.length ? list[0].primaryScore : 0) || 1;
   container.innerHTML = `
     <table>
       <thead>
@@ -225,8 +256,9 @@ function renderTable(list) {
       <tbody>
         ${list.map((row, idx) => {
           const rank = idx + 1;
-          const pct = Math.min(100, Math.round((row.primaryScore / 500) * 100));
-          const color = row.primaryScore >= 400 ? '#4ade80' : row.primaryScore >= 250 ? '#fbbf24' : '#f87171';
+          const ratio = row.primaryScore / scale;
+          const pct = Math.min(100, Math.round(ratio * 100));
+          const color = ratio >= 0.8 ? '#4ade80' : ratio >= 0.5 ? '#fbbf24' : '#f87171';
           return `
             <tr onclick="openPlayerHistory('${escAttr(row.name)}')">
               <td><span class="rank-badge rank-${rank <= 3 ? rank : ''}">${rank}</span></td>
@@ -235,7 +267,7 @@ function renderTable(list) {
                 <div style="font-size:0.76rem;color:var(--muted);">${esc(row.subLabel)}</div>
               </td>
               <td>
-                <div style="font-weight:800;font-size:1.05rem;">${esc(row.displayScore)} <span style="font-size:0.78rem;color:var(--muted);font-weight:500;">/ 500</span></div>
+                <div style="font-weight:800;font-size:1.05rem;">${esc(row.displayScore)} <span style="font-size:0.78rem;color:var(--muted);font-weight:500;">${max ? '/ ' + max : ''}</span></div>
                 <div class="bar-wrap"><div class="bar-fill" style="width:${pct}%;background:${color};"></div></div>
               </td>
               <td class="hide-mobile">
@@ -300,8 +332,14 @@ function logout() {
   renderAuthHeader();
 }
 
-// Score Parsing & Submission
+// Score Parsing — leikurinn greinist sjálfkrafa úr Share-textanum
 function parseShareText(raw) {
+  if (/skuggabaldur/i.test(raw)) return parseSkuggabaldur(raw);
+  if (/krillion/i.test(raw)) return parseKrillion(raw);
+  return parseSizeItUp(raw);
+}
+
+function parseSizeItUp(raw) {
   const puzzleMatch = raw.match(/#(\d+)/);
   const scoreMatch = raw.match(/Score:\s*(\d+)\s*\/\s*500/i);
   if (!puzzleMatch || !scoreMatch) return null;
@@ -315,7 +353,42 @@ function parseShareText(raw) {
     return m ? parseInt(m[1], 10) : null;
   }).filter(n => n !== null);
 
-  return { puzzle, score, rounds, grid: roundLines.join('\n') };
+  return { game: 'sizeitup', puzzle, score, rounds, grid: roundLines.join('\n') };
+}
+
+// Emoji-línur án hauslínu og tengla (fyrir Skuggabaldur og Krillion)
+function emojiGridLines(raw, gameName) {
+  return raw.split(/\r?\n/).map(l => l.trim()).filter(Boolean)
+    .filter(l => /\p{Extended_Pictographic}/u.test(l))
+    .filter(l => !new RegExp(gameName, 'i').test(l))
+    .filter(l => !/^https?:\/\//i.test(l));
+}
+
+function parseSkuggabaldur(raw) {
+  const m = raw.match(/Skuggabaldur\s*#(\d+)[^\n]*?(\d+)\s*\/\s*700/i);
+  if (!m) return null;
+  return {
+    game: 'skuggabaldur',
+    puzzle: parseInt(m[1], 10),
+    score: parseInt(m[2], 10),
+    rounds: [],
+    grid: emojiGridLines(raw, 'skuggabaldur').join('\n')
+  };
+}
+
+function parseKrillion(raw) {
+  const m = raw.match(/Krillion\s*#(\d+)/i);
+  if (!m) return null;
+  const lines = raw.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+  const scoreLine = lines.find(l => /^\d+$/.test(l));
+  if (!scoreLine) return null;
+  return {
+    game: 'krillion',
+    puzzle: parseInt(m[1], 10),
+    score: parseInt(scoreLine, 10),
+    rounds: [],
+    grid: emojiGridLines(raw, 'krillion').join('\n')
+  };
 }
 
 function openSubmitModal() {
@@ -336,10 +409,12 @@ function updateParsePreview() {
   const parsed = parseShareText(document.getElementById('shareInput').value);
   const box = document.getElementById('parsePreview');
   if (!parsed) {
-    box.innerHTML = 'Bíð eftir gildum Size It Up texta (t.d. <code>#103</code> og <code>Score: 314/500</code>)...';
+    box.innerHTML = 'Bíð eftir gildum Share-texta frá Size It Up, Skuggabaldur eða Krillion...';
     return;
   }
-  box.innerHTML = `✅ Greint: <strong>Þraut #${parsed.puzzle}</strong> · <strong>${parsed.score} / 500 stig</strong> (${parsed.rounds.length} umferðir)`;
+  const g = GAMES[parsed.game];
+  const roundsInfo = parsed.rounds.length ? ` (${parsed.rounds.length} umferðir)` : '';
+  box.innerHTML = `✅ Greint: ${g.icon} <strong>${g.label} #${parsed.puzzle}</strong> · <strong>${parsed.score}${g.max ? ' / ' + g.max : ''} stig</strong>${roundsInfo}`;
 }
 
 async function submitScore() {
@@ -357,6 +432,7 @@ async function submitScore() {
     await api('submit_score', {
       p_name: state.currentUser.name,
       p_pin: state.currentUser.pin,
+      p_game: parsed.game,
       p_puzzle: parsed.puzzle,
       p_score: parsed.score,
       p_grid: parsed.grid,
@@ -370,19 +446,22 @@ async function submitScore() {
 
   await fetchData();
   state.mode = 'daily';
+  switchGame(parsed.game);
   switchMode('daily');
   document.getElementById('puzzleSelect').value = parsed.puzzle;
   renderAll();
   closeModals();
 }
 
-// Player History Modal
+// Player History Modal (fyrir valinn leik)
 function openPlayerHistory(playerName) {
   const entries = state.scores
+    .filter(s => (s.game || 'sizeitup') === state.game)
     .filter(s => s.name.toLowerCase() === playerName.toLowerCase())
     .sort((a, b) => b.puzzle - a.puzzle);
 
-  document.getElementById('playerModalTitle').textContent = `${playerName} — Saga`;
+  const g = GAMES[state.game];
+  document.getElementById('playerModalTitle').textContent = `${playerName} — ${g.icon} ${g.label}`;
   const body = document.getElementById('playerHistoryBody');
 
   if (entries.length === 0) {
@@ -412,7 +491,7 @@ function openPlayerHistory(playerName) {
             ${entries.map(e => `
               <tr>
                 <td><strong>#${e.puzzle}</strong></td>
-                <td><strong>${e.score}</strong> / 500</td>
+                <td><strong>${e.score}</strong>${g.max ? ' / ' + g.max : ''}</td>
                 <td><div class="grid-inline">${esc(e.grid)}</div></td>
               </tr>
             `).join('')}

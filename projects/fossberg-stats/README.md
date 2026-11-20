@@ -1,7 +1,9 @@
-﻿# fossberg-stats — Size It Up stigatafla
+﻿# fossberg-stats — Fossberg Stats stigatafla
 
-Static leaderboard for the [Size It Up](https://magnitudle.com/size-it-up) puzzle.
-Register with a name + 4-digit PIN, paste your daily Share text, and compare
+Static leaderboard for three daily games: [Size It Up](https://magnitudle.com/size-it-up),
+[Skuggabaldur](https://skuggabaldur.is) and [Krillion](https://krillion.io).
+Register with a name + 4-digit PIN, paste your Share text (the game is
+detected automatically), and compare
 scores with friends (daily standings + overall averages).
 
 This is a static-site port of the original single-file PHP app
@@ -13,6 +15,7 @@ with no server and no database to manage.
 
 - `index.html`, `style.css`, `script.js` — the static frontend
 - `supabase-setup.sql` — one-time backend setup (tables, security, API functions)
+- `supabase-migration-games.sql` — upgrades an older single-game setup to multi-game
 - `test/smoke.mjs` — syntax, wiring and share-text parser checks (`node test/smoke.mjs`)
 
 ## Setup (one time, ~5 minutes)
@@ -20,7 +23,9 @@ with no server and no database to manage.
 1. Create a free account at <https://supabase.com> and click **New project**
    (any name/region, generate a database password — you will not need it again).
 2. Open **SQL Editor** in the project dashboard, paste the entire contents of
-   `supabase-setup.sql` and press **Run**.
+   `supabase-setup.sql` and press **Run**. (Already ran the older single-game
+   version? Run `supabase-migration-games.sql` instead — it upgrades in place
+   and keeps all existing scores.)
 3. Collect these two values (they live on different pages in the dashboard):
    - the **Project URL** (`https://<project-ref>.supabase.co`). The API Keys
      page does NOT show it — use the **Connect** button at the top of the
@@ -42,6 +47,17 @@ with no server and no database to manage.
    Done — everyone visiting the site shares the same leaderboard.
 
 Until step 4 is done the page shows a setup notice instead of the table.
+
+## Games
+
+| Game | Max score | Share format |
+|---|---|---|
+| 📏 Size It Up | 500 | `#103` + `Score: 314/500` + square grid |
+| 🌑 Skuggabaldur | 700 | `Skuggabaldur #37 🌑 380/700` + animal grid |
+| 🦐 Krillion | no fixed max | `Krillion #128 🦐` + score line + sea grid |
+
+The paste box auto-detects the game from the share text. Krillion has no
+fixed maximum, so its score bars are scaled against the current top score.
 
 ## Security notes
 

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Size It Up — Stigatafla</title>
+  <title>Fossberg Stats — Stigatafla</title>
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
@@ -11,19 +11,26 @@
     <!-- Top Navigation -->
     <header class="topbar">
       <div class="brand">
-        <div class="brand-icon">📏</div>
+        <div class="brand-icon">🏆</div>
         <div>
-          <h1>Size It Up</h1>
+          <h1>Fossberg Stats</h1>
           <span>Stigatafla &amp; Meðaltöl</span>
         </div>
       </div>
 
       <div class="nav-actions">
-        <a class="btn btn-secondary" href="https://magnitudle.com/size-it-up" target="_blank">Spila leikinn ↗</a>
+        <a class="btn btn-secondary" id="playLink" href="https://magnitudle.com/size-it-up" target="_blank">Spila leikinn ↗</a>
         <div id="authArea"></div>
         <button class="btn-primary" onclick="openSubmitModal()">+ Skrá skor</button>
       </div>
     </header>
+
+    <!-- Game Selector -->
+    <div class="tabs game-tabs">
+      <button class="tab active" id="gameTab-sizeitup" onclick="switchGame('sizeitup')">📏 Size It Up</button>
+      <button class="tab" id="gameTab-skuggabaldur" onclick="switchGame('skuggabaldur')">🌑 Skuggabaldur</button>
+      <button class="tab" id="gameTab-krillion" onclick="switchGame('krillion')">🦐 Krillion</button>
+    </div>
 
     <!-- View Mode & Puzzle Selector -->
     <div class="controls-bar">
@@ -85,7 +92,7 @@
         <button class="close-btn" onclick="closeModals()">✕</button>
       </div>
       <div class="field">
-        <label for="shareInput">Límdu niðurstöðuna úr Size It Up (Share)</label>
+        <label for="shareInput">Límdu Share-textann úr leiknum — leikurinn greinist sjálfkrafa</label>
         <textarea id="shareInput" oninput="updateParsePreview()" placeholder="Size It Up&#10;#103&#10;&#10;Score: 314/500&#10;&#10;⬜⬜⬜⬜⬜ 9&#10;🟥🟥🟥🟥⬜ 83&#10;..."></textarea>
       </div>
 

@@ -453,3 +453,10 @@ textarea {
   .mini-grid { font-size: 0.52rem; }
   .hide-mobile { display: none; }
 }
+
+/* Game Selector */
+.game-tabs {
+  align-self: flex-start;
+  flex-wrap: wrap;
+}
+.game-tabs .tab { white-space: nowrap; }

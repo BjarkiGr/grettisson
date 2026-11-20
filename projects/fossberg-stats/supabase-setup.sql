@@ -1,6 +1,8 @@
 ﻿-- ============================================================================
--- Size It Up — Stigatafla: Supabase uppsetning
+-- Fossberg Stats — Supabase uppsetning (Size It Up, Skuggabaldur, Krillion)
 -- Límdu allt þetta í SQL Editor í Supabase og ýttu á Run (sjá README.md).
+-- ATH: Ef þú keyrðir eldri útgáfu af þessari skriptu skaltu keyra
+-- supabase-migration-games.sql í staðinn (hún uppfærir núverandi gögn).
 -- ============================================================================
 
 create extension if not exists pgcrypto with schema extensions;
@@ -13,16 +15,17 @@ create table if not exists public.players (
 );
 create unique index if not exists players_name_lower_idx on public.players (lower(name));
 
--- Skor: eitt per spilara per þraut (uppfærist við endursendingu).
+-- Skor: eitt per spilara per leik per þraut (uppfærist við endursendingu).
 create table if not exists public.scores (
   id         bigint generated always as identity primary key,
   name       text not null references public.players (name) on update cascade on delete cascade,
+  game       text not null default 'sizeitup' check (game in ('sizeitup', 'skuggabaldur', 'krillion')),
   puzzle     integer not null check (puzzle > 0),
-  score      integer not null check (score between 0 and 500),
+  score      integer not null check (score >= 0),
   rounds     jsonb not null default '[]'::jsonb,
   grid       text not null default '',
   created_at timestamptz not null default now(),
-  unique (name, puzzle)
+  unique (name, game, puzzle)
 );
 
 -- Row Level Security: enginn beinn aðgangur með anon-lyklinum.
@@ -46,6 +49,7 @@ as $$
     'scores', coalesce((
       select jsonb_agg(jsonb_build_object(
         'name', name,
+        'game', game,
         'puzzle', puzzle,
         'score', score,
         'rounds', rounds,
@@ -105,9 +109,9 @@ begin
 end;
 $$;
 
--- Skrá eða uppfæra skor
+-- Skrá eða uppfæra skor (per leik)
 create or replace function public.submit_score(
-  p_name text, p_pin text, p_puzzle integer, p_score integer,
+  p_name text, p_pin text, p_game text, p_puzzle integer, p_score integer,
   p_grid text, p_rounds jsonb
 )
 returns jsonb
@@ -118,6 +122,8 @@ as $$
 declare
   v_user players%rowtype;
   v_pin  text := trim(coalesce(p_pin, ''));
+  v_game text := lower(trim(coalesce(p_game, '')));
+  v_max  integer;
 begin
   select * into v_user from players
   where lower(name) = lower(trim(coalesce(p_name, '')));
@@ -126,13 +132,21 @@ begin
     raise exception 'Innskráning rann út. Skráðu þig inn aftur.';
   end if;
 
-  if p_puzzle is null or p_puzzle <= 0 or p_score is null or p_score < 0 or p_score > 500 then
+  if v_game not in ('sizeitup', 'skuggabaldur', 'krillion') then
+    raise exception 'Óþekktur leikur.';
+  end if;
+
+  -- Hámark per leik: Krillion hefur ekkert fast hámark.
+  v_max := case v_game when 'sizeitup' then 500 when 'skuggabaldur' then 700 else null end;
+
+  if p_puzzle is null or p_puzzle <= 0 or p_score is null or p_score < 0
+     or (v_max is not null and p_score > v_max) then
     raise exception 'Ógilt þrautarnúmer eða stigafjöldi.';
   end if;
 
-  insert into scores (name, puzzle, score, rounds, grid)
-  values (v_user.name, p_puzzle, p_score, coalesce(p_rounds, '[]'::jsonb), coalesce(p_grid, ''))
-  on conflict (name, puzzle) do update
+  insert into scores (name, game, puzzle, score, rounds, grid)
+  values (v_user.name, v_game, p_puzzle, p_score, coalesce(p_rounds, '[]'::jsonb), coalesce(p_grid, ''))
+  on conflict (name, game, puzzle) do update
     set score = excluded.score,
         rounds = excluded.rounds,
         grid = excluded.grid,
@@ -146,4 +160,4 @@ $$;
 grant execute on function public.get_data() to anon, authenticated;
 grant execute on function public.register_player(text, text) to anon, authenticated;
 grant execute on function public.login_player(text, text) to anon, authenticated;
-grant execute on function public.submit_score(text, text, integer, integer, text, jsonb) to anon, authenticated;
+grant execute on function public.submit_score(text, text, text, integer, integer, text, jsonb) to anon, authenticated;

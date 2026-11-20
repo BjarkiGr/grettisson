@@ -1,4 +1,4 @@
-﻿// Smoke test for the static Size It Up leaderboard.
+﻿// Smoke test for the static Fossberg Stats leaderboard (3 games).
 // Run: node projects/fossberg-stats/test/smoke.mjs
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
@@ -30,35 +30,56 @@ for (const h of handlers) {
   check(`handler ${h}() defined`, js.includes(`function ${h}(`));
 }
 
-// 3. Every getElementById id used in script.js must exist in index.html.
+// 3. Every getElementById id used in script.js must exist in index.html
+//    (gameTab-* ids are built dynamically, so check their prefixes too).
 const ids = [...new Set([...js.matchAll(/getElementById\('([^']+)'\)/g)].map(m => m[1]))];
 for (const id of ids) {
   check(`#${id} in index.html`, html.includes(`id="${id}"`));
 }
+for (const g of ['sizeitup', 'skuggabaldur', 'krillion']) {
+  check(`#gameTab-${g} in index.html`, html.includes(`id="gameTab-${g}"`));
+}
 
-// 4. parseShareText against a real Share text.
+// 4. Parsers against real Share texts from all three games.
 const start = js.indexOf('function parseShareText');
 const end = js.indexOf('function openSubmitModal');
 const parseShareText = new Function(js.slice(start, end) + '\nreturn parseShareText;')();
 
-const sample = [
-  'Size It Up',
-  '#103',
-  '',
-  'Score: 314/500',
-  '',
-  '⬜⬜⬜⬜⬜ 9',
-  '🟥🟥🟥🟥⬜ 83',
-  '🟩🟩🟩⬜⬜ 122',
-  '🟨🟨⬜⬜⬜ 100'
+const sizeSample = [
+  'Size It Up', '#103', '', 'Score: 314/500', '',
+  '⬜⬜⬜⬜⬜ 9', '🟥🟥🟥🟥⬜ 83', '🟩🟩🟩⬜⬜ 122', '🟨🟨⬜⬜⬜ 100'
 ].join('\n');
+const p1 = parseShareText(sizeSample);
+check('Size It Up: detected', p1 !== null && p1.game === 'sizeitup');
+check('Size It Up: puzzle', p1 !== null && p1.puzzle === 103);
+check('Size It Up: score', p1 !== null && p1.score === 314);
+check('Size It Up: rounds', p1 !== null && JSON.stringify(p1.rounds) === JSON.stringify([9, 83, 122, 100]));
+check('Size It Up: grid', p1 !== null && p1.grid.split('\n').length === 4);
 
-const parsed = parseShareText(sample);
-check('parses puzzle number', parsed !== null && parsed.puzzle === 103);
-check('parses score', parsed !== null && parsed.score === 314);
-check('parses rounds', parsed !== null && JSON.stringify(parsed.rounds) === JSON.stringify([9, 83, 122, 100]));
-check('parses grid (4 round lines)', parsed !== null && parsed.grid.split('\n').length === 4);
+const skuggaSample = [
+  'Skuggabaldur #37 🌑 380/700',
+  '🐻‍❄️🐑🦌🐑🐑🦌🐻‍❄️',
+  'https://skuggabaldur.is'
+].join('\n');
+const p2 = parseShareText(skuggaSample);
+check('Skuggabaldur: detected', p2 !== null && p2.game === 'skuggabaldur');
+check('Skuggabaldur: puzzle', p2 !== null && p2.puzzle === 37);
+check('Skuggabaldur: score', p2 !== null && p2.score === 380);
+check('Skuggabaldur: grid', p2 !== null && p2.grid === '🐻‍❄️🐑🦌🐑🐑🦌🐻‍❄️');
+check('Skuggabaldur: no URL in grid', p2 !== null && !p2.grid.includes('https'));
+
+const krillionSample = [
+  'Krillion #128 🦐', '265', '', '🫧🫧🫧🦑🦑🐟🏮'
+].join('\n');
+const p3 = parseShareText(krillionSample);
+check('Krillion: detected', p3 !== null && p3.game === 'krillion');
+check('Krillion: puzzle', p3 !== null && p3.puzzle === 128);
+check('Krillion: score', p3 !== null && p3.score === 265);
+check('Krillion: grid', p3 !== null && p3.grid === '🫧🫧🫧🦑🦑🐟🏮');
+
 check('rejects invalid text', parseShareText('hello world') === null);
+check('rejects Skuggabaldur without score', parseShareText('Skuggabaldur #37 🌑') === null);
+check('rejects Krillion without score line', parseShareText('Krillion #128 🦐\n🫧🫧🫧') === null);
 
 console.log(failures === 0 ? '\nAll checks passed.' : `\n${failures} check(s) failed.`);
 process.exit(failures === 0 ? 0 : 1);
