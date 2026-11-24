@@ -123,7 +123,7 @@ export async function init() {
     root.innerHTML = emptyState("No event selected.") + '<p><a href="events.html">Browse all events</a></p>';
     return;
   }
-  const data = await loadIntelligence();
+  const data = await loadIntelligence("global"); // direct links work regardless of region focus
   const event = data.eventById.get(id);
   if (!event) {
     root.innerHTML = emptyState("Event not found.") + '<p><a href="events.html">Browse all events</a></p>';

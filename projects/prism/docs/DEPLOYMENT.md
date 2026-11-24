@@ -99,3 +99,39 @@ First ingestion run (after deploy): invoke ingest-sources, then
 process-articles (repeat process-articles until processed=0; it handles 10
 jobs per invocation). Verify real article counts via settings.html read
 tests or the SQL Editor. Automation (cron) arrives in Phase 7.
+
+## Phase 8: Render deployment (final)
+
+Option A — Blueprint: Render Dashboard -> New -> Blueprint -> connect
+BjarkiGr/grettisson -> blueprint path `projects/prism/render.yaml`.
+Option B — Manual Static Site: New -> Static Site -> same repo ->
+Root Directory `projects/prism/frontend`, Build Command empty (or the
+echo line from render.yaml), Publish Directory `.`.
+No environment variables are needed on Render (public config lives in
+js/config.js; secrets live in Supabase). Verify: the deployed URL redirects
+signed-out visitors to login.html and shows live data after sign-in.
+
+## Backup and recovery (free tier)
+
+Database backup (manual, free, run periodically):
+- Dashboard -> Settings -> Database -> copy the connection string (URI).
+- Locally: `pg_dump "<connection-string>" -Fc -f prism-backup.dump`
+  (pg_dump ships with PostgreSQL client tools; no server needed).
+- Alternative with CLI linked: `npx supabase db dump -f prism-backup.sql`.
+Restore into a fresh project:
+- Apply migrations 0001-0004 in order (SQL Editor), then
+  `pg_restore -d "<new-connection-string>" --data-only --disable-triggers prism-backup.dump`
+  (data-only: schema comes from migrations; auth users must be recreated
+  in the dashboard, then Vault secret re-inserted, then functions redeployed).
+Recovery priorities: Git holds ALL code/migrations/docs (full rebuild
+capability); the dump holds intelligence data; Supabase secrets + Vault
+must be re-entered manually (they are never in Git by design).
+
+Project pause recovery: Supabase Free pauses after ~1 week of inactivity.
+Dashboard -> Restore. Cron resumes on the next tick; missed ticks are safe
+(idempotent pipeline). The daily health tick reduces pause likelihood.
+
+Key rotation: Groq console -> revoke old key -> new key ->
+`npx supabase secrets set AI_API_KEY=<new> --project-ref yztwbnmaujcnpytewffz --yes`.
+Service key rotation: dashboard -> regenerate -> update Vault:
+`select vault.update_secret((select id from vault.secrets where name='prism_service_key'), '<new>');`

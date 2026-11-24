@@ -153,3 +153,8 @@
   padding: var(--space-1) var(--space-2);
   cursor: pointer;
 }
+
+/* Region selector in the header (Phase 8) */
+.app-header .region-selector { flex-direction: row; align-items: center; gap: var(--space-1); margin-left: auto; }
+.app-header .region-selector select { padding: 2px var(--space-1); font-size: 0.85rem; }
+@media (max-width: 860px) { .app-header .region-selector { margin-left: 0; } }

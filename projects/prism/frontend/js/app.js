@@ -9,6 +9,7 @@ import { config, isConfigured } from "./config.js";
 import { initNavigation } from "./navigation.js";
 import { getSession, onAuthChange } from "./auth.js";
 import { errorState } from "./components.js";
+import { getStoredRegion } from "./data.js";
 
 const PAGE_MODULES = {
   overview: "./dashboard.js",
@@ -21,6 +22,23 @@ const PAGE_MODULES = {
   settings: "./settings.js",
 };
 
+function initRegionSelector() {
+  const header = document.querySelector(".app-header");
+  if (!header || document.getElementById("region-selector")) return;
+  const wrap = document.createElement("label");
+  wrap.className = "filter-field region-selector";
+  wrap.innerHTML = '<span class="muted">Region</span>' +
+    '<select id="region-selector" aria-label="Region focus">' +
+    '<option value="global">Global</option><option value="iceland">Iceland</option></select>';
+  const toggle = document.getElementById("nav-toggle");
+  header.insertBefore(wrap, toggle);
+  const sel = wrap.querySelector("select");
+  sel.value = getStoredRegion();
+  sel.addEventListener("change", () => {
+    try { localStorage.setItem("prism-region", sel.value); } catch { /* private mode */ }
+    location.reload();
+  });
+}
 function renderAuthStatus(session) {
   const footer = document.querySelector(".app-footer");
   if (!footer) return;
@@ -59,6 +77,7 @@ async function initPage() {
 document.addEventListener("DOMContentLoaded", async () => {
   try {
     initNavigation();
+    initRegionSelector();
     renderConfigStatus();
   } catch (err) {
     console.error("[PRISM] initialization error:", err);

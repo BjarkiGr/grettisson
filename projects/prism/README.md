@@ -5,7 +5,7 @@ information, identifies significant developments, evaluates consequences
 with a free-tier AI provider, computes explainable risk scores and presents
 structured intelligence in a static web dashboard.
 
-**Status: Phase 6 complete — fully connected.** PRISM renders live Supabase
+**Status: MVP complete (Phases 0-8).** PRISM renders live Supabase
 intelligence (articles, AI analyses, explainable risk scores) behind an
 administrator login gate. Watchlists are functional. Phase 7 automation
 (cron + Vault) is ready to apply — see docs/AUTOMATION.md.

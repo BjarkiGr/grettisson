@@ -1,5 +1,33 @@
 ﻿# PRISM — Changelog
 
+## [Unreleased] — Phase 8: Deployment & Final Testing (MVP)
+
+### Added
+- Region selector (Global / Iceland) in the header on every page; persisted
+  in localStorage; pure applyRegion filter in data.js (Iceland = IS-involved
+  events + articles from Icelandic sources); event-detail loads unfiltered
+  so direct links always work.
+- render.yaml static-site blueprint (rootDir projects/prism/frontend,
+  no build step).
+- docs/REVIEW-BRIEF.md: plain-text agent-role description, implementation
+  summary, self-declared limitations, reviewer checklist, self-review
+  findings — ready to hand to an AI or human reviewer.
+- DEPLOYMENT.md: Render steps, free-tier backup/restore (pg_dump),
+  project-pause recovery, Groq + service key rotation procedures.
+- test/phase8-smoke.mjs (16 checks).
+
+### Verified (final sweep)
+- 9 suites: 717 local checks + 15 live RLS checks = 732, 0 failures.
+- Production: 8 sources, 181 articles, 29 events, 27 analyses, 27 scores;
+  all four pipeline functions completed HTTP 200 on the latest tick;
+  backlog draining autonomously; 0 job failures.
+- Secret scans clean before push.
+
+### Pending (manual)
+- Render deployment via Blueprint or manual Static Site (user account).
+- Optional: hand REVIEW-BRIEF.md to an external AI reviewer.
+- Groq key rotation (recommended).
+
 ## [Unreleased] — Icelandic sources (post-Phase 7)
 
 ### Added

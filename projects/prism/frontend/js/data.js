@@ -5,8 +5,30 @@
 
 import { getClient } from "./supabase.js";
 
+/** Persisted region focus: "global" (default) or "iceland". */
+export function getStoredRegion() {
+  try {
+    return globalThis.localStorage?.getItem("prism-region") === "iceland" ? "iceland" : "global";
+  } catch {
+    return "global";
+  }
+}
+
+/**
+ * Pure region filter. Iceland focus = events involving IS (primary or
+ * listed country) + articles linked to those events or published by
+ * Icelandic sources. Global returns the data unchanged.
+ */
+export function applyRegion(data, region) {
+  if (region !== "iceland") return data;
+  const events = data.events.filter((e) => e.primary_country === "IS" || (e.countries ?? []).includes("IS"));
+  const ids = new Set(events.map((e) => e.id));
+  const isSources = new Set(data.sources.filter((s) => s.country === "IS").map((s) => s.id));
+  const articles = data.articles.filter((a) => (a.event_id && ids.has(a.event_id)) || isSources.has(a.source_id));
+  return { ...data, events, articles, eventById: new Map(events.map((e) => [e.id, e])) };
+}
 /** Fetches all intelligence tables in parallel and composes view models. */
-export async function loadIntelligence() {
+export async function loadIntelligence(region = getStoredRegion()) {
   const sb = await getClient();
   const [ev, rs, an, art, ea, src] = await Promise.all([
     sb.from("events").select("*").order("last_updated_at", { ascending: false }).limit(300),
@@ -19,10 +41,10 @@ export async function loadIntelligence() {
   for (const [name, res] of [["events", ev], ["risk_scores", rs], ["analyses", an], ["articles", art], ["event_articles", ea], ["sources", src]]) {
     if (res.error) throw new Error(name + " query failed: " + res.error.message);
   }
-  return composeIntelligence({
+  return applyRegion(composeIntelligence({
     events: ev.data ?? [], riskScores: rs.data ?? [], analyses: an.data ?? [],
     articles: art.data ?? [], eventArticles: ea.data ?? [], sources: src.data ?? [],
-  });
+  }), region);
 }
 
 /** Pure composition: joins scores/analyses/articles onto events. */

@@ -1,0 +1,11 @@
+﻿# PRISM — Render Blueprint (Phase 8)
+# Use: Render Dashboard -> New -> Blueprint -> connect BjarkiGr/grettisson
+# -> set blueprint path to projects/prism/render.yaml
+# (Or create a Static Site manually with the same settings.)
+services:
+  - type: web
+    name: prism
+    env: static
+    rootDir: projects/prism/frontend
+    buildCommand: echo "PRISM is a pure static site - no build step"
+    staticPublishPath: .
