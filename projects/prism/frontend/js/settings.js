@@ -69,7 +69,12 @@ async function initUserManagement() {
   const session = await getSession();
   if (!session) return;
   const sb = await getClient();
-  const { data: profile } = await sb.from("profiles").select("role").eq("id", session.user.id).single();
+  const { data: profile, error: profErr } = await sb.from("profiles").select("role").eq("id", session.user.id).single();
+  if (profErr) {
+    section.hidden = false;
+    root.innerHTML = errorState("User roles are not initialized yet. Apply migration 20261128000000_user_roles.sql in the Supabase SQL Editor, then reload this page.");
+    return;
+  }
   if (profile?.role !== "admin") return; // viewers never see this panel
   section.hidden = false;
 
