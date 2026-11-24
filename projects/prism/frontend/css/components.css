@@ -158,3 +158,10 @@
 .app-header .region-selector { flex-direction: row; align-items: center; gap: var(--space-1); margin-left: auto; }
 .app-header .region-selector select { padding: 2px var(--space-1); font-size: 0.85rem; }
 @media (max-width: 860px) { .app-header .region-selector { margin-left: 0; } }
+
+/* Supply Chain Map (post-MVP feature) */
+.supply-map-box { height: 480px; }
+.flow-line { stroke-dasharray: 6 10; animation: flow-dash 1.2s linear infinite; }
+@keyframes flow-dash { to { stroke-dashoffset: -16; } }
+@media (max-width: 860px) { .supply-map-box { height: 340px; } }
+@media (prefers-reduced-motion: reduce) { .flow-line { animation: none; } }

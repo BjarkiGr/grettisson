@@ -12,7 +12,9 @@ administrator login gate. Watchlists are functional. Phase 7 automation
 
 ## Layout
 
-- `frontend/` — static site (HTML, CSS, vanilla ES modules; no build step).
+- `frontend/` — static site (HTML, CSS, vanilla ES modules; no build step),
+  including a Supply Chain Map with animated corridors and destination-based
+  disruption overlays from live intelligence.
 - `supabase/` — config.toml, migrations (Phase 2), Edge Functions (Deno/TS).
 - `docs/` — architecture, database, AI, risk methodology, deployment, changelog.
 - `test/` — zero-dependency Node smoke tests.

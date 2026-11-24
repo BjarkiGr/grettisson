@@ -67,13 +67,13 @@ function renderSupplyChains(data) {
   const exposed = data.events
     .filter((e) => e.dimensions && e.dimensions.supply_chain >= 3 && e.supply_chain_implications)
     .sort((a, b) => b.dimensions.supply_chain - a.dimensions.supply_chain);
-  el.innerHTML = exposed.length
+  el.innerHTML = '<p><a href="supply-chains.html">Open the Supply Chain Map \u2192</a></p>' + (exposed.length
     ? exposed.map((e) =>
         '<div class="feed-item">' +
           '<div class="feed-item-head"><a class="feed-title" href="event-detail.html?id=' + encodeURIComponent(e.id) + '">' + escapeHtml(e.title) + "</a>" + riskBadgeFromScore(e.overall_score) + "</div>" +
           '<p class="feed-excerpt">' + escapeHtml(e.supply_chain_implications) + "</p>" +
         "</div>").join("")
-    : emptyState("No significant supply-chain exposure in the current intelligence.");
+    : emptyState("No significant supply-chain exposure in the current intelligence."));
 }
 
 function renderCharts(data) {

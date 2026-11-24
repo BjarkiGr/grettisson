@@ -1,5 +1,25 @@
 ﻿# PRISM — Changelog
 
+## [Unreleased] — Supply Chain Map (post-MVP feature)
+
+### Added
+- supply-chains.html + js/supply-chains.js: Leaflet map of 16 illustrative
+  reference trade corridors with ANIMATED flow lines (origin -> destination),
+  chokepoint markers (Suez, Panama, Malacca, Hormuz, Bab-el-Mandeb), and a
+  destination-country selector. Selecting a destination highlights inbound
+  corridors and lists real PRISM developments affecting them (country
+  intersection incl. chokepoints), each linked to its assessment.
+- js/routes.js: reference corridors + chokepoints + pure matching/risk
+  helpers. Clearly labeled illustrative geography, NOT live tracking.
+- Iceland inbound corridors (NL->IS, GB->IS); Iceland region focus
+  preselects Iceland as destination.
+- Flow animation respects prefers-reduced-motion; offline map fallback.
+- Nav "Supply Chains" now a real page on all pages; overview section links
+  to the map. test/supply-chain-smoke.mjs (82 checks).
+
+### Verified
+- 10 suites: 804 checks, 0 failures. HTTP serve 14/14 resources 200 OK.
+
 ## [Unreleased] — Phase 8: Deployment & Final Testing (MVP)
 
 ### Added

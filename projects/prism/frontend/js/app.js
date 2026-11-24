@@ -17,6 +17,7 @@ const PAGE_MODULES = {
   "event-detail": "./event-detail.js",
   regions: "./regions.js",
   commodities: "./commodities.js",
+  "supply-chains": "./supply-chains.js",
   watchlists: "./watchlists.js",
   login: "./auth.js",
   settings: "./settings.js",
