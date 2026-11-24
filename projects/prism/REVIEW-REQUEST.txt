@@ -1,0 +1,170 @@
+﻿PRISM — REQUEST FOR EXTERNAL AI REVIEW
+======================================
+
+HOW TO USE THIS FILE
+Paste this entire file into ChatGPT (or any capable AI reviewer) and ask:
+"Please (1) summarize this project in plain language, (2) critically review
+the architecture and security model, (3) list the top risks and blind spots
+in priority order, and (4) suggest concrete improvements that respect the
+zero-cost constraint. Be skeptical; do not assume the implementation is
+correct just because it is described confidently."
+
+
+1. WHAT PRISM IS
+----------------
+PRISM (Political Risk & Impact Scoring Model) is a geopolitical risk and
+supply-chain intelligence platform. It automatically collects public news
+(RSS), identifies significant developments as "events", analyzes them with
+a free-tier AI model, computes transparent risk scores, and presents
+everything in a login-gated web dashboard with maps, charts, timelines and
+watchlists. It runs entirely on free tiers at zero recurring cost.
+
+Hard constraints from the master specification:
+- Frontend: pure HTML/CSS/vanilla JavaScript ES modules. No frameworks,
+  no TypeScript, no build step. Deployable as a static site (Render).
+- Backend: Supabase Edge Functions (TypeScript, Deno). Stateless,
+  small-batch, database-backed queues, cron-scheduled. No always-on server.
+- Database: Supabase PostgreSQL + Auth + Row Level Security, SQL migrations.
+- AI: external free-tier inference only (currently Groq, model
+  openai/gpt-oss-120b). Configurable/replaceable provider. No paid fallback.
+- No Python, no Docker, no VPS, no paid services. Never fabricate real
+  intelligence data; demonstration data must be clearly marked.
+
+
+2. THE IMPLEMENTING AGENT'S ROLE (plain text)
+---------------------------------------------
+A single AI coding agent (Cline, in VS Code) acted as the sole implementation
+engineer across nine approved phases (0-8), plus two post-MVP features. It
+worked inside an existing personal-site monorepo (grettisson), placing PRISM
+at projects/prism/ with user approval. Its rules: inspect before changing;
+implement only the authorized phase; test everything; report and stop for
+approval between phases; explain architectural decisions; never invent
+credentials; never fabricate intelligence. The human user performed all
+actions requiring accounts or secrets (Supabase dashboard setup, applying
+SQL migrations, creating the admin user, storing the service key in Vault,
+creating the Groq API key). The agent wrote all code, migrations, tests and
+documentation, ran local test suites, deployed Edge Functions via the
+Supabase CLI, and verified live behavior through public endpoints.
+
+
+3. ARCHITECTURE AND DATA FLOW
+-----------------------------
+RSS sources (8: BBC, Al Jazeera, DW, Guardian, NPR, UN News, RUV Iceland,
+Grapevine Iceland) -> ingest-sources function (parse RSS 2.0/RDF/Atom,
+normalize URLs, SHA-256 dedup hash, store articles, queue jobs) ->
+process-articles function (transparent keyword classification incl.
+Icelandic stems with inflection-aware matching; country detection to ISO
+codes; match existing events by category+country+14-day window or create
+provisional events; queue analysis) -> analyze-events function (Groq AI,
+versioned prompt 1.0.0 requiring a strict 16-field JSON schema; evidence
+must be tagged verified_fact/inference/speculation; citations must reference
+only the provided articles; output validated before storage; rate limits
+pause jobs with auto-resume windows) -> calculate-risk function (six 0-5
+dimensions derived by documented deterministic rules from the validated
+analysis; overall = weighted mean normalized to 0-100; append-only history
+with generated explanations; confidence stored separately from impact).
+
+Automation: pg_cron + pg_net invoke the functions (ingest every 30 min,
+process/analyze every 15 min, risk hourly, health daily). The service key
+lives in Supabase Vault, read at call time by a SECURITY DEFINER function
+whitelisted to the five PRISM functions and revoked from anon. An overlap
+guard skips invocations while a previous one is unacknowledged; a reaper
+job records HTTP outcomes into a cron_runs history table and times out
+stale invocations.
+
+Frontend: static multi-page site. Auth gate: every page except login
+redirects signed-out visitors. Data loads via the Supabase JS client (pinned
+CDN) under the admin session; RLS enforces access server-side. Chart.js and
+Leaflet load from pinned CDNs with offline fallbacks. Features: overview
+dashboard (stats, charts, feed with search/filters, supply-chain summary),
+events list, event detail (AI assessment with provenance, risk breakdown,
+score history, supporting articles, related events, watchlist linking),
+regional risk map, commodities (no prices ever fabricated), watchlists
+(owner-only CRUD), settings (connection diagnostics), a Global/Iceland
+region selector, and a Supply Chain Map: 16 illustrative reference trade
+corridors with animated flow lines, chokepoint markers, and a destination
+selector showing real events that could disrupt each route.
+
+
+4. SECURITY MODEL
+-----------------
+- anon role: ZERO table privileges (verified live: all reads/writes denied).
+- authenticated (single admin): read intelligence tables; owner-only rows
+  for profiles/watchlists; risk_scores append-only (no update/delete
+  policies or grants anywhere).
+- service_role (Edge Functions only): full access; key auto-injected by the
+  hosted runtime; also stored in Vault for cron invocation.
+- AI key: Supabase Edge Function secrets only. Never in Git or frontend.
+- All dynamic frontend strings HTML-escaped before innerHTML; map popups
+  included. Articles and AI output treated as untrusted.
+- Secret scans run before every git push. Public publishable key in
+  frontend config is intentional (RLS-protected).
+
+
+5. CURRENT STATE (verified)
+---------------------------
+Production: 8 sources, ~180+ articles, ~30 events, analyses and risk scores
+for all analyzed events; pipeline fully automated; 0 job failures at last
+check. 10 test suites, ~800 assertions, all passing. Everything committed
+and pushed to GitHub. Render deployment blueprint prepared (manual deploy
+pending). One operational incident history: pg_net's default 5s timeout
+initially mislabeled successful invocations as failed; fixed with a 120s
+timeout; pre-fix failures remain in the audit history.
+
+
+6. KNOWN LIMITATIONS (self-declared by the implementing agent)
+--------------------------------------------------------------
+1. Single-admin MVP; multi-user expansion untested beyond RLS design.
+2. Keyword classifier is a cheap first pass; Icelandic coverage is
+   stem-limited; misclassification possible.
+3. Risk dimensions use simple heuristics (count-based exposure, category
+   duration priors, verified-fact ratio as probability proxy). Documented
+   but not empirically validated; probability is an estimate, not a statistic.
+4. RSS excerpts only (licensing-safe but shallow context for the AI).
+5. Region preference stored in localStorage, not synced to the profile.
+6. Free-tier AI quotas can pause analysis; resume windows are fixed.
+7. Supabase free project pauses after ~1 week of inactivity; cron stops
+   until manually restored.
+8. Login rate limiting relies on Supabase Auth defaults.
+9. Supply-chain corridors are illustrative reference geography, not live
+   trade/vessel data; disruption matching is country-intersection based.
+10. Event dedup/matching is coarse (category+country+time window); the same
+    development reported from different angles may create separate events.
+11. The Groq API key was pasted into the implementation chat once; rotation
+    is recommended and documented but may not have been performed yet.
+12. No external penetration test or formal code audit has been performed.
+
+
+7. WHAT TO REVIEW (suggested checklist for the reviewer)
+--------------------------------------------------------
+- RLS/GRANT design: any path for anon or cross-user access? Owner checks?
+- Secrets: any leakage vector (Git, frontend, logs, function responses,
+  cron history excerpts)? Is Vault usage sound?
+- Prompt injection: articles are untrusted input to the AI. The defense is
+  strict schema validation + citation whitelisting. Is the blast radius
+  truly contained? What else should be done?
+- Scoring integrity: can the AI influence the final score beyond the
+  documented dimension inputs? Are explanations reproducible?
+- Idempotency and races: duplicate articles/events/scores under overlapping
+  cron ticks or retries? Is the atomic job claim sufficient?
+- Queue health: can jobs get stuck (running forever, paused never resumed)?
+- Free-tier sustainability: storage growth (articles accumulate forever?),
+  invocation budget, AI token budget. What pruning is missing?
+- Frontend: XSS surface, CDN supply-chain risk (pinned but third-party),
+  auth-gate bypass possibilities (client-side gate + server-side RLS).
+- Data ethics/licensing: RSS excerpt storage, attribution, robots respect.
+- Operational: backup/restore realism on free tier, pause recovery,
+  key rotation procedures.
+- Anything the implementing agent may be overconfident about.
+
+
+8. REQUESTED OUTPUT FORMAT
+--------------------------
+1. A plain-language summary of the project (5-10 sentences).
+2. Top 5-10 risks/blind spots, prioritized, each with a concrete fix.
+3. Quick wins achievable within the zero-cost constraint.
+4. Questions the reviewer would ask the implementing agent.
+5. An overall verdict: is this a sound MVP architecture, and what must
+   change before serving real paying users?
+
+END OF REVIEW REQUEST
