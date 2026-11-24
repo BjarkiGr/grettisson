@@ -61,7 +61,7 @@ const sandbox = {
   Image: class { set src(v) {} },
 };
 vm.createContext(sandbox);
-for (const f of ['util', 'data', 'daily', 'lengja', 'audio', 'leaderboard', 'game']) {
+for (const f of ['util', 'data', 'daily', 'lengja', 'audio', 'leaderboard', 'telemetry', 'game']) {
   vm.runInContext(fs.readFileSync(path.join(__dirname, '..', 'src', f + '.js'), 'utf8'), sandbox, { filename: f + '.js' });
 }
 function evalIn(expr) { return vm.runInContext(expr, sandbox); }
@@ -139,6 +139,19 @@ const svgCount = () => (strip().innerHTML.match(/<svg/g) || []).length;
   check('metralengjan banner fired', sandbox.document.getElementById('milestone-banner').textContent.includes('METRALENGJAN'));
   check('daily recorded', evalIn('Daily.playedToday()') === true);
   check('rank is frábært', evalIn('Game.el.rRank.textContent') === 'Frábært! 🏆');
+
+  // nafnlaus umferðartalning (stubbed RPC - fire-and-forget, flush first)
+  await new Promise((r) => setTimeout(r, 0));
+  const visitCall = rpcCalls.find((c) => c.url.endsWith('/verd_track') && c.body.p_event === 'visit');
+  check('telemetry: visit tracked on boot', !!visitCall);
+  const completeCalls = rpcCalls.filter((c) => c.url.endsWith('/verd_track') && c.body.p_event === 'complete');
+  check('telemetry: complete tracked once after daily', completeCalls.length === 1);
+  check('telemetry: puzzle number matches', completeCalls[0].body.p_puzzle === evalIn('Game.number'));
+  check('telemetry: anonymous uuid client', /^[0-9a-f-]{36}$/.test(completeCalls[0].body.p_client));
+  const trackCount = rpcCalls.filter((c) => c.url.endsWith('/verd_track')).length;
+  evalIn('Telemetry.visit()');
+  await new Promise((r) => setTimeout(r, 0));
+  check('telemetry: visit deduped per day', rpcCalls.filter((c) => c.url.endsWith('/verd_track')).length === trackCount);
   check('streak badge is flame + number only', /^🔥 \d+$/.test(evalIn('Game.el.rStreak.textContent')) && evalIn('Game.el.rStreak.hidden') === false);
 
   // stats modal computed from the saved history
@@ -215,6 +228,8 @@ const svgCount = () => (strip().innerHTML.match(/<svg/g) || []).length;
   check('share hidden in unlimited', evalIn('Game.el.share.hidden') === true);
   check('leaderboard hidden in unlimited', evalIn('Game.el.lbBtn.hidden') === true);
   check('daily result untouched by unlimited', evalIn('Daily.todayResult().totalCm') === perfect);
+  await new Promise((r) => setTimeout(r, 0));
+  check('telemetry: unlimited not tracked', rpcCalls.filter((c) => c.url.endsWith('/verd_track') && c.body.p_event === 'complete').length === 1);
 
   console.log(failures === 0 ? '\nAll DOM checks passed.' : '\n' + failures + ' FAILURES');
   process.exit(failures === 0 ? 0 : 1);

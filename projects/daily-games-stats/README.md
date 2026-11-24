@@ -19,6 +19,8 @@ with no server and no database to manage.
 - `supabase-migration-games.sql` — upgrades an older single-game setup to multi-game
 - `supabase-migration-verdlengjan.sql` — adds Verðlengjan to an existing multi-game setup
 - `supabase-migration-krillion-max.sql` — sets Krillion's max score to 700
+- `supabase-migration-verdlengjan-traffic.sql` — anonymous Verðlengjan traffic
+  counting (`verd_track` / `verd_traffic`) for the participation panel
 - `supabase-migration-admin.sql` — makes Bjarki admin + adds admin functions
 - `test/smoke.mjs` — syntax, wiring and share-text parser checks (`node test/smoke.mjs`)
 
@@ -63,6 +65,11 @@ Until step 4 is done the page shows a setup notice instead of the table.
 
 The paste box auto-detects the game from the share text.
 Verðlengjan scores are pastry centimetres; Thursdays allow up to 107 cm.
+Logged-in users also see a "Þátttaka í Verðlengjunni" panel on the 🥐 tab:
+**total traffic** per day — how many people visited the game and how many
+completed the daily puzzle (anonymous counting in the game itself, one visit
+per browser per day). Run `supabase-migration-verdlengjan-traffic.sql` once
+to enable it; until then the panel falls back to counting submitted scores.
 Verðlengjan can also submit directly from the game ("Senda á stigatöfluna 🏆"
 on the results screen) — same account/PIN, same `submit_score` function,
 so pasted and auto-submitted scores are identical.

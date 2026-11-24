@@ -47,6 +47,7 @@ const Game = {
     await loadHistory();
     this.el.loading.hidden = true;
     this.showStart();
+    Telemetry.visit(); // nafnlaus heildarumferð - ein per vafra per dag
   },
 
   bind() {
@@ -301,8 +302,13 @@ const Game = {
       number: this.number, date: Daily.today(), guesses: this.guesses,
       totalCm: total, thursdayBonus: bonus,
     };
-    if (this.mode === 'daily') Daily.recordResult(res);
-    else Daily.recordUnlimited(total);
+    if (this.mode === 'daily') {
+      const firstToday = !Daily.playedToday();
+      Daily.recordResult(res);
+      if (firstToday) Telemetry.track('complete'); // ein klárun per dag
+    } else {
+      Daily.recordUnlimited(total);
+    }
     this.lastResult = res;
     this.showResults(res);
   },

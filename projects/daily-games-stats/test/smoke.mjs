@@ -100,5 +100,31 @@ check('rejects invalid text', parseShareText('hello world') === null);
 check('rejects Skuggabaldur without score', parseShareText('Skuggabaldur #37 🌑') === null);
 check('rejects Krillion without score line', parseShareText('Krillion #128 🦐\n🫧🫧🫧') === null);
 
+// 5. Participation panel: wiring, per-day counts, visibility.
+check('renderParticipation() defined', js.includes('function renderParticipation('));
+const pStart = js.indexOf('const VERD_EPOCH');
+const pEnd = js.indexOf('function renderPodium');
+const snippet = js.slice(pStart, pEnd);
+const els = { participationCard: { style: {}, innerHTML: '' }, participationBody: { style: {}, innerHTML: '' } };
+const doc = { getElementById: (id) => els[id] };
+const panelScores = [
+  { game: 'verdlengjan', puzzle: 7, name: 'a', score: 80 },
+  { game: 'verdlengjan', puzzle: 7, name: 'b', score: 90 },
+  { game: 'verdlengjan', puzzle: 6, name: 'a', score: 70 },
+  { game: 'sizeitup', puzzle: 7, name: 'c', score: 300 }
+];
+const runPanel = (user, traffic) => new Function('document', 'state', snippet + '\nrenderParticipation();')(doc, { game: 'verdlengjan', currentUser: user, scores: panelScores, traffic });
+runPanel({ name: 'bjarki' }, [{ puzzle: 7, visits: 5, completes: 3 }, { puzzle: 6, visits: 2, completes: 2 }]);
+check('participation: visible when logged in', els.participationCard.style.display === 'block');
+check('participation: traffic visits + completes per day', els.participationBody.innerHTML.includes('5 heimsóknir · 3 kláruðu') && els.participationBody.innerHTML.includes('2 heimsóknir · 2 kláruðu'));
+check('participation: traffic totals', els.participationBody.innerHTML.includes('7 heimsóknir · 5 kláruðu'));
+check('participation: puzzle date label', els.participationBody.innerHTML.includes('#7 · 24.11.'));
+runPanel({ name: 'bjarki' }, null);
+check('participation: fallback counts submissions', els.participationBody.innerHTML.includes('2 leikmenn') && els.participationBody.innerHTML.includes('3 skráð skor'));
+runPanel(null);
+check('participation: hidden when logged out', els.participationCard.style.display === 'none');
+const verdDate = new Function(snippet + '\nreturn verdPuzzleDate;')();
+check('participation: epoch matches game (#1 = 18.11.)', verdDate(1) === '18.11.');
+
 console.log(failures === 0 ? '\nAll checks passed.' : `\n${failures} check(s) failed.`);
 process.exit(failures === 0 ? 0 : 1);

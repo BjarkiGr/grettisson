@@ -71,6 +71,16 @@ node tools/fetch-products.mjs --api
 
 The token stays on your machine — it is never written into the site.
 
+## Anonymous traffic counting
+
+`src/telemetry.js` sends one `visit` per browser per day (on boot) and one
+`complete` per daily finish to the same Supabase project as Daily Games Stats
+(`verd_track`). No personal data — just a random client id in localStorage.
+The leaderboard's "Þátttaka" panel shows the totals via `verd_traffic`.
+Requires running `daily-games-stats/supabase-migration-verdlengjan-traffic.sql`
+once; until then (and on any network failure) telemetry fails silently and
+the game is unaffected.
+
 ## Tests
 
 - `node test/smoke.js` — scoring bands, seeded daily-five determinism, cm math,

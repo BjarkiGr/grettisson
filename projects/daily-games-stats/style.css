@@ -1,4 +1,14 @@
-﻿:root {
+﻿/* Verðlengjan participation (logged-in users, 🥐 tab) */
+.participation-title { font-weight: 800; font-size: 1rem; margin-bottom: 12px; }
+.participation-summary { color: var(--muted); font-size: 0.85rem; margin-bottom: 12px; }
+.participation-row { display: flex; align-items: center; gap: 12px; padding: 6px 0; border-bottom: 1px solid rgba(42, 57, 92, 0.5); }
+.participation-row:last-child { border-bottom: none; }
+.p-day { min-width: 110px; font-size: 0.85rem; color: var(--muted); font-variant-numeric: tabular-nums; }
+.p-bar { flex: 1; height: 10px; background: var(--surface-2); border-radius: 999px; overflow: hidden; }
+.p-bar-fill { height: 100%; background: linear-gradient(90deg, #f59e0b, #fbbf24); border-radius: 999px; }
+.p-count { min-width: 170px; text-align: right; font-size: 0.8rem; font-weight: 700; white-space: nowrap; }
+
+:root {
   --bg: #0b1120;
   --surface: #131c31;
   --surface-2: #1c2742;

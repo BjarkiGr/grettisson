@@ -48,6 +48,7 @@ async function api(fn, args = {}) {
 let state = {
   users: [],
   scores: [],
+  traffic: null,
   mode: 'daily',
   authMode: 'login',
   game: 'sizeitup',
@@ -72,6 +73,9 @@ async function fetchData() {
     const json = await api('get_data');
     state.users = json.users || [];
     state.scores = json.scores || [];
+    // Heildarumferð Verðlengjan (nafnlaus talning í leiknum). Ef migration
+    // hefur ekki verið keyrt ennþá fellur spjaldið til baka á skráð skor.
+    try { state.traffic = await api('verd_traffic'); } catch (e) { state.traffic = null; }
     populatePuzzleDropdown();
     renderAll();
   } catch (e) {
@@ -190,7 +194,71 @@ function renderAll() {
   const list = getStandings();
   renderPodium(list);
   renderTable(list);
+  renderParticipation();
 }
+
+// Verðlengjan þraut #1 var 18.11.2026 (sama EPOCH og í leiknum sjálfum).
+const VERD_EPOCH = Date.UTC(2026, 10, 18);
+function verdPuzzleDate(puzzle) {
+  const d = new Date(VERD_EPOCH + (puzzle - 1) * 86400000);
+  return String(d.getUTCDate()).padStart(2, '0') + '.' + String(d.getUTCMonth() + 1).padStart(2, '0') + '.';
+}
+
+// Þátttaka í Verðlengjunni: HEILDARUMFERÐ — hversu margir heimsóttu leikinn
+// og kláruðu daglega þraut á hverjum degi (nafnlaus talning í leiknum sjálfum,
+// verd_traffic). Sýnist aðeins innskráðum notendum á Verðlengjan-flipanum.
+// Ef traffic-migration hefur ekki verið keyrt: fallback á skráð skor.
+function renderParticipation() {
+  const card = document.getElementById('participationCard');
+  const show = state.game === 'verdlengjan' && !!state.currentUser;
+  card.style.display = show ? 'block' : 'none';
+  if (!show) return;
+  const body = document.getElementById('participationBody');
+
+  const days = Array.isArray(state.traffic) ? state.traffic : [];
+  if (days.length) {
+    const max = Math.max(...days.map(d => Number(d.visits) || 0), 1);
+    const totalV = days.reduce((s, d) => s + (Number(d.visits) || 0), 0);
+    const totalC = days.reduce((s, d) => s + (Number(d.completes) || 0), 0);
+    body.innerHTML = `
+      <div class="participation-summary">${days.length} ${days.length === 1 ? 'dagur' : 'dagar'} · ${totalV} heimsóknir · ${totalC} kláruðu</div>
+      ${days.map(d => {
+        const v = Number(d.visits) || 0, c = Number(d.completes) || 0;
+        return `
+        <div class="participation-row">
+          <span class="p-day">#${d.puzzle} · ${verdPuzzleDate(Number(d.puzzle))}</span>
+          <div class="p-bar"><div class="p-bar-fill" style="width:${Math.max(4, Math.round(v / max * 100))}%"></div></div>
+          <span class="p-count">${v} ${v === 1 ? 'heimsókn' : 'heimsóknir'} · ${c} kláruðu</span>
+        </div>`;
+      }).join('')}
+    `;
+    return;
+  }
+
+  // Fallback: skráð skor á stigatöfluna (þar til traffic-migration er keyrt).
+  const counts = {};
+  state.scores
+    .filter(s => (s.game || 'sizeitup') === 'verdlengjan')
+    .forEach(s => { const p = Number(s.puzzle); counts[p] = (counts[p] || 0) + 1; });
+  const puzzles = Object.keys(counts).map(Number).sort((a, b) => b - a);
+  if (!puzzles.length) {
+    body.innerHTML = '<div class="empty-state">Engin Verðlengjan-gögn ennþá.</div>';
+    return;
+  }
+  const max = Math.max(...puzzles.map(p => counts[p]));
+  const total = puzzles.reduce((s, p) => s + counts[p], 0);
+  body.innerHTML = `
+    <div class="participation-summary">${puzzles.length} ${puzzles.length === 1 ? 'dagur' : 'dagar'} · ${total} skráð skor — heildarumferð birtist þegar traffic-migration er keyrt</div>
+    ${puzzles.map(p => `
+      <div class="participation-row">
+        <span class="p-day">#${p} · ${verdPuzzleDate(p)}</span>
+        <div class="p-bar"><div class="p-bar-fill" style="width:${Math.max(4, Math.round(counts[p] / max * 100))}%"></div></div>
+        <span class="p-count">${counts[p]} ${counts[p] === 1 ? 'leikmaður' : 'leikmenn'}</span>
+      </div>
+    `).join('')}
+  `;
+}
+
 
 function renderPodium(list) {
   const container = document.getElementById('podiumContainer');
@@ -336,6 +404,7 @@ function logout() {
   state.currentUser = null;
   localStorage.removeItem('sizeitup_session');
   renderAuthHeader();
+  renderParticipation(); // felur þátttökuspjaldið við útskráningu
 }
 
 // Score Parsing — leikurinn greinist sjálfkrafa úr Share-textanum
