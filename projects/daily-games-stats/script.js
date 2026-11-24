@@ -85,6 +85,7 @@ async function fetchData() {
 
 function renderAuthHeader() {
   const area = document.getElementById('authArea');
+  document.getElementById('feedbackTab').style.display = isAdmin() ? '' : 'none';
   if (state.currentUser) {
     area.innerHTML = `
       <div class="user-badge">
@@ -650,6 +651,87 @@ async function adminResetPin(target) {
       p_new_pin: newPin.trim()
     });
     alert(`PIN fyrir ${target} endurstillt.`);
+  } catch (e) {
+    alert(e.message || 'Villa kom upp.');
+  }
+}
+
+// Ábendingar: allir geta sent inn tillögu; aðeins stjórnendur sjá þær.
+// Öryggi: þjónninn staðfestir PIN + is_admin fyrir lestur/eyðingu,
+// parameterized SQL í föllunum, og allur texti HTML-escapaður hér við birtingu.
+function openFeedbackModal() {
+  document.getElementById('feedbackInput').value = '';
+  const msg = document.getElementById('feedbackMsg');
+  msg.className = 'msg';
+  msg.textContent = state.currentUser
+    ? `Sendist sem ${state.currentUser.name}.`
+    : 'Þú getur sent nafnlaust — eða skráð þig inn fyrst.';
+  document.getElementById('feedbackModal').classList.add('open');
+  document.getElementById('feedbackInput').focus();
+}
+
+async function submitFeedback() {
+  const input = document.getElementById('feedbackInput');
+  const msg = document.getElementById('feedbackMsg');
+  const text = input.value.trim();
+  if (!text || text.length > 2000) {
+    msg.className = 'msg err';
+    msg.textContent = 'Ábending verður að vera 1–2000 stafir.';
+    return;
+  }
+  try {
+    await api('submit_feedback', {
+      p_name: state.currentUser ? state.currentUser.name : '',
+      p_message: text
+    });
+    input.value = '';
+    msg.className = 'msg';
+    msg.textContent = 'Takk! Ábendingin er komin til stjórnenda. 💡';
+  } catch (e) {
+    msg.className = 'msg err';
+    msg.textContent = e.message || 'Tókst ekki að senda ábendingu.';
+  }
+}
+
+// Admin-flipi: sýnir ábendingar (þjónninn staðfestir PIN + is_admin).
+async function openFeedbackPanel() {
+  if (!isAdmin()) return;
+  const body = document.getElementById('feedbackPanelBody');
+  body.innerHTML = '<div class="empty-state">Sæki ábendingar…</div>';
+  document.getElementById('feedbackPanelModal').classList.add('open');
+  try {
+    const list = await api('get_feedback', {
+      p_name: state.currentUser.name,
+      p_pin: state.currentUser.pin
+    });
+    if (!Array.isArray(list) || !list.length) {
+      body.innerHTML = '<div class="empty-state">Engar ábendingar ennþá. 💤</div>';
+      return;
+    }
+    body.innerHTML = list.map(f => `
+      <div class="feedback-item">
+        <div class="feedback-meta">
+          <span>${f.name ? esc(f.name) : 'Nafnlaus'} · ${esc(f.timestamp)}</span>
+          <button class="admin-del" onclick="adminDeleteFeedback(${Number(f.id)})" title="Eyða ábendingu">🗑</button>
+        </div>
+        <div class="feedback-text">${esc(f.message)}</div>
+      </div>
+    `).join('');
+  } catch (e) {
+    body.innerHTML = `<div class="empty-state">${esc(e.message || 'Villa kom upp.')}</div>`;
+  }
+}
+
+async function adminDeleteFeedback(id) {
+  if (!isAdmin()) return;
+  if (!confirm('Eyða þessari ábendingu?')) return;
+  try {
+    await api('admin_delete_feedback', {
+      p_name: state.currentUser.name,
+      p_pin: state.currentUser.pin,
+      p_id: id
+    });
+    await openFeedbackPanel();
   } catch (e) {
     alert(e.message || 'Villa kom upp.');
   }

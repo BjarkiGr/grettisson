@@ -38,6 +38,7 @@
       <div class="tabs">
         <button class="tab active" id="tabDaily" onclick="switchMode('daily')">Dagleg staða</button>
         <button class="tab" id="tabAverage" onclick="switchMode('average')">Heildarmeðaltal</button>
+        <button class="tab" id="feedbackTab" onclick="openFeedbackPanel()" style="display:none;">💡 Ábendingar</button>
       </div>
 
       <div id="puzzleFilterWrap">
@@ -61,6 +62,11 @@
       <div class="participation-title">🥐 Þátttaka í Verðlengjunni</div>
       <div id="participationBody"></div>
     </section>
+
+    <!-- Feedback button (all visitors) -->
+    <footer class="feedback-footer">
+      <button class="btn-secondary" onclick="openFeedbackModal()">💡 Senda inn ábendingu</button>
+    </footer>
   </div>
 
   <!-- Auth Modal (Login / Register with 4-digit PIN) -->
@@ -120,6 +126,34 @@
       <div id="playerHistoryBody"></div>
     </div>
   </div>
+
+  <!-- Feedback Modal (all visitors) -->
+  <div class="modal-backdrop" id="feedbackModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h2>💡 Senda inn ábendingu</h2>
+        <button class="close-btn" onclick="closeModals()">✕</button>
+      </div>
+      <div class="field">
+        <label for="feedbackInput">Tillaga, hugmynd eða villutilkynning</label>
+        <textarea id="feedbackInput" maxlength="2000" placeholder="T.d. „Það væri sniðugt að…“"></textarea>
+      </div>
+      <button class="btn-primary" style="width:100%; justify-content:center;" onclick="submitFeedback()">Senda ábendingu</button>
+      <div class="msg" id="feedbackMsg"></div>
+    </div>
+  </div>
+
+  <!-- Feedback Panel (admins only) -->
+  <div class="modal-backdrop" id="feedbackPanelModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h2>💡 Ábendingar</h2>
+        <button class="close-btn" onclick="closeModals()">✕</button>
+      </div>
+      <div id="feedbackPanelBody"></div>
+    </div>
+  </div>
+
 
   <script src="script.js"></script>
 </body>

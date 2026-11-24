@@ -21,6 +21,8 @@ with no server and no database to manage.
 - `supabase-migration-krillion-max.sql` — sets Krillion's max score to 700
 - `supabase-migration-verdlengjan-traffic.sql` — anonymous Verðlengjan traffic
   counting (`verd_track` / `verd_traffic`) for the participation panel
+- `supabase-migration-feedback.sql` — feedback box ("Senda inn ábendingu")
+  and the admin-only "💡 Ábendingar" tab
 - `supabase-migration-admin.sql` — makes Bjarki admin + adds admin functions
 - `test/smoke.mjs` — syntax, wiring and share-text parser checks (`node test/smoke.mjs`)
 
@@ -90,6 +92,20 @@ To make someone else admin, run in the SQL Editor:
 ```sql
 update players set is_admin = true where lower(name) = 'nafn';
 ```
+
+## Feedback (ábendingar)
+
+Anyone can click **"💡 Senda inn ábendingu"** at the bottom of the page and
+send a suggestion (anonymously, or under their logged-in name). Admins see a
+**"💡 Ábendingar"** tab next to the view modes with all feedback (newest
+first) and a 🗑 delete button per item. Run
+`supabase-migration-feedback.sql` once to enable it.
+
+Security: parameterized plpgsql only (no SQL string concatenation — injection
+safe), RLS blocks direct table access, reading/deleting verifies PIN +
+`is_admin` server-side, messages are limited to 1–2000 chars with casual rate
+limits (3 per name/hour, 30 total/hour), and all text is HTML-escaped when
+rendered (XSS safe).
 
 ## Security notes
 

@@ -126,5 +126,18 @@ check('participation: hidden when logged out', els.participationCard.style.displ
 const verdDate = new Function(snippet + '\nreturn verdPuzzleDate;')();
 check('participation: epoch matches game (#1 = 18.11.)', verdDate(1) === '18.11.');
 
+// 6. Feedback (ábendingar): security wiring.
+const fbSql = readFileSync(path.join(dir, 'supabase-migration-feedback.sql'), 'utf8');
+check('feedback: parameterized insert (no SQL concat)', fbSql.includes('insert into feedback (name, message) values (v_name, v_msg)'));
+check('feedback: no dynamic SQL (execute/format)', !/execute\s+(format|'|"|v_)/i.test(fbSql));
+check('feedback: admin read verifies PIN + is_admin', fbSql.includes('get_feedback') && fbSql.includes('not v_user.is_admin'));
+check('feedback: message length constrained server-side', fbSql.includes('between 1 and 2000'));
+check('feedback: rate limits present', fbSql.includes("interval '1 hour'"));
+check('feedback: RLS enabled', fbSql.includes('alter table public.feedback enable row level security'));
+check('feedback: rendered messages are HTML-escaped', js.includes('${esc(f.message)}'));
+check('feedback: delete id is numeric-only in onclick', js.includes('adminDeleteFeedback(${Number(f.id)})'));
+check('feedback: submitFeedback defined', js.includes('function submitFeedback('));
+check('feedback: adminDeleteFeedback defined', js.includes('function adminDeleteFeedback('));
+
 console.log(failures === 0 ? '\nAll checks passed.' : `\n${failures} check(s) failed.`);
 process.exit(failures === 0 ? 0 : 1);
