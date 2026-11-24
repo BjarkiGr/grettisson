@@ -17,7 +17,7 @@ const read = (p) => readFileSync(p, "utf8").replace(/^\uFEFF/, "");
 
 const { parseFeed, decodeEntities, stripHtml } = await imp(SHARED, "rss.ts");
 const { normalizeUrl, contentHash } = await imp(SHARED, "normalize.ts");
-const { classifyArticle } = await imp(SHARED, "classify.ts");
+const { classifyArticle, detectLanguage } = await imp(SHARED, "classify.ts");
 
 console.log("[1] RSS 2.0 parsing");
 const rss2 = '<rss><channel><title>Feed</title>' +
@@ -88,6 +88,22 @@ check("irrelevant content rejected", irr.relevant === false && irr.category === 
 const bodyHit = classifyArticle("Weekly digest", "The government announced new sanctions today.");
 check("content-only hit works", bodyHit.relevant === true && bodyHit.category === "sanctions");
 
+console.log("[4b] Icelandic classification + language detection");
+const isCases = [
+  ["Jarðskjálfti á Reykjanesi", "natural_disasters", "IS"],
+  ["Jarðskjálfta mældist á Suðurlandi", "natural_disasters", null],
+  ["Verkfall hjá flugvirkjum", "political_instability", null],
+  ["Verðbólga eykst á Íslandi", "economic_instability", "IS"],
+  ["Eldgos hófst á Reykjanesskaga", "natural_disasters", null],
+  ["Nýr samningur undirritaður í Reykjavík", "diplomatic_developments", "IS"],
+];
+for (const [title, cat, country] of isCases) {
+  const r = classifyArticle(title, "");
+  check("IS classify: " + title.slice(0, 32), r.relevant && r.category === cat && (country === null || r.primaryCountry === country), JSON.stringify({ cat: r.category, country: r.primaryCountry }));
+}
+check("detectLanguage is", detectLanguage("Jarðskjálfti", "þetta er prófun") === "is");
+check("detectLanguage en", detectLanguage("Hello world", "plain english text") === "en");
+check("English rules unaffected", classifyArticle("New sanctions target Russian oil exports", "").category === "sanctions");
 console.log("[5] function structure");
 const FN = path.join(ROOT, "supabase", "functions");
 const ing = read(path.join(FN, "ingest-sources", "index.ts"));

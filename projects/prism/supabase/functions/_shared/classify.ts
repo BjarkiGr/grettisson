@@ -31,6 +31,26 @@ const CATEGORY_RULES: Array<{ category: EventCategory; keywords: string[] }> = [
   { category: "cybersecurity_incidents", keywords: ["cyberattack", "cyber attack", "ransomware", "hacker", "data breach", "malware", "hack"] },
 ];
 
+
+// Icelandic keyword stems (RÚV and other Icelandic feeds). Prefix matching
+// handles inflections. Documented MVP coverage; AI analysis refines later.
+const IS_KEYWORDS: Partial<Record<EventCategory, string[]>> = {
+  military_conflict: ["árás", "sprengja", "hernaður"],
+  political_instability: ["verkfall", "mótmæl", "kosning", "þingrofi", "stjórnarkreppa"],
+  trade_restrictions: ["útflutningsbann", "innflutningsbann"],
+  sanctions: ["viðskiptabann"],
+  tariffs: ["tollar", "tollur"],
+  natural_disasters: ["jarðskjálft", "eldgos", "snjóflóð", "flóð", "óveður", "eldfjall"],
+  energy_disruptions: ["rafmagnsleysi", "hitaveita", "orkuskortur"],
+  shipping_disruptions: ["höfn", "siglingar", "flutningaskip", "vöruflutningar"],
+  economic_instability: ["verðbólg", "vextir", "gjaldþrot", "efnahagskreppa"],
+  infrastructure_disruptions: ["samgöngurof", "vegbilun"],
+  diplomatic_developments: ["samningur", "viðræður", "sendiherra", "utanríkisráðherra"],
+  cybersecurity_incidents: ["netárás", "tölvuárás", "hakkari", "gagnaleki"],
+};
+for (const rule of CATEGORY_RULES) {
+  rule.keywords.push(...(IS_KEYWORDS[rule.category] ?? []));
+}
 const COUNTRY_NAMES: Record<string, string> = {
   "united states": "US", "usa": "US", "u.s.": "US", "american": "US",
   "china": "CN", "chinese": "CN", "beijing": "CN",
@@ -65,6 +85,7 @@ const COUNTRY_NAMES: Record<string, string> = {
   "angola": "AO", "mozambique": "MZ", "zimbabwe": "ZW", "zambia": "ZM",
   "uganda": "UG", "rwanda": "RW", "tanzania": "TZ", "nepal": "NP",
   "mongolia": "MN", "cambodia": "KH", "laos": "LA", "brunei": "BN",
+  "iceland": "IS", "icelandic": "IS", "ísland": "IS", "íslensk": "IS", "reykjavík": "IS", "reykjavik": "IS", "reykjanes": "IS", "reykjanesi": "IS", "reykjanesskaga": "IS", "reykjanesskagi": "IS",
 };
 
 const REGION_BY_COUNTRY: Record<string, string> = {
@@ -93,12 +114,22 @@ const REGION_BY_COUNTRY: Record<string, string> = {
   ML: "Africa", NE: "Africa", TD: "Africa", CM: "Africa", CD: "Africa",
   AO: "Africa", MZ: "Africa", ZW: "Africa", ZM: "Africa", UG: "Africa",
   RW: "Africa", TZ: "Africa", ZA: "Africa",
-  AU: "Oceania", NZ: "Oceania", KZ: "Central Asia",
+  AU: "Oceania", NZ: "Oceania", KZ: "Central Asia", IS: "Europe",
 };
 
 function countHits(text: string, keyword: string): number {
-  const re = new RegExp("\\b" + keyword.replace(/[.*+?^${}()|[\]\\]/g, "\\$&") + "(?:e?s)?\\b", "gi");
+  const escaped = keyword.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  // Non-ASCII (e.g. Icelandic) keywords use Unicode-aware boundaries and
+  // prefix matching so inflected forms (jarðskjálfta vs jarðskjálfti) hit.
+  const re = /[^\x00-\x7F]/.test(keyword)
+    ? new RegExp("(?:^|[^\\p{L}\\p{N}])" + escaped + "[\\p{L}\\p{N}]*", "giu")
+    : new RegExp("\\b" + escaped + "(?:e?s)?\\b", "gi");
   return (text.match(re) ?? []).length;
+}
+
+/** Detects Icelandic vs English from characteristic characters. */
+export function detectLanguage(title: string, content: string): string {
+  return /[ðþæöáéíóúý]/i.test((title ?? "") + " " + (content ?? "")) ? "is" : "en";
 }
 
 /** Classifies an article with transparent keyword rules. */

@@ -8,6 +8,7 @@ import { handleCorsPreflight, jsonResponse } from "../_shared/cors.ts";
 import { createServiceClient } from "../_shared/database.ts";
 import { parseFeed } from "../_shared/rss.ts";
 import { normalizeUrl, contentHash } from "../_shared/normalize.ts";
+import { detectLanguage } from "../_shared/classify.ts";
 
 const MAX_SOURCES = 8;
 const MAX_ITEMS_PER_FEED = 25;
@@ -85,7 +86,7 @@ Deno.serve(async (req: Request) => {
               published_at: item.publishedAt,
               content: item.description || null,
               content_hash: hash,
-              language: "en",
+              language: detectLanguage(item.title, item.description),
               processing_status: "pending",
             }, { onConflict: "content_hash", ignoreDuplicates: true })
             .select("id");

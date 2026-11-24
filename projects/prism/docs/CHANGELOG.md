@@ -1,5 +1,21 @@
 ﻿# PRISM — Changelog
 
+## [Unreleased] — Icelandic sources (post-Phase 7)
+
+### Added
+- Migration 20261127000000_icelandic_sources.sql: RÚV (Icelandic-language
+  national broadcaster) + Grapevine (English Iceland coverage). Both feeds
+  verified live and parseable (mbl.is 404 and Iceland Review 403 excluded).
+- classify.ts: Icelandic keyword stems with Unicode-aware, inflection-aware
+  prefix matching; Iceland place-name detection (incl. dative forms);
+  detectLanguage() (is/en) used by ingest-sources.
+- 9 new tests (Icelandic classification, inflections, language detection,
+  English rules unaffected).
+
+### Changed
+- ingest-sources stores detected language instead of hardcoded 'en'.
+- Phases 0-7 committed and pushed to GitHub (b3610ef).
+
 ## [Unreleased] — Phase 7: Automation
 
 ### Added
