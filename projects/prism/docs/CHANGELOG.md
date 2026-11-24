@@ -1,5 +1,27 @@
 ﻿# PRISM — Changelog
 
+## [Unreleased] — Admin-managed users (roles)
+
+### Added
+- Migration 20261128000000_user_roles.sql: profiles.role (admin/viewer,
+  default viewer); first auth user becomes admin. SELF-PROMOTION BLOCKED:
+  profiles update privilege narrowed to column-level (display_name,
+  preferences only) — role changes are service-role-only.
+- manage-users Edge Function (deployed): caller JWT verified, server-side
+  admin role check, list/create/delete via Auth admin API. Created users
+  are always viewers; no self-delete; no admin-delete; email confirmed;
+  password minimum 8. Sign-ups remain disabled.
+- Settings: admin-only Users panel (list, add viewer, remove). Viewers
+  never see it; the server enforces the rule regardless of UI.
+- test/user-management-smoke.mjs (19 checks).
+
+### Verified
+- 11 suites, 0 failures. Function deployed.
+
+### Pending (manual)
+- Apply migration 0005 in SQL Editor; browser test: admin adds a viewer,
+  viewer signs in and sees no Users panel.
+
 ## [Unreleased] — Supply Chain Map (post-MVP feature)
 
 ### Added

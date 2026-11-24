@@ -6,7 +6,7 @@
 import { isConfigured } from "./config.js";
 import { getClient } from "./supabase.js";
 import { getSession, signOut } from "./auth.js";
-import { escapeHtml } from "./utils.js";
+import { escapeHtml, formatDate } from "./utils.js";
 import { loadingState, errorState } from "./components.js";
 
 const READ_TABLES = ["sources", "articles", "events", "analyses", "risk_scores", "watchlists"];
@@ -57,4 +57,74 @@ export async function init() {
       catch (err) { results.innerHTML = errorState(err?.message ?? "Sign-out failed."); }
     });
   }
+  await initUserManagement();
+}
+
+
+/** Admin-only user management via the manage-users Edge Function. */
+async function initUserManagement() {
+  const section = document.getElementById("users-section");
+  const root = document.getElementById("users-root");
+  if (!section || !root) return;
+  const session = await getSession();
+  if (!session) return;
+  const sb = await getClient();
+  const { data: profile } = await sb.from("profiles").select("role").eq("id", session.user.id).single();
+  if (profile?.role !== "admin") return; // viewers never see this panel
+  section.hidden = false;
+
+  const call = async (body) => {
+    const { data, error } = await sb.functions.invoke("manage-users", { body });
+    if (error) {
+      let msg = error.message;
+      try {
+        if (error.context && typeof error.context.json === "function") {
+          const j = await error.context.json();
+          msg = j.error ?? msg;
+        }
+      } catch { /* keep original message */ }
+      throw new Error(msg);
+    }
+    if (data?.error) throw new Error(data.error);
+    return data;
+  };
+
+  const render = async () => {
+    root.innerHTML = loadingState("Loading users\u2026");
+    try {
+      const { users } = await call({ action: "list" });
+      root.innerHTML =
+        '<div class="filter-bar">' +
+          '<label class="filter-field"><span class="muted">Email</span><input id="nu-email" type="email" placeholder="viewer@example.com" autocomplete="off"></label>' +
+          '<label class="filter-field"><span class="muted">Password (min 8 chars)</span><input id="nu-password" type="password" autocomplete="new-password"></label>' +
+          '<button id="nu-add" class="nav-toggle" style="display:inline-block">Add viewer</button>' +
+        "</div>" +
+        '<p id="nu-status" class="muted" role="status"></p>' +
+        '<table class="data-table"><thead><tr><th>Email</th><th>Role</th><th>Created</th><th>Last sign-in</th><th></th></tr></thead><tbody>' +
+        users.map((u) =>
+          '<tr><td>' + escapeHtml(u.email) + (u.is_self ? " (you)" : "") + "</td><td>" + escapeHtml(u.role) + "</td><td>" + formatDate(u.created_at) + "</td><td>" + formatDate(u.last_sign_in_at) + "</td><td>" +
+          (u.is_self || u.role === "admin" ? "" : '<button class="nav-toggle u-del" data-id="' + escapeHtml(u.id) + '" style="display:inline-block">Remove</button>') +
+          "</td></tr>").join("") +
+        "</tbody></table>" +
+        '<p class="muted">New users are viewers: they can read intelligence and manage their own watchlists, but cannot add or remove users. Share the password with them securely; they sign in on the login page.</p>';
+      const status = root.querySelector("#nu-status");
+      root.querySelector("#nu-add").addEventListener("click", async () => {
+        const email = root.querySelector("#nu-email").value.trim();
+        const password = root.querySelector("#nu-password").value;
+        status.textContent = "Creating\u2026";
+        try { await call({ action: "create", email, password }); await render(); }
+        catch (e) { status.textContent = "Error: " + e.message; }
+      });
+      for (const btn of root.querySelectorAll(".u-del")) {
+        btn.addEventListener("click", async () => {
+          status.textContent = "Removing\u2026";
+          try { await call({ action: "delete", user_id: btn.dataset.id }); await render(); }
+          catch (e) { status.textContent = "Error: " + e.message; }
+        });
+      }
+    } catch (e) {
+      root.innerHTML = errorState("User management unavailable: " + e.message);
+    }
+  };
+  await render();
 }

@@ -11,7 +11,7 @@ Migration: `supabase/migrations/20261124000000_initial_schema.sql`
 
 | Table | Purpose | Key constraints (planned) |
 |---|---|---|
-| profiles | User info/preferences (single admin MVP) | FK -> auth.users; private via RLS |
+| profiles | User info/preferences + role (admin/viewer) | FK -> auth.users; owner-only RLS; column-level update grant blocks role self-promotion |
 | sources | Registered public information sources | unique(feed_url); active flag |
 | articles | Collected article metadata + available text | unique(content_hash); index on (source_id, published_at); processing_status |
 | events | Identified developments (not raw articles) | category enum (12 values); index on (primary_country, region) |
