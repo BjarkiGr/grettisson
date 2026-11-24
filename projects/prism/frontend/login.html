@@ -1,0 +1,54 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PRISM — Sign in</title>
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/layout.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/dashboard.css">
+  <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body class="app-shell" data-page="login">
+  <a class="skip-link" href="#main">Skip to content</a>
+  <header class="app-header">
+    <div class="brand">PRISM<span class="brand-sub">Political Risk &amp; Impact Scoring Model</span></div>
+    <button id="nav-toggle" class="nav-toggle" aria-expanded="false" aria-controls="app-nav">Menu</button>
+    <nav id="app-nav" class="app-nav" aria-label="Main navigation">
+      <a href="index.html">Overview</a>
+      <a href="index.html#intelligence-feed">Intelligence Feed</a>
+      <a href="events.html">Geopolitical Events</a>
+      <a href="regions.html">Regional Risk</a>
+      <a href="commodities.html">Commodities</a>
+      <a href="index.html#supply-chains">Supply Chains</a>
+      <a href="watchlists.html">Watchlists</a>
+      <a href="settings.html">Settings</a>
+    </nav>
+  </header>
+  <main id="main" class="app-main">
+    <div class="page-head"><h1>Sign in</h1></div>
+    <section class="panel auth-panel" aria-labelledby="h-auth">
+      <h2 id="h-auth">Administrator access</h2>
+      <div id="auth-signed-out">
+        <form id="login-form">
+          <label class="filter-field"><span class="muted">Email</span>
+            <input id="login-email" type="email" required autocomplete="username"></label>
+          <label class="filter-field"><span class="muted">Password</span>
+            <input id="login-password" type="password" required autocomplete="current-password"></label>
+          <p><button type="submit" id="login-submit" class="nav-toggle" style="display:inline-block">Sign in</button></p>
+          <p id="login-error" class="state error" role="alert" hidden></p>
+        </form>
+      </div>
+      <div id="auth-signed-in" hidden>
+        <p>Signed in as <strong id="auth-email"></strong>.</p>
+        <p><button id="logout-btn" class="nav-toggle" style="display:inline-block">Sign out</button>
+        <a href="index.html">Continue to overview</a></p>
+      </div>
+      <p id="auth-config-note" class="muted"></p>
+    </section>
+  </main>
+  <footer class="app-footer">PRISM v1.0 — live intelligence, authenticated access only. <a href="login.html" aria-current="page">Account</a>.</footer>
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>

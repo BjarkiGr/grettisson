@@ -1,0 +1,155 @@
+﻿/* PRISM — components.css: reusable components (Phase 1).
+   All colors come from the tokens in main.css. */
+
+.panel {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  padding: var(--space-3);
+}
+
+.notice {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-left: 3px solid var(--color-accent);
+  border-radius: var(--radius);
+  padding: var(--space-3) var(--space-4);
+  max-width: 720px;
+}
+.notice p { color: var(--color-text-muted); }
+
+.muted { color: var(--color-text-muted); }
+.state { padding: var(--space-2) 0; }
+.state.error { color: var(--risk-critical); }
+
+/* Demonstration-data markers — deliberately visible at all times. */
+.demo-banner {
+  background: #2b2410;
+  border-bottom: 1px solid var(--risk-moderate);
+  color: var(--risk-moderate);
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  padding: var(--space-2) var(--space-4);
+}
+.demo-badge {
+  display: inline-block;
+  border: 1px solid var(--risk-moderate);
+  color: var(--risk-moderate);
+  border-radius: var(--radius);
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  padding: 0 var(--space-1);
+  vertical-align: middle;
+}
+
+/* Risk badges — colors reserved for risk semantics only. */
+.risk-badge {
+  display: inline-block;
+  padding: 0 var(--space-2);
+  border-radius: var(--radius);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  color: #0b1220;
+}
+.risk-badge.minimal { background: var(--risk-minimal); }
+.risk-badge.low { background: var(--risk-low); }
+.risk-badge.moderate { background: var(--risk-moderate); }
+.risk-badge.high { background: var(--risk-high); }
+.risk-badge.critical { background: var(--risk-critical); color: var(--color-text); }
+
+.chip {
+  display: inline-block;
+  background: var(--color-bg-alt);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  color: var(--color-text-muted);
+  font-size: 0.75rem;
+  padding: 0 var(--space-2);
+}
+
+/* Event rows */
+.event-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2);
+  border-bottom: 1px solid var(--color-border);
+  color: var(--color-text);
+}
+.event-row:last-child { border-bottom: none; }
+.event-row:hover { background: var(--color-bg-alt); text-decoration: none; }
+.event-row-main { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.event-title { font-weight: 600; }
+.event-meta { font-size: 0.8rem; display: flex; flex-wrap: wrap; gap: var(--space-1); align-items: center; }
+.event-row-side { display: flex; align-items: center; gap: var(--space-2); flex-shrink: 0; }
+.event-row-side .score { font-family: var(--font-mono); font-weight: 700; }
+
+/* Intelligence feed */
+.feed-item { padding: var(--space-2) 0; border-bottom: 1px solid var(--color-border); }
+.feed-item:last-child { border-bottom: none; }
+.feed-item-head { display: flex; align-items: center; gap: var(--space-2); flex-wrap: wrap; }
+.feed-title { font-weight: 600; color: var(--color-text); }
+.feed-meta { display: flex; flex-wrap: wrap; gap: var(--space-2); align-items: center; font-size: 0.8rem; margin: 2px 0; }
+.feed-excerpt { color: var(--color-text-muted); font-size: 0.9rem; }
+.feed-links { display: flex; gap: var(--space-3); font-size: 0.85rem; }
+
+/* Filters */
+.filter-bar { display: flex; flex-wrap: wrap; gap: var(--space-2); align-items: end; margin-bottom: var(--space-2); }
+.filter-field { display: flex; flex-direction: column; gap: 2px; font-size: 0.8rem; }
+.filter-field.grow { flex: 1 1 220px; }
+.filter-field input, .filter-field select {
+  background: var(--color-bg-alt);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  color: var(--color-text);
+  padding: var(--space-1) var(--space-2);
+  font: inherit;
+}
+
+/* Tables */
+.data-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+.data-table th, .data-table td { text-align: left; padding: var(--space-1) var(--space-2); border-bottom: 1px solid var(--color-border); }
+.data-table th { color: var(--color-text-muted); font-weight: 600; }
+
+/* Risk changes */
+.change-row { display: flex; align-items: center; gap: var(--space-2); padding: var(--space-1) 0; border-bottom: 1px solid var(--color-border); font-size: 0.9rem; }
+.change-row:last-child { border-bottom: none; }
+.change-row a { flex: 1; min-width: 0; }
+.change-delta { font-family: var(--font-mono); font-weight: 700; }
+.change-delta.up { color: var(--risk-critical); }
+.change-delta.down { color: var(--risk-minimal); }
+.change-delta.flat { color: var(--color-text-muted); }
+
+/* Region summaries */
+.region-row { display: flex; align-items: center; gap: var(--space-2); padding: var(--space-2) 0; border-bottom: 1px solid var(--color-border); flex-wrap: wrap; }
+.region-row:last-child { border-bottom: none; }
+.region-name { font-weight: 600; flex: 1; min-width: 110px; }
+
+/* Risk breakdown */
+.dim-row { display: grid; grid-template-columns: 160px 1fr 40px; gap: var(--space-2); align-items: center; padding: 3px 0; font-size: 0.85rem; }
+.dim-track { background: var(--color-bg-alt); border-radius: var(--radius); height: 8px; overflow: hidden; }
+.dim-fill { display: block; height: 100%; background: var(--color-accent); }
+.dim-value { font-family: var(--font-mono); text-align: right; }
+.overall-score { font-size: 2rem; font-weight: 700; font-family: var(--font-mono); }
+.overall-score .muted { font-size: 0.9rem; font-weight: 400; margin-left: var(--space-2); }
+
+/* Timeline */
+.timeline { list-style: none; margin: 0; padding: 0; }
+.timeline li { display: flex; gap: var(--space-2); padding: var(--space-1) 0; border-left: 2px solid var(--color-border); padding-left: var(--space-2); font-size: 0.9rem; }
+.timeline-date { font-family: var(--font-mono); color: var(--color-text-muted); flex-shrink: 0; }
+
+/* Mobile navigation toggle (hidden on desktop; see responsive.css) */
+.nav-toggle {
+  display: none;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  color: var(--color-text);
+  font: inherit;
+  padding: var(--space-1) var(--space-2);
+  cursor: pointer;
+}

@@ -1,0 +1,41 @@
+﻿/* PRISM — layout.css: application shell (header, navigation, main, footer). */
+
+.app-shell { min-height: 100vh; display: flex; flex-direction: column; }
+
+.app-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-bg-alt);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.brand { font-weight: 700; letter-spacing: 0.08em; }
+.brand .brand-sub {
+  font-weight: 400;
+  letter-spacing: normal;
+  color: var(--color-text-muted);
+  font-size: 0.8rem;
+  margin-left: var(--space-2);
+}
+
+.app-nav { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+.app-nav a {
+  color: var(--color-text-muted);
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius);
+  font-size: 0.9rem;
+}
+.app-nav a:hover { color: var(--color-text); text-decoration: none; }
+.app-nav a[aria-current="page"] { color: var(--color-text); background: var(--color-surface); }
+
+.app-main { flex: 1; width: 100%; max-width: 1280px; margin: 0 auto; padding: var(--space-4); }
+
+.app-footer {
+  padding: var(--space-3) var(--space-4);
+  border-top: 1px solid var(--color-border);
+  color: var(--color-text-muted);
+  font-size: 0.8rem;
+}

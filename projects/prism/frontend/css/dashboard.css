@@ -1,0 +1,60 @@
+﻿/* PRISM — dashboard.css: page layouts for the Phase 1 interface. */
+
+.page-head { margin-bottom: var(--space-3); }
+.page-head h1 { margin-bottom: var(--space-1); }
+
+/* Overview */
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: var(--space-2);
+  margin-bottom: var(--space-3);
+}
+.stat-card { padding: var(--space-2) var(--space-3); }
+.stat-label { color: var(--color-text-muted); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.06em; }
+.stat-value { font-size: 1.5rem; font-weight: 700; font-family: var(--font-mono); }
+.stat-sub { font-size: 0.75rem; }
+
+.dash-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-3);
+  margin-bottom: var(--space-3);
+}
+.dash-grid .panel h2, .app-main > .panel h2 { margin-bottom: var(--space-2); }
+
+.chart-box { position: relative; height: 260px; }
+.map-box { height: 420px; border-radius: var(--radius); overflow: hidden; background: var(--color-bg-alt); }
+
+.app-main > .panel { margin-bottom: var(--space-3); }
+
+/* Event detail */
+.detail-meta { display: flex; flex-wrap: wrap; gap: var(--space-2); align-items: center; margin-bottom: var(--space-1); }
+.detail-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-3);
+}
+.detail-grid h3 { margin-top: var(--space-3); }
+.detail-grid ul { margin: var(--space-1) 0; padding-left: var(--space-4); color: var(--color-text-muted); }
+
+/* Regions */
+.regions-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: var(--space-3);
+  margin-bottom: var(--space-3);
+}
+
+/* Commodities */
+.commodity-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-3);
+}
+.commodity-card h2 { margin: 0; }
+.commodity-card h3 { margin-top: var(--space-3); }
+
+/* Leaflet dark tweaks */
+.leaflet-container { background: var(--color-bg-alt); font: inherit; }
+.leaflet-popup-content-wrapper, .leaflet-popup-tip { background: var(--color-surface); color: var(--color-text); }

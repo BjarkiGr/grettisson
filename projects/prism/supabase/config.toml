@@ -1,0 +1,24 @@
+﻿# PRISM — Supabase project configuration
+# Used by the Supabase CLI. Run CLI commands from projects/prism/ (the workdir
+# containing this supabase/ folder), e.g.: supabase functions deploy health-check
+# NOTE: project_id is a local label; link the real project with: supabase link --project-ref <ref>
+
+project_id = "prism"
+
+[functions.ingest-sources]
+verify_jwt = true
+
+[functions.process-articles]
+verify_jwt = true
+
+[functions.analyze-events]
+verify_jwt = true
+
+[functions.calculate-risk]
+verify_jwt = true
+
+[functions.health-check]
+verify_jwt = true
+
+# Scheduled invocations (Phase 7) will authenticate with a key stored in
+# Supabase Vault — never committed to this repository.

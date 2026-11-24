@@ -1,0 +1,65 @@
+﻿/* PRISM — main.css
+   Design tokens and base styles. Dark-first intelligence terminal look:
+   deep navy/charcoal, muted grey secondary text, restrained risk colors. */
+
+:root {
+  --color-bg: #0b1220;
+  --color-bg-alt: #101827;
+  --color-surface: #151f31;
+  --color-border: #243147;
+  --color-text: #e6ebf2;
+  --color-text-muted: #8b98ab;
+  --color-accent: #4f8cff;
+
+  --risk-minimal: #3a8f5d;
+  --risk-low: #8aa84f;
+  --risk-moderate: #d9a441;
+  --risk-high: #d97b29;
+  --risk-critical: #c94f4f;
+
+  --font-sans: "Segoe UI", system-ui, -apple-system, Roboto, sans-serif;
+  --font-mono: "Cascadia Mono", Consolas, monospace;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 16px;
+  --space-4: 24px;
+  --radius: 6px;
+}
+
+* { box-sizing: border-box; }
+
+html { color-scheme: dark; }
+
+body {
+  margin: 0;
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-sans);
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+h1, h2, h3 { font-weight: 600; line-height: 1.25; margin: 0 0 var(--space-2); }
+h1 { font-size: 1.35rem; }
+h2 { font-size: 1.1rem; }
+h3 { font-size: 1rem; }
+
+p { margin: 0 0 var(--space-2); }
+
+a { color: var(--color-accent); text-decoration: none; }
+a:hover, a:focus-visible { text-decoration: underline; }
+
+code { font-family: var(--font-mono); font-size: 0.9em; color: var(--color-text-muted); }
+
+:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 2px; }
+
+.skip-link {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  background: var(--color-surface);
+  color: var(--color-text);
+  padding: var(--space-2) var(--space-3);
+  z-index: 100;
+}
+.skip-link:focus { left: 0; }

@@ -1,0 +1,15 @@
+﻿# PRISM — never commit secrets or local environment files
+.env
+.env.*
+!.env.example
+
+# Supabase CLI local artifacts
+supabase/.temp/
+supabase/.branches/
+
+# Node (test tooling only; frontend has no build step)
+node_modules/
+
+# OS / editor noise
+.DS_Store
+Thumbs.db
