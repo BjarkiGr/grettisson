@@ -29,6 +29,12 @@ class Game {
     if (mode === 'daily') setSeed(Daily.today()); else clearSeed();
     this.world.reset();
     this.godzilla = new Godzilla(220);
+    if (mode === 'daily') {
+      // Daily tuning: the beam burns hotter, but a roar recharges it.
+      // Unlimited keeps the entity defaults (26 drain / 7 regen / no roar recharge).
+      this.godzilla.beamDrain = 40;
+      this.godzilla.roarRecharge = 35;
+    }
     this.startX = this.godzilla.x;
     this.finishX = this.startX + DAILY_LEN;
     this.score = 0;
@@ -42,6 +48,7 @@ class Game {
     this.beamHits = 0;
     this.beamTickT = 0;
     this.wasBeaming = false;
+    this.energyFlashT = 0;
     // per-segment stats for the share grid: city, water, city, water, ...
     this.segments = Array.from({ length: 7 }, (_, i) => ({ water: i % 2 === 1, smashed: 0, kills: 0 }));
     this.cam = { x: 0, shakeT: 0, shakeDur: 1, shakeMag: 0 };
@@ -78,6 +85,7 @@ class Game {
     const inp = this.input;
     if (inp.hit('m')) this.sfx.toggleMute();
     if (this.shareCopiedT > 0) this.shareCopiedT -= dt;
+    if (this.energyFlashT > 0) this.energyFlashT -= dt;
     if (this.state === 'title') {
       if (inp.hit('enter', ' ')) {
         this.sfx.unlock();
@@ -118,12 +126,20 @@ class Game {
       ? (inp.down('arrowdown', 's') ? 1 : 0) - (inp.down('arrowup', 'w') ? 1 : 0)
       : 0;
     // roar
-    if (inp.hit('r') && g.startRoar()) {
-      this.sfx.roar();
-      this.shake(9, 0.7);
-      this.particles.popup(g.x, gy - g.height - 30, 'ROAAR!', '#ffd23e', 30);
-      for (const b of this.world.buildings) {
-        if (Math.abs(b.x + b.w / 2 - g.x) < 650) b.scare();
+    if (inp.hit('r')) {
+      const before = g.energy;
+      if (g.startRoar()) {
+        this.sfx.roar();
+        this.shake(9, 0.7);
+        this.particles.popup(g.x, gy - g.height - 30, 'ROAAR!', '#ffd23e', 30);
+        const gained = Math.round(g.energy - before);
+        if (gained > 0) {
+          this.particles.popup(g.x, gy - g.height - 64, '+' + gained + ' ENERGY', '#ff5fa2', 20);
+          this.energyFlashT = 0.6;
+        }
+        for (const b of this.world.buildings) {
+          if (Math.abs(b.x + b.w / 2 - g.x) < 650) b.scare();
+        }
       }
     }
     // attack / body slam
@@ -432,7 +448,7 @@ class Game {
     // atomic energy bar
     ctx.fillStyle = 'rgba(255,95,162,0.25)';
     ctx.fillRect(26 * u, 82 * u, 200 * u, 10 * u);
-    ctx.fillStyle = '#ff5fa2';
+    ctx.fillStyle = this.energyFlashT > 0 ? '#ffd7ef' : '#ff5fa2';
     ctx.fillRect(26 * u, 82 * u, 200 * u * clamp(g.energy / 100, 0, 1), 10 * u);
     ctx.fillStyle = 'rgba(255,255,255,0.6)';
     ctx.font = Math.round(11 * u) + 'px monospace';
@@ -471,9 +487,10 @@ class Game {
       ctx.font = '13px monospace';
       ctx.textAlign = 'center';
       const inWater = this.world.isWater(g.x);
+      const roarHint = g.roarRecharge > 0 ? 'R roar (+energy)' : 'R roar';
       let hint = inWater
-        ? 'SWIM: UP/DOWN dive & surface    F beam (near surface)    LEFT brake    dodging shells saves points'
-        : 'AUTO-WALK    LEFT brake    RIGHT sprint    UP jump    SPACE smash    F beam    R roar    M mute';
+        ? 'SWIM: UP/DOWN dive & surface    F beam (near surface)' + (g.roarRecharge > 0 ? '    ' + roarHint : '') + '    LEFT brake    dodging shells saves points'
+        : 'AUTO-WALK    LEFT brake    RIGHT sprint    UP jump    SPACE smash    F beam    ' + roarHint + '    M mute';
       if (this.sfx.muted) hint += '    [MUTED]';
       ctx.fillText(hint, w / 2, h - 16);
     }

@@ -40,7 +40,12 @@ for (const g of ['sizeitup', 'skuggabaldur', 'krillion', 'verdlengjan']) {
   check(`#gameTab-${g} in index.html`, html.includes(`id="gameTab-${g}"`));
 }
 
-// 4. Parsers against real Share texts from all three games.
+// 3b. Admin functions must exist.
+for (const fn of ['isAdmin', 'adminDeleteScore', 'adminDeletePlayer', 'adminResetPin', 'init']) {
+  check(`admin fn ${fn}() defined`, js.includes(`function ${fn}(`));
+}
+
+// 4. Parsers against real Share texts from all four games.
 const start = js.indexOf('function parseShareText');
 const end = js.indexOf('function openSubmitModal');
 const parseShareText = new Function(js.slice(start, end) + '\nreturn parseShareText;')();

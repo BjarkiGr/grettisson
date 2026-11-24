@@ -58,6 +58,10 @@ function gameMax() {
   return GAMES[state.game].max;
 }
 
+function isAdmin() {
+  return !!(state.currentUser && state.currentUser.isAdmin);
+}
+
 async function fetchData() {
   if (!isConfigured()) {
     renderAuthHeader();
@@ -81,7 +85,7 @@ function renderAuthHeader() {
     area.innerHTML = `
       <div class="user-badge">
         <span class="user-dot"></span>
-        <span>${esc(state.currentUser.name)}</span>
+        <span>${isAdmin() ? '👑 ' : ''}${esc(state.currentUser.name)}</span>
         <button style="background:transparent;color:var(--muted);padding:0 0 0 6px;font-size:0.8rem;" onclick="logout()" title="Útskrá">Út</button>
       </div>
     `;
@@ -318,7 +322,7 @@ async function handleAuth() {
   try {
     const fn = state.authMode === 'login' ? 'login_player' : 'register_player';
     const data = await api(fn, { p_name: name, p_pin: pin });
-    state.currentUser = { name: data.name, pin };
+    state.currentUser = { name: data.name, pin, isAdmin: !!data.isAdmin };
     localStorage.setItem('sizeitup_session', JSON.stringify(state.currentUser));
     closeModals();
     await fetchData();
@@ -501,15 +505,21 @@ function openPlayerHistory(playerName) {
           <div style="font-size:1.3rem;font-weight:800;">${entries.length}</div>
         </div>
       </div>
+      ${isAdmin() ? `
+      <div class="admin-actions">
+        <button class="btn-secondary" onclick="adminResetPin('${escAttr(playerName)}')">🔑 Endurstilla PIN</button>
+        <button class="btn-secondary admin-danger" onclick="adminDeletePlayer('${escAttr(playerName)}')">🗑 Eyða leikmanni</button>
+      </div>` : ''}
       <div style="max-height:280px;overflow-y:auto;">
         <table>
-          <thead><tr><th>Þraut</th><th>Stig</th><th>Umferðir</th></tr></thead>
+          <thead><tr><th>Þraut</th><th>Stig</th><th>Umferðir</th>${isAdmin() ? '<th></th>' : ''}</tr></thead>
           <tbody>
             ${entries.map(e => `
               <tr>
                 <td><strong>#${e.puzzle}</strong></td>
                 <td><strong>${e.score}</strong>${g.max ? ' / ' + g.max : ''}${g.unit || ''}</td>
                 <td><div class="grid-inline">${esc(e.grid)}</div></td>
+                ${isAdmin() ? `<td><button class="admin-del" onclick="adminDeleteScore('${escAttr(e.name)}', '${e.game || 'sizeitup'}', ${e.puzzle})" title="Eyða þessu skori">🗑</button></td>` : ''}
               </tr>
             `).join('')}
           </tbody>
@@ -518,6 +528,62 @@ function openPlayerHistory(playerName) {
     `;
   }
   document.getElementById('playerModal').classList.add('open');
+}
+
+// Admin controls — þjónninn staðfestir PIN + is_admin við hvert kall
+async function adminDeleteScore(target, game, puzzle) {
+  if (!isAdmin()) return;
+  if (!confirm(`Eyða skori: ${target} — ${GAMES[game].label} #${puzzle}?`)) return;
+  try {
+    await api('admin_delete_score', {
+      p_name: state.currentUser.name,
+      p_pin: state.currentUser.pin,
+      p_target: target,
+      p_game: game,
+      p_puzzle: puzzle
+    });
+    closeModals();
+    await fetchData();
+  } catch (e) {
+    alert(e.message || 'Villa kom upp.');
+  }
+}
+
+async function adminDeletePlayer(target) {
+  if (!isAdmin()) return;
+  if (!confirm(`Eyða leikmanninum ${target} og ÖLLUM skorunum hans? Þetta er ekki afturkræft.`)) return;
+  try {
+    await api('admin_delete_player', {
+      p_name: state.currentUser.name,
+      p_pin: state.currentUser.pin,
+      p_target: target
+    });
+    closeModals();
+    await fetchData();
+  } catch (e) {
+    alert(e.message || 'Villa kom upp.');
+  }
+}
+
+async function adminResetPin(target) {
+  if (!isAdmin()) return;
+  const newPin = prompt(`Nýtt 4 stafa PIN fyrir ${target}:`);
+  if (newPin === null) return;
+  if (!/^\d{4}$/.test(newPin.trim())) {
+    alert('PIN verður að vera nákvæmlega 4 tölustafir.');
+    return;
+  }
+  try {
+    await api('admin_reset_pin', {
+      p_name: state.currentUser.name,
+      p_pin: state.currentUser.pin,
+      p_target: target,
+      p_new_pin: newPin.trim()
+    });
+    alert(`PIN fyrir ${target} endurstillt.`);
+  } catch (e) {
+    alert(e.message || 'Villa kom upp.');
+  }
 }
 
 function closeModals() {
@@ -534,5 +600,19 @@ function escAttr(str) {
 }
 
 // Uppfæra sjálfkrafa á 30 sekúndna fresti svo ný skor birtist hjá öllum
-fetchData();
-setInterval(fetchData, 30000);
+async function init() {
+  // Við ræsingu er setan endurstaðfest (PIN + isAdmin) gegnum login_player.
+  if (state.currentUser && isConfigured()) {
+    try {
+      const data = await api('login_player', { p_name: state.currentUser.name, p_pin: state.currentUser.pin });
+      state.currentUser = { name: data.name, pin: state.currentUser.pin, isAdmin: !!data.isAdmin };
+      localStorage.setItem('sizeitup_session', JSON.stringify(state.currentUser));
+    } catch (e) {
+      state.currentUser = null;
+      localStorage.removeItem('sizeitup_session');
+    }
+  }
+  await fetchData();
+  setInterval(fetchData, 30000);
+}
+init();

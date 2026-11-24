@@ -11,6 +11,7 @@ create extension if not exists pgcrypto with schema extensions;
 create table if not exists public.players (
   name       text primary key,
   pin_hash   text not null,
+  is_admin   boolean not null default false,
   created_at timestamptz not null default now()
 );
 create unique index if not exists players_name_lower_idx on public.players (lower(name));
@@ -105,7 +106,7 @@ begin
     raise exception 'Rangt nafn eða PIN-númer.';
   end if;
 
-  return jsonb_build_object('status', 'ok', 'name', v_user.name);
+  return jsonb_build_object('status', 'ok', 'name', v_user.name, 'isAdmin', v_user.is_admin);
 end;
 $$;
 
@@ -161,3 +162,109 @@ grant execute on function public.get_data() to anon, authenticated;
 grant execute on function public.register_player(text, text) to anon, authenticated;
 grant execute on function public.login_player(text, text) to anon, authenticated;
 grant execute on function public.submit_score(text, text, text, integer, integer, text, jsonb) to anon, authenticated;
+
+-- ============================================================================
+-- ADMIN: is_admin flagið er á players. Eftir nýskráningu þíns fyrsta
+-- stjórnanda, keyrðu (skiptu út nafninu):
+--   update public.players set is_admin = true where lower(name) = 'bjarki';
+-- ============================================================================
+
+-- Eyða einu skori (admin)
+create or replace function public.admin_delete_score(
+  p_name text, p_pin text, p_target text, p_game text, p_puzzle integer
+)
+returns jsonb
+language plpgsql
+security definer
+set search_path = public, extensions
+as $$
+declare
+  v_user players%rowtype;
+  v_pin  text := trim(coalesce(p_pin, ''));
+begin
+  select * into v_user from players
+  where lower(name) = lower(trim(coalesce(p_name, '')));
+
+  if not found or crypt(v_pin, v_user.pin_hash) is distinct from v_user.pin_hash
+     or not v_user.is_admin then
+    raise exception 'Aðeins stjórnendur geta gert þetta.';
+  end if;
+
+  delete from scores
+  where lower(name) = lower(trim(coalesce(p_target, '')))
+    and game = p_game and puzzle = p_puzzle;
+
+  return jsonb_build_object('status', 'ok');
+end;
+$$;
+
+-- Eyða leikmanni og öllum skorunum hans (admin)
+create or replace function public.admin_delete_player(p_name text, p_pin text, p_target text)
+returns jsonb
+language plpgsql
+security definer
+set search_path = public, extensions
+as $$
+declare
+  v_user players%rowtype;
+  v_pin  text := trim(coalesce(p_pin, ''));
+  v_target text := trim(coalesce(p_target, ''));
+begin
+  select * into v_user from players
+  where lower(name) = lower(trim(coalesce(p_name, '')));
+
+  if not found or crypt(v_pin, v_user.pin_hash) is distinct from v_user.pin_hash
+     or not v_user.is_admin then
+    raise exception 'Aðeins stjórnendur geta gert þetta.';
+  end if;
+
+  if lower(v_target) = lower(v_user.name) then
+    raise exception 'Þú getur ekki eytt þínum eigin aðgangi.';
+  end if;
+
+  delete from players where lower(name) = lower(v_target);
+
+  return jsonb_build_object('status', 'ok');
+end;
+$$;
+
+-- Endurstilla PIN leikmanns (admin)
+create or replace function public.admin_reset_pin(
+  p_name text, p_pin text, p_target text, p_new_pin text
+)
+returns jsonb
+language plpgsql
+security definer
+set search_path = public, extensions
+as $$
+declare
+  v_user players%rowtype;
+  v_pin  text := trim(coalesce(p_pin, ''));
+  v_new  text := trim(coalesce(p_new_pin, ''));
+begin
+  select * into v_user from players
+  where lower(name) = lower(trim(coalesce(p_name, '')));
+
+  if not found or crypt(v_pin, v_user.pin_hash) is distinct from v_user.pin_hash
+     or not v_user.is_admin then
+    raise exception 'Aðeins stjórnendur geta gert þetta.';
+  end if;
+
+  if v_new !~ '^\d{4}$' then
+    raise exception 'PIN verður að vera nákvæmlega 4 tölustafir.';
+  end if;
+
+  update players set pin_hash = crypt(v_new, gen_salt('bf'))
+  where lower(name) = lower(trim(coalesce(p_target, '')));
+
+  if not found then
+    raise exception 'Leikmaður fannst ekki.';
+  end if;
+
+  return jsonb_build_object('status', 'ok');
+end;
+$$;
+
+grant execute on function public.admin_delete_score(text, text, text, text, integer) to anon, authenticated;
+grant execute on function public.admin_delete_player(text, text, text) to anon, authenticated;
+grant execute on function public.admin_reset_pin(text, text, text, text) to anon, authenticated;

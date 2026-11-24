@@ -8,7 +8,8 @@ import { fileURLToPath } from 'node:url';
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const html = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8');
 const ids = new Set([...html.matchAll(/id="([^"]+)"/g)].map((m) => m[1]));
-const js = ['src/game.js', 'src/lengja.js'].map((f) => fs.readFileSync(path.join(ROOT, f), 'utf8')).join('\n');
+const js = fs.readdirSync(path.join(ROOT, 'src')).filter((f) => f.endsWith('.js'))
+  .map((f) => fs.readFileSync(path.join(ROOT, 'src', f), 'utf8')).join('\n');
 const refs = [...js.matchAll(/getElementById\('([^']+)'\)|\$\('([^']+)'\)/g)].map((m) => m[1] || m[2]);
 const missing = [...new Set(refs)].filter((r) => !ids.has(r));
 console.log('ID refs: ' + new Set(refs).size + ', missing: ' + (missing.length ? missing.join(', ') : 'none'));

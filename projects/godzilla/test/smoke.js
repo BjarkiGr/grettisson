@@ -141,6 +141,18 @@ check('beam drained energy', evalIn('game.godzilla.energy') < 95);
 frame();
 check('beam released', evalIn('game.godzilla.beamOn') === false);
 
+// --- daily tuning: hotter beam drain, roar recharges the meter ---
+check('daily beam drain is faster', evalIn('game.godzilla.beamDrain') > 26);
+const drainDefault = evalIn('(function () { const gz = new Godzilla(0); gz.setBeam(true); gz.update(0.5, 0, [], false, 0); return gz.energy; })()');
+check('entity default drain unchanged (26/s)', Math.abs(drainDefault - 87) < 0.01);
+evalIn('game.godzilla.energy = 20;');
+key('r'); frame(); key('r', false);
+check('daily roar recharges the beam', evalIn('game.godzilla.energy') >= 55);
+evalIn('game.godzilla.energy = 90; game.godzilla.roarCooldown = 0; game.godzilla.state = "idle";');
+key('r'); frame(); key('r', false);
+check('roar recharge caps at 100', evalIn('game.godzilla.energy') === 100);
+for (let i = 0; i < 60; i++) frame(); // let the roar animation finish
+
 // --- smash everything for ~50 simulated seconds (auto-walk + attacks) ---
 let roared = false;
 for (let i = 0; i < 3000; i++) {
@@ -215,6 +227,11 @@ check('share text has segment grid', clipboardText.includes('🌊') || clipboard
 // --- unlimited mode + escape back to title ---
 key('u'); frame(); key('u', false);
 check('U starts unlimited', evalIn('game.state') === 'playing' && evalIn('game.mode') === 'unlimited');
+check('unlimited keeps default beam drain', evalIn('game.godzilla.beamDrain') === 26);
+check('unlimited roar has no recharge', evalIn('game.godzilla.roarRecharge') === 0);
+evalIn('game.godzilla.energy = 50;');
+key('r'); frame(); key('r', false);
+check('unlimited roar leaves energy unchanged', evalIn('game.godzilla.energy') < 51);
 key('Escape'); frame(); key('Escape', false);
 check('ESC ends run to title', evalIn('game.state') === 'title');
 check('unlimited best saved', evalIn('Daily.load().bestUnlimited') >= 0);

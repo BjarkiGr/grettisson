@@ -1,0 +1,78 @@
+# Weekly Verðlengjan price refresh via the OFFICIAL Krónan API.
+# Requires the repo secret KRONAN_TOKEN (kronan.is settings, Auðkenni login).
+# The token never ships to the site - it only lives in GitHub Secrets.
+# The workflow archives the old bank, fetches + curates a fresh one, runs the
+# tests and opens a PR for human review (fun flags, junk) before deploy.
+name: Refresh Verðlengjan price bank
+
+on:
+  schedule:
+    - cron: '0 6 * * 1' # Mondays 06:00 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: verdlengjan-refresh
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: projects/verdlengjan
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Archive current bank
+        run: node tools/archive-bank.mjs
+
+      - name: Fetch fresh prices (official Krónan API)
+        env:
+          KRONAN_TOKEN: ${{ secrets.KRONAN_TOKEN }}
+        run: node tools/fetch-products.mjs --api
+
+      - name: Curate bank
+        id: curate
+        run: |
+          node tools/curate.mjs | tee "$RUNNER_TEMP/curate-summary.txt"
+          {
+            echo 'summary<<EOF'
+            cat "$RUNNER_TEMP/curate-summary.txt"
+            echo 'EOF'
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Build price history
+        run: node tools/build-history.mjs
+
+      - name: Tests
+        run: |
+          node test/smoke.js
+          node test/dom-smoke.js
+          node tools/check-wiring.mjs
+
+      - name: Open pull request
+        uses: peter-evans/create-pull-request@v6
+        with:
+          branch: verdlengjan/price-refresh
+          delete-branch: true
+          title: '🥐 Verðlengjan: weekly Krónan price refresh'
+          commit-message: 'chore(verdlengjan): refresh Krónan price bank'
+          body: |
+            Automated weekly refresh from the official Krónan API.
+
+            Curation summary:
+            ```
+            ${{ steps.curate.outputs.summary }}
+            ```
+
+            Before merging: review `data/products.json` (fun flags, junk,
+            price buckets) and confirm the tests above are green. The old
+            bank was archived to `data/banks/` so older puzzles stay fair.

@@ -32,6 +32,11 @@ class Godzilla {
     this.energy = 100;
     this.beamOn = false;
     this.stunT = 0;
+    // Beam tuning. Defaults = unlimited mode; the daily overrides these
+    // in Game.resetRun (hotter drain, roar recharges the meter).
+    this.beamDrain = 26;
+    this.beamRegen = 7;
+    this.roarRecharge = 0;
   }
 
   get busy() { return this.state === 'attacking' || this.state === 'roaring'; }
@@ -64,6 +69,7 @@ class Godzilla {
     this.state = 'roaring';
     this.roarT = 0;
     this.roarCooldown = 4;
+    this.energy = Math.min(100, this.energy + this.roarRecharge);
     return true;
   }
 
@@ -92,10 +98,10 @@ class Godzilla {
     this.idleT += dt;
     // beam energy: drains while firing, slow regen otherwise
     if (this.beamOn) {
-      this.energy -= 26 * dt;
+      this.energy -= this.beamDrain * dt;
       if (this.energy <= 0) { this.energy = 0; this.beamOn = false; }
     } else {
-      this.energy = Math.min(100, this.energy + 7 * dt);
+      this.energy = Math.min(100, this.energy + this.beamRegen * dt);
     }
     if (this.state === 'attacking') {
       this.attackT += dt;

@@ -19,6 +19,7 @@ with no server and no database to manage.
 - `supabase-migration-games.sql` — upgrades an older single-game setup to multi-game
 - `supabase-migration-verdlengjan.sql` — adds Verðlengjan to an existing multi-game setup
 - `supabase-migration-krillion-max.sql` — sets Krillion's max score to 700
+- `supabase-migration-admin.sql` — makes Bjarki admin + adds admin functions
 - `test/smoke.mjs` — syntax, wiring and share-text parser checks (`node test/smoke.mjs`)
 
 ## Setup (one time, ~5 minutes)
@@ -62,6 +63,26 @@ Until step 4 is done the page shows a setup notice instead of the table.
 
 The paste box auto-detects the game from the share text.
 Verðlengjan scores are pastry centimetres; Thursdays allow up to 107 cm.
+Verðlengjan can also submit directly from the game ("Senda á stigatöfluna 🏆"
+on the results screen) — same account/PIN, same `submit_score` function,
+so pasted and auto-submitted scores are identical.
+
+## Admin
+
+The player `Bjarki` is admin (👑 next to the name). Clicking any player opens
+their history modal, where admins get extra controls:
+
+- 🗑 delete a single score (per game/puzzle)
+- 🔑 reset a player's PIN (for friends who forget it)
+- 🗑 delete a player entirely, including all their scores (not yourself)
+
+Every admin action is verified **server-side** (PIN + `is_admin` flag) — the
+buttons are just convenience; crafted requests from non-admins are rejected.
+To make someone else admin, run in the SQL Editor:
+
+```sql
+update players set is_admin = true where lower(name) = 'nafn';
+```
 
 ## Security notes
 

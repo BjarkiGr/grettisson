@@ -33,7 +33,12 @@ const DROP = [
 
 let flagged = 0, dropped = 0;
 data.products = data.products.filter((p) => {
+  // The game needs a sku, an image and a link - drop incomplete entries.
+  if (!p.sku || !p.image || !p.url || !(p.price > 0)) { dropped++; return false; }
   if (DROP.some((d) => p.name.toLowerCase().startsWith(d.toLowerCase()))) { dropped++; return false; }
+  // Safety net: a size line is short ("ca. 160 gr."). Anything huge or full
+  // of script junk is a bad regex capture - clear it rather than ship it.
+  if (p.size && (p.size.length > 60 || p.size.includes('__next_f'))) p.size = '';
   p.fun = FUN.some((f) => p.name.toLowerCase().includes(f));
   if (p.fun) flagged++;
   return true;

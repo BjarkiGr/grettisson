@@ -93,6 +93,12 @@ Detailed build plan. Items are ticked off once implemented AND verified.
 - [x] Safe-area aware button layout, no zoom/scroll/selection (style.css, index.html viewport)
 - [x] Smoke test: touch buttons drive gameplay, water swap, menus, key cleanup, DPR + phone resize (test/smoke.js)
 
+## Phase 14 - Daily beam tuning
+- [x] Tunable beam params on Godzilla (beamDrain / beamRegen / roarRecharge); defaults = unlimited (src/entities/godzilla.js)
+- [x] Daily only: beam drains 40/s (vs 26), roar recharges +35 energy, capped at 100 (src/game.js resetRun)
+- [x] Recharge feedback: +ENERGY popup, energy-bar flash, daily-only 'R roar (+energy)' hint (src/game.js)
+- [x] Smoke test: daily drain/recharge + cap, unlimited defaults untouched (test/smoke.js)
+
 ## How to run
 Open index.html in a browser (no server or build step needed),
 or serve the folder: `npx serve .` / `python -m http.server`.

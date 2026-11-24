@@ -2,8 +2,9 @@
 // the exact number of cm each answer earns. The whole loaf is a single SVG
 // sprite on a 4px pixel grid (8px per cm). The ruler is a fixed 0-100 cm
 // scale: the loaf fills its share of the band - no scrolling, no zooming.
-// Look: brown puff pastry, a yellow vanilla line down the center, toasted
-// almonds on one half, chocolate + pink frosting on the other.
+// Look: identical cross-section along the whole length - chocolate + pink
+// frosting on top, a yellow custard line in the middle, toasted almonds on
+// the brown crust below.
 // All randomness here is cosmetic (hash1/crand) - never the seeded stream.
 const Lengja = {
   PX_PER_CM: 8,
@@ -125,7 +126,6 @@ const Lengja = {
     const g = [];
     for (let y = 0; y < rows; y++) g.push(new Array(cols).fill('.'));
     const set = (x, y, c) => { if (x >= 0 && x < cols && y >= 0 && y < rows) g[y][x] = c; };
-    const mid = Math.floor(cols / 2);
     // ground shadow
     for (let x = 2; x < cols - 2; x++) set(x, 15, 'S');
     // outline, with skipped corner pixels for a rounded 16-bit look
@@ -149,20 +149,20 @@ const Lengja = {
     for (let y = 5; y <= 13; y++) {
       if (y !== 9 && y !== 10) { set(1, y, 'D'); set(cols - 2, y, 'D'); }
     }
-    // left half: chocolate frosting with a pink zigzag drizzle
-    for (let x = 1; x < mid; x++) {
+    // chocolate frosting with a pink zigzag drizzle along the WHOLE top
+    for (let x = 1; x < cols - 1; x++) {
       set(x, 5, 'k'); set(x, 6, 'K'); set(x, 7, 'K');
       const py = 5 + (Math.floor(x / 2) % 2);
       set(x, py, 'P'); set(x, py + 1, 'p');
       if (hash1(x * 3.7) < 0.18) set(x, 8, 'K'); // chocolate drip
     }
-    // right half: toasted almond flakes on the golden crust
-    const half = cols - 2 - mid;
-    if (half > 0) {
-      const n = Math.max(2, Math.floor(half / 2));
+    // toasted almond flakes on the brown crust along the WHOLE bottom
+    const span = cols - 2;
+    if (span > 0) {
+      const n = Math.max(2, Math.floor(span / 2));
       for (let i = 0; i < n; i++) {
-        const x = mid + Math.floor(hash1(i * 3.1 + cols) * half);
-        const y = 5 + Math.floor(hash1(i * 7.7 + cols) * 3);
+        const x = 1 + Math.floor(hash1(i * 3.1 + cols) * span);
+        const y = 11 + Math.floor(hash1(i * 7.7 + cols) * 2);
         set(x, y, 'A'); set(x, y + 1, 'a');
       }
     }

@@ -42,9 +42,16 @@ function parseKr(str) {
   return parseInt(cleaned, 10);
 }
 
-// Logarithmic guess slider: 10 kr .. 15.000 kr over 1000 steps.
+// Logarithmic guess slider: 10 kr .. 15.000 kr over 1000 steps (by default).
 // Log scale keeps low prices (the interesting ones) easy to aim at.
-const SLIDER_MIN = 10, SLIDER_MAX = 15000, SLIDER_STEPS = 1000;
+const SLIDER_MIN = 10, SLIDER_STEPS = 1000;
+let SLIDER_MAX = 15000;
+// Widen the slider when the bank holds pricier items than the default max
+// (the full Krónan API catalog can exceed 15.000 kr). Never shrinks below it.
+function fitSliderToBank(products) {
+  const top = products.reduce((m, p) => Math.max(m, p.price || 0), 0);
+  SLIDER_MAX = Math.max(15000, Math.ceil(top / 500) * 500);
+}
 function sliderToPrice(v) {
   return Math.round(SLIDER_MIN * Math.pow(SLIDER_MAX / SLIDER_MIN, v / SLIDER_STEPS));
 }

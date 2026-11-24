@@ -41,6 +41,24 @@ check('mid bucket >= 5', bank.products.filter((p) => p.price >= 200 && p.price <
 check('expensive bucket >= 5', bank.products.filter((p) => p.price > 1000).length >= 5);
 check('fun wildcard >= 5', bank.products.filter((p) => p.fun).length >= 5);
 
+// --- bank versioning (manifest selection) ---
+sandbox.__manifest = { banks: [
+  { file: 'banks/products-2026-11-18.json', from: '2026-11-18' },
+  { file: 'banks/products-2026-10-01.json', from: '2026-10-01' },
+] };
+check('date >= snapshot uses current bank', evalIn('bankForDate(__manifest, "2026-11-20", "2026-11-18")') === null);
+check('exact snapshot date uses current bank', evalIn('bankForDate(__manifest, "2026-11-18", "2026-11-18")') === null);
+check('older date picks newest covering archive', evalIn('bankForDate(__manifest, "2026-10-15", "2026-11-18").from') === '2026-10-01');
+check('archive boundary date picks that archive', evalIn('bankForDate(__manifest, "2026-11-17", "2026-11-18").from') === '2026-10-01');
+check('date before all archives falls back', evalIn('bankForDate(__manifest, "2026-09-01", "2026-11-18")') === null);
+check('missing manifest falls back', evalIn('bankForDate(null, "2026-10-15", "2026-11-18")') === null);
+
+// --- price history helper ---
+sandbox.__pts = [['2026-11-18', 499], ['2026-10-01', 399]];
+check('previous price found (unsorted input)', evalIn('previousPrice(__pts, "2026-11-18")[1]') === 399);
+check('no prior points => null', evalIn('previousPrice(__pts, "2026-10-01")') === null);
+check('missing history => null', evalIn('previousPrice(null, "2026-11-18")') === null);
+
 // --- ISK formatting ---
 check('formatKr', evalIn('formatKr(1499)') === '1.499 kr.');
 check('parseKr plain', evalIn('parseKr("1499")') === 1499);
@@ -65,6 +83,15 @@ check('price->slider endpoints', evalIn('priceToSlider(10)') === 0 && evalIn('pr
 check('slider roundtrip ~500', Math.abs(evalIn('sliderToPrice(priceToSlider(500))') - 500) <= 4);
 check('slider clamps out-of-range', evalIn('priceToSlider(5)') === 0 && evalIn('priceToSlider(99999)') === 1000);
 
+// --- dynamic slider max ---
+evalIn('fitSliderToBank([{ price: 20000 }, { price: 500 }])');
+check('slider widens to bank max', evalIn('sliderToPrice(1000)') === 20000);
+evalIn('fitSliderToBank([{ price: 15300 }])');
+check('widened max rounded up to nearest 500', evalIn('SLIDER_MAX') === 15500);
+evalIn('fitSliderToBank([{ price: 500 }])');
+check('slider never shrinks below 15000', evalIn('sliderToPrice(1000)') === 15000);
+evalIn('fitSliderToBank([])');
+
 // --- cm math + thursday ---
 const guesses = evalIn('[scoreGuess(849,849), scoreGuess(880,849), scoreGuess(934,849), scoreGuess(1061,849), scoreGuess(2547,849)]');
 check('totalCm = 2 + 20+16+12+8+0', evalIn('totalCm(' + JSON.stringify(guesses) + ', false)') === 58);
@@ -83,6 +110,8 @@ check('five unique products', new Set(fiveA.split(',')).size === 5);
 const pricesA = fiveA.split(',').map((sku) => bank.products.find((p) => p.sku === sku).price);
 check('daily five has cheap+mid+expensive', pricesA.some((p) => p < 200) && pricesA.some((p) => p >= 200 && p <= 600) && pricesA.some((p) => p > 1000));
 check('randomFive gives 5 unique', new Set(evalIn('randomFive(Bank.products).map(p=>p.sku)')).size === 5);
+const catsA = evalIn('buildDailyFive(Bank.products, "2026-11-18", 1).map(p=>p.category)');
+check('daily five spans 5 distinct categories', new Set(catsA).size === 5);
 
 // --- daily persistence ---
 check('puzzle #1 on launch day', evalIn('Daily.number("2026-11-18")') === 1);

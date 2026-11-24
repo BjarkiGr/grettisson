@@ -460,3 +460,19 @@ textarea {
   flex-wrap: wrap;
 }
 .game-tabs .tab { white-space: nowrap; }
+
+/* Admin controls */
+.admin-actions {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+.admin-del {
+  background: transparent;
+  color: var(--muted);
+  padding: 4px 8px;
+  font-size: 0.9rem;
+}
+.admin-del:hover { color: #f87171; }
+.admin-danger { color: #f87171; border-color: rgba(248, 113, 113, 0.4); }

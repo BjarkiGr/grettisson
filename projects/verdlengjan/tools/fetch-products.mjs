@@ -2,9 +2,10 @@
 // Builds data/products.json from real Krónan prices. Two modes:
 //
 //   node tools/fetch-products.mjs            (default, no token needed)
-//       Scrapes the PUBLIC catalog page /voruurval + front page for product
-//       links, then reads schema.org JSON-LD from each /vara/ page.
-//       Respects robots.txt (never touches /snjallverslun/*).
+//       Harvests product links from the front page + ALL public landing pages
+//       in the server sitemap, then reads schema.org JSON-LD per /vara/ page.
+//       Respects robots.txt (never touches /snjallverslun/*). With --limit N
+//       it samples N products evenly across the catalog for variety.
 //
 //   node tools/fetch-products.mjs --api      (needs KRONAN_TOKEN env var)
 //       Uses the official public API (api.kronan.is/api/v1). Create a token
@@ -58,11 +59,14 @@ function parseProduct(html, url) {
     const price = Number(p.offers.price);
     if (!p.name || !Number.isFinite(price) || price <= 0) return null;
     // Package size line, e.g. "ca. 160 gr. - 230 kr. / kg" -> "ca. 160 gr."
-    const sm = html.match(/>([^<>]*?\d[\d.,]*\s*(?:gr\.?|kg|ml\.?|ltr\.?|stk\.?)[^<>]*?)\s*-\s*\d[\d.]*\s*kr\.\s*\/\s*(?:kg|ltr|stk)/);
+    // Strip <script> blocks first: the Next.js flight payload contains
+    // size-like text that would otherwise pollute the match (KB of junk).
+    const body = html.replace(/<script[\s\S]*?<\/script>/g, '');
+    const sm = body.match(/>([^<>]*?\d[\d.,]*\s*(?:gr\.?|kg|ml\.?|ltr\.?|stk\.?)[^<>]*?)\s*-\s*\d[\d.]*\s*kr\.\s*\/\s*(?:kg|ltr|stk)/);
     return {
       sku: String(p.sku || ''),
       name: String(p.name).trim(),
-      size: sm ? sm[1].trim() : '',
+      size: sm ? sm[1].trim().slice(0, 60) : '',
       price,
       category: String(p.category || '').trim(),
       image: Array.isArray(p.image) ? p.image[0] : (p.image || ''),
@@ -73,15 +77,41 @@ function parseProduct(html, url) {
   return null;
 }
 
+// Public landing pages listed in the server sitemap (robots.txt-approved).
+// Category listings load from /snjallverslun (disallowed) - never touched.
+async function sitemapPages() {
+  const xml = await get('https://kronan.is/server-sitemap.xml');
+  const locs = [...xml.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => m[1]);
+  return locs.filter((u) =>
+    u.startsWith('https://kronan.is/') &&
+    !/^https:\/\/kronan\.is\/(adgangur|afgreidsla|pontun|snjallverslun)/.test(u));
+}
+
 async function scrapeMode() {
-  console.log('Collecting product links from /voruurval and front page...');
+  console.log('Collecting product links from public pages (front page + sitemap)...');
   const links = new Set();
-  for (const page of ['https://kronan.is/voruurval', 'https://kronan.is/']) {
-    for (const l of productLinks(await get(page))) links.add(l);
+  const pages = [...new Set(['https://kronan.is/voruurval', 'https://kronan.is/', ...(await sitemapPages())])];
+  let pi = 0;
+  async function pageWorker() {
+    while (pi < pages.length) {
+      const page = pages[pi++];
+      try {
+        for (const l of productLinks(await get(page))) links.add(l);
+      } catch (e) { console.log('  page ' + page + ': ' + e.message); }
+      await sleep(120);
+    }
   }
-  let urls = [...links];
-  if (Number.isFinite(LIMIT)) urls = urls.slice(0, LIMIT);
-  console.log('Found ' + urls.length + ' product pages. Fetching (3 at a time)...');
+  await Promise.all([pageWorker(), pageWorker(), pageWorker()]);
+  let urls = [...links].sort();
+  console.log('Found ' + urls.length + ' product links on ' + pages.length + ' pages.');
+  // Even sampling when capped, so the bank spans the whole catalog instead
+  // of whatever happens to sit on the front page (seasonal skew).
+  if (Number.isFinite(LIMIT) && urls.length > LIMIT) {
+    const stride = urls.length / LIMIT;
+    urls = Array.from({ length: LIMIT }, (_, i) => urls[Math.floor(i * stride)]);
+    console.log('Sampled ' + urls.length + ' evenly across the catalog.');
+  }
+  console.log('Fetching product pages (3 at a time)...');
   const products = [];
   let done = 0, failed = 0;
   const queue = [...urls];

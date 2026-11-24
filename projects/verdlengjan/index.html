@@ -13,6 +13,7 @@
       <div class="top-row">
         <h1>🥐 Verðlengjan</h1>
         <div class="top-buttons">
+          <button id="stats-btn" class="icon-btn" title="Bakstrarsagan þín" aria-label="Bakstrarsagan þín">📊</button>
           <button id="help-btn" class="icon-btn" title="Hvernig á að spila" aria-label="Hvernig á að spila">?</button>
           <button id="mute-btn" class="icon-btn" title="Hljóð af/á" aria-label="Hljóð af/á">🔊</button>
         </div>
@@ -49,6 +50,7 @@
         <p class="start-text">Giskaðu á verð á fimm vörum úr Krónunni og bakaðu vínarbrauðslengjuna þína.
           Því nákvæmari gisk, því lengri lengja!</p>
         <button class="primary" id="start-btn">Búa til vínarbrauð dagsins! 🥐</button>
+        <p id="streak-line" class="streak-line" hidden></p>
       </div>
 
       <div id="guess-phase" hidden>
@@ -70,6 +72,12 @@
             <button type="button" class="tune-btn" data-d="1" aria-label="Hækka um 1 krónu">+1</button>
             <button type="button" class="tune-btn" data-d="10" aria-label="Hækka um 10 krónur">+10</button>
           </div>
+          <div class="type-row">
+            <label class="type-label" for="guess-input">…eða sláðu inn verð:</label>
+            <input type="text" id="guess-input" inputmode="numeric" autocomplete="off"
+                   placeholder="t.d. 1.499" aria-label="Slá inn verð í krónum">
+            <span class="type-unit">kr.</span>
+          </div>
         </div>
         <p class="hint" id="guess-error" hidden></p>
         <button class="primary" id="bake-btn">BAKA 🥐</button>
@@ -86,6 +94,7 @@
           <div class="r-row"><span>Raunverð</span><span id="reveal-price"></span></div>
           <div class="r-row"><span>Frávik</span><span id="reveal-error"></span></div>
         </div>
+        <div class="history-row" id="price-history" hidden></div>
         <a id="product-link" class="product-link" href="#" target="_blank" rel="noopener">Sjá vöruna í Krónunni ↗</a>
         <button class="primary" id="next-btn">Næsta vara →</button>
       </div>
@@ -100,9 +109,11 @@
         <p class="snapshot-note" id="results-note"></p>
         <div class="btn-row">
           <button class="primary" id="share-btn">Deila 📋</button>
+          <button id="leaderboard-btn">Senda á stigatöfluna 🏆</button>
           <button id="unlimited-btn">Ótakmarkað bakkelsi ∞</button>
           <button id="back-daily-btn" hidden>Til baka í daglegu 🥐</button>
         </div>
+        <p id="results-streak" class="streak-line" hidden></p>
         <p class="tomorrow" id="tomorrow-note"></p>
       </div>
     </main>
@@ -136,11 +147,37 @@
     </div>
   </div>
 
+  <div class="modal" id="lb-modal" hidden>
+    <div class="modal-box">
+      <h2>Stigataflan 🏆</h2>
+      <p>Skráðu þig inn á <a href="/projects/daily-games-stats/">Daily Games Stats</a>
+        (nafn + 4 stafa PIN). Nýtt nafn? Aðgangur stofnast sjálfkrafa.</p>
+      <div class="lb-fields">
+        <label for="lb-name">Nafn</label>
+        <input type="text" id="lb-name" maxlength="24" autocomplete="nickname">
+        <label for="lb-pin">PIN (4 tölustafir)</label>
+        <input type="password" id="lb-pin" inputmode="numeric" maxlength="4" autocomplete="off">
+      </div>
+      <p class="hint" id="lb-msg" hidden></p>
+      <button class="primary" id="lb-submit">Senda skor 🥐</button>
+      <button id="lb-close">Loka</button>
+    </div>
+  </div>
+
+  <div class="modal" id="stats-modal" hidden>
+    <div class="modal-box">
+      <h2>Bakstrarsagan þín 📊</h2>
+      <div id="stats-body"></div>
+      <button class="primary" id="stats-close">Loka</button>
+    </div>
+  </div>
+
   <script src="src/util.js"></script>
   <script src="src/data.js"></script>
   <script src="src/daily.js"></script>
   <script src="src/lengja.js"></script>
   <script src="src/audio.js"></script>
+  <script src="src/leaderboard.js"></script>
   <script src="src/game.js"></script>
 </body>
 </html>
