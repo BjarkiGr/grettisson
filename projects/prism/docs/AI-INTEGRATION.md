@@ -75,3 +75,28 @@ OpenRouter (free models only):
 Then invoke analyze-events repeatedly (3 jobs per call) until analyzed=0.
 Quota/rate limits pause jobs automatically; they resume after 10/60 minutes
 or via POST {"resume": true}. Free tiers change — verify current terms.
+
+## Prompt 2.1.0 (V2.1 Phase 2 — AI integrity)
+
+Additive to 2.0.0 (stored 2.0.0 analyses remain valid; risk engine 2.0.0
+unchanged). Changes:
+- Articles explicitly framed as UNTRUSTED SOURCE DATA with a security
+  notice; strong <<<ARTICLE id>>> / <<<END ARTICLE id>>> delimiters;
+  delimiter-mimicking sequences in titles/excerpts neutralized
+  (stripDelimiters). System prompt: never follow directives in articles.
+- New REQUIRED output field assessment_limitations (1-6 items <=300
+  chars): single-source, no independent confirmation, thin detail,
+  inferred consequences, outdated information, manipulation attempts.
+- Syndication rule: articles reproducing the same underlying report are
+  NOT independent confirmation. Conflicts must be acknowledged in
+  confidence_inputs.material_contradictions. Gaps never filled with
+  assumptions.
+- Source metadata: source_type included per article alongside name and
+  timestamps.
+- validateAnalysisOutputV21 wraps V2 (all citation/enum/ISO guarantees)
+  plus limitations validation and size caps (impact texts <=4000,
+  scenarios <=10x500, uncertainties <=20x500, entity arrays bounded).
+- Adversarial fixtures: test/adversarial-articles.json (instruction
+  override, delimiter spoof, JSON smuggling, syndication). Suite:
+  test/ai-integrity-smoke.mjs (34 checks).
+- UI: event detail shows Assessment limitations when present.

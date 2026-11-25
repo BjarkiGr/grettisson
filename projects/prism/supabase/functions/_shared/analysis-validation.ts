@@ -110,3 +110,25 @@ export function validateAnalysisOutputV2(input: unknown, allowedArticleIds: stri
   if (errors.length > 0) return { ok: false, errors };
   return { ok: true, value: o as unknown as AiAnalysisOutput };
 }
+
+// ===================== V2.1 output validation =====================
+// Wraps V2 (all prior guarantees) + assessment_limitations + size caps.
+export function validateAnalysisOutputV21(input: unknown, allowedArticleIds: string[], allowedUrls: string[]): ValidationResult {
+  const base = validateAnalysisOutputV2(input, allowedArticleIds, allowedUrls);
+  if (!base.ok) return base;
+  const o = input as Record<string, unknown>;
+  const errors: string[] = [];
+  const lim = o.assessment_limitations;
+  if (!Array.isArray(lim) || lim.length < 1 || lim.length > 6 || !lim.every((x) => typeof x === "string" && x.trim().length > 0 && x.length <= 300)) {
+    errors.push("assessment_limitations must be 1-6 non-empty strings <=300 chars");
+  }
+  for (const f of ["supply_chain_implications", "economic_consequences"]) {
+    if (typeof o[f] !== "string" || (o[f] as string).length > 4000) errors.push(f + " exceeds 4000 chars");
+  }
+  const bounded = (v: unknown, maxItems: number, maxLen: number) => Array.isArray(v) && v.length <= maxItems && v.every((x) => typeof x === "string" && x.length <= maxLen);
+  if (!bounded(o.escalation_scenarios, 10, 500)) errors.push("escalation_scenarios exceeds bounds (10 x 500)");
+  if (!bounded(o.uncertainties, 20, 500)) errors.push("uncertainties exceeds bounds (20 x 500)");
+  if (!bounded(o.organizations, 50, 200) || !bounded(o.commodities_affected, 50, 100) || !bounded(o.industries_affected, 50, 100)) errors.push("entity arrays exceed bounds");
+  if (errors.length > 0) return { ok: false, errors };
+  return base;
+}

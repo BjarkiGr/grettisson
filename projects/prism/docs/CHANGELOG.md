@@ -1,5 +1,22 @@
 ﻿# PRISM — Changelog
 
+## [Unreleased] — V2.1 Phase 2: AI Intelligence Integrity
+
+### Added
+- Prompt 2.1.0 (additive; 2.0.0 preserved): untrusted-input framing,
+  strong article delimiters + spoof neutralization, never-follow rule,
+  REQUIRED assessment_limitations field, syndication/independence rule,
+  conflict acknowledgment, no-assumptions rule, source_type metadata.
+- validateAnalysisOutputV21: V2 guarantees + limitations validation +
+  output size caps. analyze-events deployed on 2.1.0.
+- Event detail: Assessment limitations section (when present).
+- test/adversarial-articles.json (5 fixtures, 4 attack classes) +
+  test/ai-integrity-smoke.mjs (34 checks).
+
+### Verified
+- 19 suites: 1175 checks, 0 failures. Risk engine 2.0.0 untouched;
+  stored 2.0.0/1.0.0 analyses remain valid (backward-compat checks).
+
 ## [Unreleased] — V2.1 Phase 1: Security & Data Protection
 
 ### Fixed

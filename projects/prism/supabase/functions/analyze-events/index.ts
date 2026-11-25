@@ -11,9 +11,9 @@ import { isServiceRole, readJsonLimited } from "../_shared/auth.ts";
 import { createServiceClient } from "../_shared/database.ts";
 import type { SupabaseClient } from "../_shared/database.ts";
 import { readProviderConfig, createOpenAiCompatibleProvider } from "../_shared/ai-provider.ts";
-import { PROMPT_VERSION_V2, SYSTEM_PROMPT_V2, buildUserPrompt } from "../_shared/prompts.ts";
-import type { PromptArticle } from "../_shared/prompts.ts";
-import { validateAnalysisOutputV2 } from "../_shared/analysis-validation.ts";
+import { PROMPT_VERSION_V21, SYSTEM_PROMPT_V21, buildUserPromptV21 } from "../_shared/prompts.ts";
+import type { PromptArticleV21 as PromptArticle } from "../_shared/prompts.ts";
+import { validateAnalysisOutputV21 } from "../_shared/analysis-validation.ts";
 import { contentHash } from "../_shared/normalize.ts";
 
 const BATCH_SIZE = 3;
@@ -30,13 +30,15 @@ async function loadEventArticles(db: SupabaseClient, eventId: string): Promise<P
   if (ids.length === 0) return [];
   const { data: arts } = await db.from("articles").select("id, title, url, content, published_at, source_id").in("id", ids);
   const sourceIds = [...new Set((arts ?? []).map((a) => a.source_id))];
-  const { data: sources } = await db.from("sources").select("id, name").in("id", sourceIds);
+  const { data: sources } = await db.from("sources").select("id, name, source_type").in("id", sourceIds);
   const nameById = new Map((sources ?? []).map((s) => [s.id, s.name]));
+  const typeById = new Map((sources ?? []).map((s) => [s.id, s.source_type]));
   return (arts ?? []).map((a) => ({
     id: a.id, title: a.title, url: a.url,
     excerpt: (a.content ?? "").slice(0, 1200),
     published_at: a.published_at,
     source_name: nameById.get(a.source_id) ?? "unknown source",
+    source_type: typeById.get(a.source_id) ?? null,
   }));
 }
 
@@ -108,9 +110,9 @@ Deno.serve(async (req: Request) => {
         }
 
         const result = await provider.analyze({
-          systemPrompt: SYSTEM_PROMPT_V2,
-          userPrompt: buildUserPrompt(event, articles),
-          promptVersion: PROMPT_VERSION_V2,
+          systemPrompt: SYSTEM_PROMPT_V21,
+          userPrompt: buildUserPromptV21(event, articles),
+          promptVersion: PROMPT_VERSION_V21,
           expectJson: true,
         });
 
@@ -124,7 +126,7 @@ Deno.serve(async (req: Request) => {
           throw new Error(result.kind + ": " + result.message);
         }
 
-        const validation = validateAnalysisOutputV2(result.json, articles.map((a) => a.id), articles.map((a) => a.url));
+        const validation = validateAnalysisOutputV21(result.json, articles.map((a) => a.id), articles.map((a) => a.url));
         if (!validation.ok) {
           results.rejected++;
           throw new Error("invalid_response: " + validation.errors.slice(0, 3).join("; "));
@@ -136,7 +138,7 @@ Deno.serve(async (req: Request) => {
           article_id: articles[0].id,
           provider: result.provider,
           model: result.model,
-          prompt_version: PROMPT_VERSION_V2,
+          prompt_version: PROMPT_VERSION_V21,
           inputs_hash: inputsHash,
           analysis_json: a,
           confidence: a.confidence_level,
@@ -172,7 +174,7 @@ Deno.serve(async (req: Request) => {
       function: "analyze-events",
       provider: config.provider,
       model: config.model,
-      prompt_version: PROMPT_VERSION_V2,
+      prompt_version: PROMPT_VERSION_V21,
       timestamp: new Date().toISOString(),
       paused_reason: pausedReason,
       ...results,

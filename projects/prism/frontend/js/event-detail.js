@@ -79,6 +79,7 @@ function renderDetail(root, event, data) {
             '<h3>Economic consequences</h3><p>' + escapeHtml(aj.economic_consequences) + "</p>" +
             '<h3>Escalation scenarios (speculative)</h3>' + listHtml(aj.escalation_scenarios) +
             '<h3>Uncertainties</h3>' + listHtml(aj.uncertainties) +
+            (aj.assessment_limitations ? '<h3>Assessment limitations</h3>' + listHtml(aj.assessment_limitations) : '') +
             '<h3>Evidence</h3>' + listHtml((aj.supporting_evidence ?? []).map((e) => "[" + e.kind + "] " + e.claim))
           : emptyState("Not yet analyzed \u2014 the AI pipeline will assess this event.")) + "</section>" +
       '<section class="panel"><h2>Timeline</h2><ol class="timeline">' +
