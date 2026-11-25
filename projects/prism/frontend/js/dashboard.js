@@ -1,8 +1,10 @@
-﻿// PRISM — dashboard.js (Phase 6: live data)
+// PRISM — dashboard.js (Phase 6: live data)
 // Overview dashboard driven by real Supabase intelligence.
 
 import { loadIntelligence, weeklyActivity, commodityIndex } from "./data.js";
 import { getClient } from "./supabase.js";
+import { getSession } from "./auth.js";
+import { freshAlerts } from "./personalize.js";
 import { aggregateByRegion } from "./regions.js";
 import { initFeed } from "./intelligence.js";
 import { statCard, eventListItem, simpleTable, emptyState, riskBadgeFromScore, loadingState } from "./components.js";
@@ -125,14 +127,36 @@ async function loadRelevance() {
     const { data, error } = await sb.functions.invoke("match-company-events", { body: {} });
     if (error || !data?.has_profile || !data.items?.length) return;
     section.hidden = false;
-    list.innerHTML = data.items.map((it) =>
-      '<article class="feed-item">' +
-      '<div class="feed-item-head"><a class="feed-title" href="event-detail.html?id=' + encodeURIComponent(it.event_id) + '">' + escapeHtml(it.title) + "</a>" +
-      '<span class="chip">' + escapeHtml(it.exposure) + " exposure</span>" +
-      '<span class="chip">relevance ' + escapeHtml(it.relevance_score) + "/100</span>" +
-      (it.global_risk ? '<span class="chip">global risk ' + (it.global_risk.overall_score === null ? "unrated" : escapeHtml(it.global_risk.overall_score)) + "</span>" : "") +
-      "</div>" +
-      '<p class="feed-excerpt">' + escapeHtml(it.explanation) + "</p>" +
-      "</article>").join("");
+    // V2 Phase 5: "new since last looked" alerts; read state is device-local.
+    let seenKey = "prism_seen_relevance_anon";
+    let seenIds = [];
+    try {
+      const session = await getSession();
+      seenKey = "prism_seen_relevance_" + (session?.user?.id ?? "anon");
+      seenIds = JSON.parse(localStorage.getItem(seenKey) ?? "[]");
+    } catch { /* storage unavailable */ }
+    const fresh = freshAlerts(data.items, seenIds);
+    const freshIds = new Set(fresh.map((f) => f.event_id));
+    list.innerHTML =
+      (fresh.length
+        ? '<div class="filter-bar"><span class="chip">' + fresh.length + ' new since you last looked</span>' +
+          '<button id="rel-seen" class="nav-toggle" style="display:inline-block">Mark all as seen</button>' +
+          '<span class="muted">Read state is stored on this device only.</span></div>'
+        : '') +
+      data.items.map((it) =>
+        '<article class="feed-item">' +
+        '<div class="feed-item-head"><a class="feed-title" href="event-detail.html?id=' + encodeURIComponent(it.event_id) + '">' + escapeHtml(it.title) + '</a>' +
+        (freshIds.has(it.event_id) ? '<span class="chip">NEW</span>' : '') +
+        '<span class="chip">' + escapeHtml(it.exposure) + ' exposure</span>' +
+        '<span class="chip">relevance ' + escapeHtml(it.relevance_score) + '/100</span>' +
+        (it.global_risk ? '<span class="chip">global risk ' + (it.global_risk.overall_score === null ? 'unrated' : escapeHtml(it.global_risk.overall_score)) + '</span>' : '') +
+        '</div>' +
+        '<p class="feed-excerpt">' + escapeHtml(it.explanation) + '</p>' +
+        '</article>').join('');
+    const seenBtn = list.querySelector('#rel-seen');
+    if (seenBtn) seenBtn.addEventListener('click', () => {
+      try { localStorage.setItem(seenKey, JSON.stringify(data.items.map((x) => x.event_id))); } catch { /* ignore */ }
+      loadRelevance();
+    });
   } catch { /* relevance is optional; the dashboard works without it */ }
 }

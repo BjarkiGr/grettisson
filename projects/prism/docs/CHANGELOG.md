@@ -1,5 +1,24 @@
 ﻿# PRISM — Changelog
 
+## [Unreleased] — V2 Phase 5: Personalized watchlists & alerts
+
+### Added
+- js/personalize.js: pure helpers — suggestWatchlists (profile facts ->
+  watchlist suggestions; deduped against existing entries incl. case;
+  country dedup across roles; origins preserved; cap 12; dependencies
+  deliberately excluded — no matching watchlist kind) and freshAlerts
+  (unseen relevance items).
+- Watchlists page: "Suggested from your company profile" panel — one-click
+  Add creates a normal private watchlist (explicit user action; nothing
+  auto-created; duplicates handled).
+- Dashboard relevance section: "N new since you last looked" alert bar,
+  NEW chips, Mark-all-as-seen. Read state is per-user localStorage,
+  honestly labeled device-only, storage failures guarded.
+- test/watchlist-alerts-smoke.mjs: 23 checks.
+
+### Verified
+- 16 suites: 1009 checks, 0 failures. No backend changes; no migration.
+
 ## [Unreleased] — V2 Phase 4: Personalized Intelligence Feed
 
 ### Added
