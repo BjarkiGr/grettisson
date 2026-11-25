@@ -10,9 +10,10 @@ import { handleCorsPreflight, jsonResponse } from "../_shared/cors.ts";
 import { createServiceClient } from "../_shared/database.ts";
 import type { SupabaseClient } from "../_shared/database.ts";
 import { readProviderConfig, createOpenAiCompatibleProvider } from "../_shared/ai-provider.ts";
-import { PROMPT_VERSION, SYSTEM_PROMPT, buildUserPrompt } from "../_shared/prompts.ts";
+import { PROMPT_VERSION_V2, SYSTEM_PROMPT_V2, buildUserPrompt } from "../_shared/prompts.ts";
 import type { PromptArticle } from "../_shared/prompts.ts";
-import { validateAnalysisOutput } from "../_shared/analysis-validation.ts";
+import { validateAnalysisOutputV2 } from "../_shared/analysis-validation.ts";
+import { contentHash } from "../_shared/normalize.ts";
 
 const BATCH_SIZE = 3;
 const MAX_ATTEMPTS = 3;
@@ -77,7 +78,7 @@ Deno.serve(async (req: Request) => {
       .order("created_at", { ascending: true }).limit(BATCH_SIZE);
     if (error) throw new Error("job query failed: " + error.message);
 
-    const results = { analyzed: 0, rejected: 0, retried: 0, failed: 0, paused: 0, skipped: 0 };
+    const results = { analyzed: 0, rejected: 0, retried: 0, failed: 0, paused: 0, skipped: 0, skipped_unchanged: 0 };
     let pausedReason: string | null = null;
 
     for (const job of (jobs ?? []) as JobRow[]) {
@@ -94,10 +95,20 @@ Deno.serve(async (req: Request) => {
         const articles = await loadEventArticles(db, event.id);
         if (articles.length === 0) throw new Error("event has no supporting articles");
 
+        // Quota-safe change detection (V2 section 10): skip unchanged inputs.
+        const inputsHash = await contentHash(event.id, articles.map((a) => a.id).sort().join(","));
+        const { data: lastAn } = await db.from("analyses").select("inputs_hash, created_at").eq("event_id", event.id).order("created_at", { ascending: false }).limit(1);
+        const last = lastAn?.[0];
+        if (last?.inputs_hash === inputsHash && Date.now() - new Date(last.created_at).getTime() < 7 * 86400000) {
+          await db.from("processing_jobs").update({ status: "completed", completed_at: new Date().toISOString(), last_error: null }).eq("id", job.id);
+          results.skipped_unchanged++;
+          continue;
+        }
+
         const result = await provider.analyze({
-          systemPrompt: SYSTEM_PROMPT,
+          systemPrompt: SYSTEM_PROMPT_V2,
           userPrompt: buildUserPrompt(event, articles),
-          promptVersion: PROMPT_VERSION,
+          promptVersion: PROMPT_VERSION_V2,
           expectJson: true,
         });
 
@@ -111,7 +122,7 @@ Deno.serve(async (req: Request) => {
           throw new Error(result.kind + ": " + result.message);
         }
 
-        const validation = validateAnalysisOutput(result.json, articles.map((a) => a.id), articles.map((a) => a.url));
+        const validation = validateAnalysisOutputV2(result.json, articles.map((a) => a.id), articles.map((a) => a.url));
         if (!validation.ok) {
           results.rejected++;
           throw new Error("invalid_response: " + validation.errors.slice(0, 3).join("; "));
@@ -123,7 +134,8 @@ Deno.serve(async (req: Request) => {
           article_id: articles[0].id,
           provider: result.provider,
           model: result.model,
-          prompt_version: PROMPT_VERSION,
+          prompt_version: PROMPT_VERSION_V2,
+          inputs_hash: inputsHash,
           analysis_json: a,
           confidence: a.confidence_level,
         });
@@ -158,7 +170,7 @@ Deno.serve(async (req: Request) => {
       function: "analyze-events",
       provider: config.provider,
       model: config.model,
-      prompt_version: PROMPT_VERSION,
+      prompt_version: PROMPT_VERSION_V2,
       timestamp: new Date().toISOString(),
       paused_reason: pausedReason,
       ...results,

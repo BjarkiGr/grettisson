@@ -104,6 +104,23 @@ for (const [title, cat, country] of isCases) {
 check("detectLanguage is", detectLanguage("Jarðskjálfti", "þetta er prófun") === "is");
 check("detectLanguage en", detectLanguage("Hello world", "plain english text") === "en");
 check("English rules unaffected", classifyArticle("New sanctions target Russian oil exports", "").category === "sanctions");
+console.log("[4c] classifier bug-fix regressions (real-feed findings)");
+const fixCases = [
+  ["Africa Cup title given back to Senegal after sports court rules against Morocco", "Fans protest the decision.", false, null],
+  ["Trump boðar nýja tolla", "Bandaríkjaforseti boðar nýja tolla á innflutning.", true, "tariffs"],
+  ["Nýir tollar á bandarískan innflutning", "", true, "tariffs"],
+  ["Trump impersonator mocks president at Canada press dinner", "A comedy performance.", false, null],
+  ["US court convicts Huawei of theft: A history of Chinese firm's global woes", "The case spans years of legal battles.", false, null],
+  ["War in Ukraine enters fourth year", "", true, "military_conflict"],
+  ["Import duties rise on steel", "", true, "tariffs"],
+  ["Liði vikunnar í enska boltanum tilkynntur", "", false, null],
+  ["Kosningar til Alþingis fara fram í vor", "", true, "political_instability"],
+];
+for (const [title, content, rel, cat] of fixCases) {
+  const r = classifyArticle(title, content);
+  check("fix: " + title.slice(0, 42), r.relevant === rel && (cat === null || r.category === cat), JSON.stringify({ rel: r.relevant, cat: r.category }));
+}
+
 console.log("[5] function structure");
 const FN = path.join(ROOT, "supabase", "functions");
 const ing = read(path.join(FN, "ingest-sources", "index.ts"));

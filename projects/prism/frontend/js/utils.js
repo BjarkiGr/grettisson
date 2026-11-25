@@ -100,3 +100,24 @@ export function debounce(fn, ms = 200) {
     timer = setTimeout(() => fn(...args), ms);
   };
 }
+
+// ===== V2 risk methodology parity (must match backend _shared/risk-v2.ts) =====
+export const V2_WEIGHTS = Object.freeze({
+  escalation: 1.0, economic: 1.2, supply_chain: 1.3,
+  geographic: 0.9, strategic: 0.8, persistence: 0.8,
+});
+export const V2_DIMENSIONS = ["escalation", "economic", "supply_chain", "geographic", "strategic", "persistence"];
+export const RISK_MATRIX_V2 = Object.freeze({
+  very_low: [5, 10, 15, 20, 25],
+  low: [10, 20, 30, 40, 50],
+  moderate: [15, 30, 45, 60, 70],
+  high: [20, 40, 60, 75, 85],
+  very_high: [25, 50, 70, 85, 95],
+});
+export function impactBandV2(i) {
+  return i < 20 ? "NEGLIGIBLE" : i < 40 ? "LIMITED" : i < 60 ? "SIGNIFICANT" : i < 80 ? "SEVERE" : "EXTREME";
+}
+export function computeImpactIndexV2(gated) {
+  const wsum = V2_DIMENSIONS.reduce((a, d) => a + V2_WEIGHTS[d], 0);
+  return Math.round(V2_DIMENSIONS.reduce((a, d) => a + V2_WEIGHTS[d] * Number(gated[d]), 0) / (5 * wsum) * 100);
+}

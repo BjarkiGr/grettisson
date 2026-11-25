@@ -32,6 +32,31 @@ export async function init() {
     '<p class="muted">Read tests query each table with your current credentials. Signed out, reads are denied (anon has no table privileges). Signed in as the admin, reads succeed. Empty tables are expected until Phase 3.</p>' +
     "</div>";
 
+  const reBtn = document.createElement("button");
+  reBtn.id = "reclassify-btn";
+  reBtn.className = "nav-toggle";
+  reBtn.style.display = "inline-block";
+  reBtn.textContent = "Re-run classification (repair legacy mislabels)";
+  const reStatus = document.createElement("span");
+  reStatus.id = "reclassify-status";
+  reStatus.className = "muted";
+  reStatus.setAttribute("role", "status");
+  root.querySelector(".filter-bar").append(reBtn, reStatus);
+  reBtn.addEventListener("click", async () => {
+    reStatus.textContent = " Reclassifying\u2026";
+    reBtn.disabled = true;
+    try {
+      const sb2 = await getClient();
+      const { data, error } = await sb2.functions.invoke("reclassify-articles", { body: { action: "run" } });
+      if (error) throw new Error(error.message);
+      if (data?.error) throw new Error(data.error);
+      reStatus.textContent = " Done: " + data.marked_irrelevant + " marked irrelevant, " + data.requeued + " requeued, " + (data.events_deleted?.length ?? 0) + " junk events deleted.";
+    } catch (e) {
+      reStatus.textContent = " Error: " + e.message;
+    } finally {
+      reBtn.disabled = false;
+    }
+  });
   const results = root.querySelector("#read-test-results");
   root.querySelector("#run-read-tests").addEventListener("click", async () => {
     results.innerHTML = loadingState("Testing reads\u2026");

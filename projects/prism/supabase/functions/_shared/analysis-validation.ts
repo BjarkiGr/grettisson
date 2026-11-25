@@ -69,3 +69,44 @@ export function validateAnalysisOutput(
   if (errors.length > 0) return { ok: false, errors };
   return { ok: true, value: o as unknown as AiAnalysisOutput };
 }
+
+// ===================== V2 output validation =====================
+const V2_DIMS = ["escalation", "economic", "supply_chain", "geographic", "strategic", "persistence"];
+const LIKELIHOOD_LEVELS = ["insufficient_evidence", "very_low", "low", "moderate", "high", "very_high"];
+
+export function validateAnalysisOutputV2(input: unknown, allowedArticleIds: string[], allowedUrls: string[]): ValidationResult {
+  const base = validateAnalysisOutput(input, allowedArticleIds, allowedUrls);
+  if (!base.ok) return base;
+  const errors: string[] = [];
+  const o = input as Record<string, unknown>;
+  const idSet = new Set(allowedArticleIds);
+  const dims = o.dimensions;
+  if (!isRecord(dims)) {
+    errors.push("dimensions missing");
+  } else {
+    for (const d of V2_DIMS) {
+      const p = (dims as Record<string, unknown>)[d];
+      if (!isRecord(p) || typeof p.proposed_score !== "number" || !Number.isInteger(p.proposed_score) || p.proposed_score < 0 || p.proposed_score > 5 || !isNonEmptyString(p.rationale) || !Array.isArray(p.evidence_article_ids)) {
+        errors.push("dimensions." + d + " malformed");
+        continue;
+      }
+      for (const id of p.evidence_article_ids as unknown[]) {
+        if (!idSet.has(id as string)) errors.push("dimensions." + d + " cites unknown article (fabricated)");
+      }
+    }
+  }
+  const lik = o.likelihood;
+  if (!isRecord(lik) || !isNonEmptyString(lik.outcome) || typeof lik.horizon_days !== "number" || !Number.isInteger(lik.horizon_days) || lik.horizon_days < 1 || lik.horizon_days > 365 || !LIKELIHOOD_LEVELS.includes(lik.level as string) || !isNonEmptyString(lik.rationale) || typeof lik.ongoing_claim !== "boolean" || !Array.isArray(lik.evidence_article_ids)) {
+    errors.push("likelihood malformed");
+  } else {
+    for (const id of lik.evidence_article_ids as unknown[]) {
+      if (!idSet.has(id as string)) errors.push("likelihood cites unknown article (fabricated)");
+    }
+  }
+  const ci = o.confidence_inputs;
+  if (!isRecord(ci) || !Array.isArray(ci.material_contradictions) || !Array.isArray(ci.evidence_gaps)) {
+    errors.push("confidence_inputs malformed");
+  }
+  if (errors.length > 0) return { ok: false, errors };
+  return { ok: true, value: o as unknown as AiAnalysisOutput };
+}

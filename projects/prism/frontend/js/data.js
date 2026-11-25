@@ -73,12 +73,23 @@ export function composeIntelligence({ events, riskScores, analyses, articles, ev
     return {
       ...e,
       demo: false,
-      overall_score: latest ? latest.overall_score : null,
-      dimensions: latest ? {
+      overall_score: latest ? (latest.scoring_version === "2.0.0" && latest.likelihood_level === "insufficient_evidence" ? null : latest.overall_score) : null,
+      unrated: Boolean(latest && latest.scoring_version === "2.0.0" && latest.likelihood_level === "insufficient_evidence"),
+      scoring_version: latest?.scoring_version ?? null,
+      likelihood_level: latest?.likelihood_level ?? null,
+      confidence_level: latest?.confidence_level ?? null,
+      impact_index: latest?.impact_index ?? null,
+      ongoing: Boolean(latest?.ongoing),
+      horizon_days: latest?.likelihood_horizon_days ?? null,
+      dimensions: latest ? (latest.scoring_version === "2.0.0" ? {
+        escalation: latest.escalation_score, economic: latest.economic_impact_score,
+        supply_chain: latest.supply_chain_disruption_score, geographic: latest.geographic_reach_score,
+        strategic: latest.strategic_importance_score, persistence: latest.persistence_score,
+      } : {
         severity: latest.severity_score, probability: latest.probability_score,
         geographic: latest.geographic_score, duration: latest.duration_score,
         supply_chain: latest.supply_chain_score, economic: latest.economic_score,
-      } : null,
+      }) : null,
       explanation: latest ? latest.explanation : null,
       confidence: latest?.confidence ?? an?.confidence ?? null,
       history: risks.map((r) => ({ date: r.created_at, overall_score: r.overall_score })),

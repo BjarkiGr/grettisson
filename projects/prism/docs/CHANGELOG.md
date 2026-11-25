@@ -1,5 +1,40 @@
 ﻿# PRISM — Changelog
 
+## [Unreleased] — V2 Phase 1 implementation + classifier repairs
+
+### Fixed (classifier, from real-feed diagnosis)
+- Sports/entertainment false positives: title-level blocklist (EN+IS) with
+  score>=4 override; ambiguous bare keywords "war"/"offensive" replaced with
+  phrases ("war in", "military offensive", ...).
+- Icelandic tariff false negative: stem "toll" (matches tolla/tollar/tollur)
+  via prefix mode for all IS stems; "kosning" -> election-specific forms.
+- Tariff vocabulary: levy/levies, import/customs duties, import tax,
+  export controls, trade barrier.
+- reclassify-articles Edge Function (admin-only) + Settings button:
+  re-runs classifier over stored articles, deletes junk events (cascade),
+  requeues newly-relevant articles. 9 regression tests added.
+
+### Added (V2 risk engine, scoring_version 2.0.0)
+- Migration 0006: versioning + inputs snapshot + analysis_id + likelihood/
+  confidence columns + V2 dimension columns + analyses.inputs_hash.
+- _shared/risk-v2.ts: gates G1-G3, likelihood rules L1-L4, code-computed
+  confidence, impact index, documented 5x5 matrix, UNRATED path.
+- Prompt 2.0.0 + validateAnalysisOutputV2 (fail-closed, citation whitelist).
+- analyze-events: v2 prompt/validation + quota-safe change detection
+  (inputs hash + 7-day staleness).
+- calculate-risk: v2 path with full snapshot + delta explanation; legacy
+  v1 path preserved for history.
+- Frontend: data.js surfaces v2 fields; event-detail renders likelihood/
+  confidence/horizon/impact/version + UNRATED; utils.js v2 parity helpers.
+- test/risk-v2-engine-smoke.mjs: 39 checks (12 fixtures, invariants, parity,
+  v2 validation, wiring).
+
+### Verified
+- 12 suites: 874 checks, 0 failures. Functions deployed.
+
+### Pending (manual)
+- Apply migration 0006; click Settings -> Re-run classification.
+
 ## [Unreleased] — Admin-managed users (roles)
 
 ### Added

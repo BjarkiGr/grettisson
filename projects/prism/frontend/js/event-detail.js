@@ -13,6 +13,10 @@ const DIMENSION_LABELS = {
   severity: "Severity", probability: "Probability (estimate)", geographic: "Geographic reach",
   duration: "Expected duration", supply_chain: "Supply-chain exposure", economic: "Economic impact",
 };
+const DIMENSION_LABELS_V2 = {
+  escalation: "Escalation potential", economic: "Economic impact", supply_chain: "Supply-chain disruption",
+  geographic: "Geographic reach", strategic: "Strategic importance", persistence: "Persistence",
+};
 
 function listHtml(items) {
   return items && items.length
@@ -24,8 +28,9 @@ function renderDetail(root, event, data) {
   const level = riskLevelFromScore(event.overall_score);
   const articles = data.articles.filter((a) => event.article_ids.includes(a.id));
   const related = relatedEvents(event, data.events);
+  const labels = event.scoring_version === "2.0.0" ? DIMENSION_LABELS_V2 : DIMENSION_LABELS;
   const dims = event.dimensions
-    ? Object.entries(DIMENSION_LABELS).map(([key, label]) => dimensionBar(label, event.dimensions[key])).join("")
+    ? Object.entries(labels).map(([key, label]) => dimensionBar(label, event.dimensions[key])).join("")
     : emptyState("Not yet scored \u2014 the risk pipeline will score this event.");
   const an = event.analysis;
   const aj = an?.analysis_json;
@@ -51,13 +56,21 @@ function renderDetail(root, event, data) {
         '<h3>Organizations</h3>' + listHtml(event.organizations) +
         '<h3>Industries affected</h3>' + listHtml(event.industries) +
         '<h3>Commodities affected</h3>' + listHtml(event.commodities) + "</section>" +
-      '<section class="panel"><h2>Risk score breakdown</h2>' +
-        (event.overall_score !== null
-          ? '<div class="overall-score">' + escapeHtml(event.overall_score) + '<span class="muted">/100 \u00b7 ' + escapeHtml(level) + "</span></div>" + dims +
-            '<p class="muted">' + escapeHtml(event.explanation ?? "") + "</p>" +
-            '<p class="muted">Confidence: ' + (event.confidence != null ? Math.round(event.confidence * 100) + "%" : "\u2014") + " \u2014 distinct from impact. Probability is an analytical estimate.</p>"
+      '<section class="panel"><h2>Risk assessment' + (event.scoring_version ? ' <span class="chip">v' + escapeHtml(event.scoring_version) + '</span>' : '') + '</h2>' +
+        (event.unrated
+          ? '<div class="overall-score">UNRATED<span class="muted">insufficient evidence</span></div>' +
+            '<p class="muted">Heuristic impact index: ' + escapeHtml(event.impact_index ?? "\u2014") + '/100. No likelihood estimate is possible from the available evidence.</p>' + dims
+          : event.overall_score !== null
+          ? '<div class="overall-score">' + escapeHtml(event.overall_score) + '<span class="muted">/100 \u00b7 ' + escapeHtml(level) + ' \u00b7 heuristic index</span></div>' +
+            (event.scoring_version === "2.0.0"
+              ? '<p>' + (event.likelihood_level ? '<span class="chip">Likelihood: ' + escapeHtml(event.likelihood_level.replaceAll("_", " ")) + (event.ongoing ? " (ongoing)" : "") + '</span> ' : '') +
+                (event.confidence_level ? '<span class="chip">Confidence: ' + escapeHtml(event.confidence_level) + '</span> ' : '') +
+                (event.horizon_days ? '<span class="chip">Horizon: ' + escapeHtml(event.horizon_days) + ' days</span>' : '') + '</p>' +
+                '<p class="muted">Impact index: ' + escapeHtml(event.impact_index ?? "\u2014") + '/100. Likelihood and confidence are separate from impact.</p>'
+              : '<p class="muted">Confidence: ' + (event.confidence != null ? Math.round(event.confidence * 100) + "%" : "\u2014") + " \u2014 legacy V1 assessment.</p>") +
+            dims + '<p class="muted">' + escapeHtml(event.explanation ?? "") + "</p>"
           : dims) +
-        '<p class="muted">Methodology: docs/RISK-METHODOLOGY.md.</p></section>' +
+        '<p class="muted">Methodology: docs/RISK-METHODOLOGY' + (event.scoring_version === "2.0.0" ? "-V2" : "") + '.md.</p></section>' +
       '<section class="panel"><h2>AI assessment</h2>' +
         (aj
           ? '<p class="muted">Provider: ' + escapeHtml(an.provider) + " \u00b7 model: " + escapeHtml(an.model) + " \u00b7 prompt: " + escapeHtml(an.prompt_version) + " \u00b7 " + formatDateTime(an.created_at) + "</p>" +
