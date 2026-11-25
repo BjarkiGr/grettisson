@@ -128,6 +128,29 @@ async function initWatchLink(event) {
   }
 }
 
+// V2 Phase 4: personalized "why this matters" panel (only with a profile).
+async function initCompanyWhy(event) {
+  try {
+    const sb = await getClient();
+    const { data, error } = await sb.functions.invoke("match-company-events", { body: { event_id: event.id } });
+    if (error || !data?.has_profile) return;
+    const grid = document.querySelector(".detail-grid");
+    if (!grid) return;
+    const it = data.item;
+    const panel = document.createElement("section");
+    panel.className = "panel";
+    panel.innerHTML = '<h2>Why this matters to your company</h2>' +
+      (it && it.exposure !== "none"
+        ? '<div class="chip-row"><span class="chip">' + escapeHtml(it.exposure) + ' exposure</span>' +
+          '<span class="chip">relevance ' + escapeHtml(it.relevance_score) + '/100</span></div>' +
+          '<p>' + escapeHtml(it.explanation) + '</p>' +
+          '<ul>' + it.matches.map((m) => '<li>' + escapeHtml(m.reason) + '</li>').join('') + '</ul>'
+        : '<p class="muted">No connection found between this event and your company profile.</p>') +
+      '<p class="muted">Based on your private <a href="company.html">company profile</a>. Relevance is separate from global risk.</p>';
+    grid.prepend(panel);
+  } catch { /* personalized panel is optional */ }
+}
+
 export async function init() {
   const root = document.getElementById("event-detail-root");
   if (!root) return;
@@ -144,4 +167,5 @@ export async function init() {
   }
   renderDetail(root, event, data);
   await initWatchLink(event);
+  initCompanyWhy(event);
 }

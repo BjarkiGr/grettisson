@@ -1,5 +1,25 @@
 ﻿# PRISM — Changelog
 
+## [Unreleased] — V2 Phase 4: Personalized Intelligence Feed
+
+### Added
+- match-company-events: single-event mode ({event_id}, UUID-validated)
+  returns relevance for any event page, including an honest "none" result;
+  list mode unchanged. Deployed.
+- Event pages: "Why this matters to your company" panel (only with a
+  profile) — exposure chip, relevance /100, plain-language explanation,
+  per-match reasons; states clearly that relevance is separate from
+  global risk.
+- Geopolitical Events feed: "My company" toggle (visible only when the
+  profile has matches). On: relevance-ranked cards with exposure +
+  relevance chips and explanations; search/category/region/risk filters
+  and the Global/Iceland selector still apply first. Off: unchanged V1
+  behavior. Pure rankByRelevance helper (tested).
+- test/personalization-smoke.mjs: 21 checks.
+
+### Verified
+- 15 suites: 984 checks, 0 failures.
+
 ## [Unreleased] — V2 Phase 3: Personalized Relevance Engine
 
 ### Added

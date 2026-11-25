@@ -1,4 +1,4 @@
-﻿// match-company-events — V2 Phase 3: personalized relevance (on demand).
+// match-company-events — V2 Phase 3: personalized relevance (on demand).
 // Auth: caller JWT. The profile is loaded THROUGH THE CALLER'S JWT client
 // so owner RLS is enforced by Postgres itself; the service client is used
 // ONLY for shared event data. Nothing is persisted; no AI is involved;
@@ -36,11 +36,16 @@ Deno.serve(async (req: Request) => {
       dependencies: await get("company_dependencies"),
     };
 
+    // Optional single-event mode: relevance for one specific event page.
+    let body: Record<string, unknown> = {};
+    try { body = await req.json(); } catch { /* empty body = list mode */ }
+    const singleId = typeof body?.event_id === "string" && /^[0-9a-f-]{36}$/i.test(body.event_id) ? body.event_id : null;
+
     // Shared event data via service client (read-only here).
     const svc = createServiceClient();
-    const { data: events, error: evErr } = await svc.from("events")
-      .select("id, title, event_type, occurred_at, status")
-      .eq("status", "active").order("occurred_at", { ascending: false }).limit(MAX_EVENTS);
+    let evQuery = svc.from("events").select("id, title, event_type, occurred_at, status");
+    evQuery = singleId ? evQuery.eq("id", singleId) : evQuery.eq("status", "active");
+    const { data: events, error: evErr } = await evQuery.order("occurred_at", { ascending: false }).limit(MAX_EVENTS);
     if (evErr) return json({ error: "events_failed" }, 500);
     const ids = (events ?? []).map((e) => e.id);
     if (!ids.length) return json({ has_profile: true, items: [] });
@@ -72,7 +77,7 @@ Deno.serve(async (req: Request) => {
     const items = [];
     for (const ev of events ?? []) {
       const rel = matchProfileToEvent(profile, factsFor(ev.id));
-      if (rel.exposure === "none") continue;
+      if (rel.exposure === "none" && !singleId) continue;
       const risk = latestRisk.get(ev.id) ?? null;
       items.push({
         event_id: ev.id, title: ev.title, event_type: ev.event_type, occurred_at: ev.occurred_at,
@@ -84,6 +89,7 @@ Deno.serve(async (req: Request) => {
         } : null,
       });
     }
+    if (singleId) return json({ has_profile: true, item: items[0] ?? null });
     items.sort((a, b) => b.relevance_score - a.relevance_score || String(b.occurred_at).localeCompare(String(a.occurred_at)));
     return json({ has_profile: true, items: items.slice(0, MAX_RESULTS) });
   } catch (_e) {
