@@ -159,7 +159,7 @@ export async function init() {
   const sb = await getClient();
   root.innerHTML = loadingState("Loading profile\u2026");
   const existing = await loadExisting(sb, session.user.id);
-  if (existing) { state = existing; renderForm(root); return; }
+  if (existing) { state = existing; renderForm(root); renderCompanySummary(root, sb); return; }
 
   root.innerHTML =
     '<section class="panel"><h2>Tell PRISM about your company</h2>' +
@@ -189,4 +189,35 @@ export async function init() {
       status.textContent = "Error: " + (e?.message ?? "extraction failed");
     }
   });
+}
+
+// V2.1 Phase 5: company intelligence summary (deterministic, from matches).
+async function renderCompanySummary(root, sb) {
+  try {
+    const { data, error } = await sb.functions.invoke("match-company-events", { body: {} });
+    if (error || !data?.has_profile || !data.items?.length) return;
+    const items = data.items;
+    const comCounts = new Map();
+    const ctyCounts = new Map();
+    const typeCounts = new Map();
+    for (const it of items) {
+      for (const m of it.matches ?? []) {
+        if (m.kind === "commodity") comCounts.set(m.value, (comCounts.get(m.value) ?? 0) + 1);
+        if (m.kind === "country") ctyCounts.set(m.value, (ctyCounts.get(m.value) ?? 0) + 1);
+      }
+      const dt = it.purchasing?.disruption_type;
+      if (dt) typeCounts.set(dt, (typeCounts.get(dt) ?? 0) + 1);
+    }
+    const top = (map, n) => [...map.entries()].sort((a, b) => b[1] - a[1]).slice(0, n);
+    const sec = document.createElement("section");
+    sec.className = "panel";
+    sec.innerHTML = '<h2>Intelligence summary</h2>' +
+      '<p class="muted">From your current profile matches. Relevance is separate from global risk.</p>' +
+      '<h3>Top relevant events</h3>' +
+      items.slice(0, 5).map((it) => '<div class="region-row"><a class="region-name" href="event-detail.html?id=' + encodeURIComponent(it.event_id) + '">' + escapeHtml(it.title) + '</a><span class="chip">' + escapeHtml(it.exposure) + '</span><span class="chip">' + escapeHtml(it.relevance_score) + '/100</span></div>').join('') +
+      '<h3>Critical commodities</h3>' + (top(comCounts, 5).map(([k, v]) => '<span class="chip">' + escapeHtml(k) + ' (' + v + ')</span>').join(' ') || '<span class="muted">none matched</span>') +
+      '<h3>Countries to monitor</h3>' + (top(ctyCounts, 6).map(([k, v]) => '<span class="chip">' + escapeHtml(k) + ' (' + v + ')</span>').join(' ') || '<span class="muted">none matched</span>') +
+      '<h3>Emerging disruption patterns</h3>' + (top(typeCounts, 5).map(([k, v]) => '<span class="chip">' + escapeHtml(k) + ' (' + v + ')</span>').join(' ') || '<span class="muted">none matched</span>');
+    root.prepend(sec);
+  } catch { /* summary is optional */ }
 }

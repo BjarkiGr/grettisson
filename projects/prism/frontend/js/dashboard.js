@@ -25,7 +25,7 @@ function renderStats(data) {
     statCard("High / critical", elevated, "score 60 or above") +
     statCard("Average risk score", avg === null ? "\u2014" : avg + "/100", avg === null ? "no scores yet" : riskLevelFromScore(avg)) +
     statCard("Active sources", data.sources.filter((s) => s.active).length, data.sources.length + " registered") +
-    statCard("Articles collected", data.articles.length, data.articles.filter((a) => a.processing_status === "analyzed" || a.processing_status === "classified").length + " relevant");
+    statCard("Articles collected", data.totals?.articles ?? data.articles.length, "showing latest " + data.articles.length + " in this view");
 }
 
 function renderTopEvents(data) {
@@ -135,7 +135,13 @@ async function loadRelevance() {
       seenKey = "prism_seen_relevance_" + (session?.user?.id ?? "anon");
       seenIds = JSON.parse(localStorage.getItem(seenKey) ?? "[]");
     } catch { /* storage unavailable */ }
-    const fresh = freshAlerts(data.items, seenIds);
+    // V2.1: seen state stores scores for change detection (array = legacy).
+    const seenScores = new Map();
+    if (Array.isArray(seenIds)) { for (const id of seenIds) seenScores.set(id, null); }
+    else if (seenIds && typeof seenIds === "object") { for (const [id, sc] of Object.entries(seenIds)) seenScores.set(id, sc); }
+    const fresh = freshAlerts(data.items, [...seenScores.keys()]);
+    const changed = data.items.filter((it) => seenScores.has(it.event_id) && seenScores.get(it.event_id) !== null && seenScores.get(it.event_id) !== it.relevance_score);
+    const changedIds = new Set(changed.map((x) => x.event_id));
     const freshIds = new Set(fresh.map((f) => f.event_id));
     list.innerHTML =
       (fresh.length
@@ -147,6 +153,8 @@ async function loadRelevance() {
         '<article class="feed-item">' +
         '<div class="feed-item-head"><a class="feed-title" href="event-detail.html?id=' + encodeURIComponent(it.event_id) + '">' + escapeHtml(it.title) + '</a>' +
         (freshIds.has(it.event_id) ? '<span class="chip">NEW</span>' : '') +
+        (changedIds.has(it.event_id) ? '<span class="chip">RELEVANCE CHANGED</span>' : '') +
+        (it.exposure === 'direct' ? '<span class="chip">high priority</span>' : '') +
         '<span class="chip">' + escapeHtml(it.exposure) + ' exposure</span>' +
         '<span class="chip">relevance ' + escapeHtml(it.relevance_score) + '/100</span>' +
         (it.global_risk ? '<span class="chip">global risk ' + (it.global_risk.overall_score === null ? 'unrated' : escapeHtml(it.global_risk.overall_score)) + '</span>' : '') +
@@ -155,7 +163,7 @@ async function loadRelevance() {
         '</article>').join('');
     const seenBtn = list.querySelector('#rel-seen');
     if (seenBtn) seenBtn.addEventListener('click', () => {
-      try { localStorage.setItem(seenKey, JSON.stringify(data.items.map((x) => x.event_id))); } catch { /* ignore */ }
+      try { localStorage.setItem(seenKey, JSON.stringify(Object.fromEntries(data.items.map((x) => [x.event_id, x.relevance_score])))); } catch { /* ignore */ }
       loadRelevance();
     });
   } catch { /* relevance is optional; the dashboard works without it */ }

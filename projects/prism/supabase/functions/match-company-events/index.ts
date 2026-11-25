@@ -1,4 +1,4 @@
-// match-company-events — V2 Phase 3: personalized relevance (on demand).
+﻿// match-company-events — V2 Phase 3: personalized relevance (on demand).
 // Auth: caller JWT. The profile is loaded THROUGH THE CALLER'S JWT client
 // so owner RLS is enforced by Postgres itself; the service client is used
 // ONLY for shared event data. Nothing is persisted; no AI is involved;
@@ -66,7 +66,8 @@ Deno.serve(async (req: Request) => {
     const latestRisk = new Map<string, Record<string, unknown>>();
     for (const r of ra.data ?? []) if (!latestRisk.has(r.event_id)) latestRisk.set(r.event_id, r);
 
-    const factsFor = (id: string): EventFacts => ({
+    const factsFor = (id: string, eventType?: string): EventFacts => ({
+      event_type: eventType,
       commodity_slugs: (ec.data ?? []).filter((x) => x.event_id === id).map((x) => comSlug.get(x.commodity_id) ?? "").filter(Boolean),
       country_codes: (ecty.data ?? []).filter((x) => x.event_id === id).map((x) => ctyCode.get(x.country_id) ?? "").filter(Boolean),
       industries: (ei.data ?? []).filter((x) => x.event_id === id).map((x) => x.industry),
@@ -76,13 +77,14 @@ Deno.serve(async (req: Request) => {
 
     const items = [];
     for (const ev of events ?? []) {
-      const rel = matchProfileToEvent(profile, factsFor(ev.id));
+      const rel = matchProfileToEvent(profile, factsFor(ev.id, ev.event_type));
       if (rel.exposure === "none" && !singleId) continue;
       const risk = latestRisk.get(ev.id) ?? null;
       items.push({
         event_id: ev.id, title: ev.title, event_type: ev.event_type, occurred_at: ev.occurred_at,
         exposure: rel.exposure, relevance_score: rel.relevance_score,
         explanation: rel.explanation, matches: rel.matches,
+        assumptions: rel.assumptions, missing_information: rel.missing_information, purchasing: rel.purchasing,
         global_risk: risk ? {
           overall_score: risk.scoring_version === "2.0.0" && risk.risk_level === "insufficient_evidence" ? null : risk.overall_score,
           risk_level: risk.risk_level, scoring_version: risk.scoring_version,

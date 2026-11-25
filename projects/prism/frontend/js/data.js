@@ -1,4 +1,4 @@
-﻿// PRISM — data.js (Phase 6)
+// PRISM — data.js (Phase 6)
 // Live intelligence access layer. Fetches from Supabase under the signed-in
 // administrator's session (RLS enforced) and composes view models for the
 // pages. Composition helpers are pure and unit-tested. No demo data here.
@@ -30,21 +30,25 @@ export function applyRegion(data, region) {
 /** Fetches all intelligence tables in parallel and composes view models. */
 export async function loadIntelligence(region = getStoredRegion()) {
   const sb = await getClient();
-  const [ev, rs, an, art, ea, src] = await Promise.all([
+  const [ev, rs, an, art, ea, src, artCount, evCount] = await Promise.all([
     sb.from("events").select("*").order("last_updated_at", { ascending: false }).limit(300),
     sb.from("risk_scores").select("*").order("created_at", { ascending: true }).limit(1000),
     sb.from("analyses").select("event_id, analysis_json, confidence, provider, model, prompt_version, created_at").order("created_at", { ascending: true }).limit(300),
     sb.from("articles").select("id, source_id, title, url, author, published_at, collected_at, content, processing_status").order("published_at", { ascending: false }).limit(300),
     sb.from("event_articles").select("event_id, article_id").limit(2000),
     sb.from("sources").select("*").order("name").limit(100),
+    sb.from("articles").select("id", { count: "exact", head: true }),
+    sb.from("events").select("id", { count: "exact", head: true }),
   ]);
   for (const [name, res] of [["events", ev], ["risk_scores", rs], ["analyses", an], ["articles", art], ["event_articles", ea], ["sources", src]]) {
     if (res.error) throw new Error(name + " query failed: " + res.error.message);
   }
-  return applyRegion(composeIntelligence({
+  const data = applyRegion(composeIntelligence({
     events: ev.data ?? [], riskScores: rs.data ?? [], analyses: an.data ?? [],
     articles: art.data ?? [], eventArticles: ea.data ?? [], sources: src.data ?? [],
   }), region);
+  data.totals = { articles: artCount.count ?? data.articles.length, events: evCount.count ?? data.events.length };
+  return data;
 }
 
 /** Pure composition: joins scores/analyses/articles onto events. */

@@ -145,7 +145,10 @@ async function initCompanyWhy(event) {
         ? '<div class="chip-row"><span class="chip">' + escapeHtml(it.exposure) + ' exposure</span>' +
           '<span class="chip">relevance ' + escapeHtml(it.relevance_score) + '/100</span></div>' +
           '<p>' + escapeHtml(it.explanation) + '</p>' +
-          '<ul>' + it.matches.map((m) => '<li>' + escapeHtml(m.reason) + '</li>').join('') + '</ul>'
+          '<ul>' + it.matches.map((m) => '<li>' + escapeHtml(m.reason) + '</li>').join('') + '</ul>' +
+          (it.purchasing?.potential_business_implications?.length ? '<h3>Potential business implications (not confirmed impacts)</h3><ul>' + it.purchasing.potential_business_implications.map((x) => '<li>' + escapeHtml(x) + '</li>').join('') + '</ul>' : '') +
+          (it.assumptions?.length ? '<p class="muted">Assumptions: ' + escapeHtml(it.assumptions.join(' ')) + '</p>' : '') +
+          (it.missing_information?.length ? '<p class="muted">Missing information: ' + escapeHtml(it.missing_information.join(' ')) + '</p>' : '')
         : '<p class="muted">No connection found between this event and your company profile.</p>') +
       '<p class="muted">Based on your private <a href="company.html">company profile</a>. Relevance is separate from global risk.</p>';
     grid.prepend(panel);

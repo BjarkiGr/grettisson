@@ -1,4 +1,4 @@
-﻿// PRISM V2 Phase 3 — deterministic company relevance engine.
+// PRISM V2 Phase 3 — deterministic company relevance engine.
 // Pure functions only. Relevance is SEPARATE from global risk: it measures
 // how related an event is to this company, not how dangerous it is.
 // Every match carries evidence + the profile entry origin; explanations
@@ -108,12 +108,68 @@ export function matchProfileToEvent(p: ProfileFacts, e: EventFacts): RelevanceRe
   const exposure = classifyExposure(matches);
   const score = relevanceScore(matches, exposure);
   if (exposure === "none") {
-    return { exposure, relevance_score: 0, matches: [], explanation: "No connection found between this event and your company profile." };
+    return { exposure, relevance_score: 0, matches: [], explanation: "No connection found between this event and your company profile.", assumptions: [], missing_information: ["No matching profile attributes found."], purchasing: { dimensions: [], disruption_type: disruptionType(e.event_type), potential_business_implications: [] } };
   }
   const lead = exposure === "direct"
     ? "Direct exposure: this event touches both what you trade and where you trade."
     : exposure === "inferred"
     ? "Possible exposure: one strong link connects this event to your company."
     : "Indirect exposure: a secondary link connects this event to your company.";
-  return { exposure, relevance_score: score, matches, explanation: lead + " " + matches.map((m) => m.reason).join(" ") };
+  const am = exposureAssumptions(exposure, matches);
+  const dtype = disruptionType(e.event_type);
+  return { exposure, relevance_score: score, matches, explanation: lead + " " + matches.map((m) => m.reason).join(" "),
+    assumptions: am.assumptions, missing_information: am.missing,
+    purchasing: { dimensions: purchasingDimensions(matches), disruption_type: dtype, potential_business_implications: potentialImplications(exposure, dtype) } };
+}
+
+// ===================== V2.1 Phase 5: purchasing framework =====================
+// Deterministic templates only. "Potential" implications, never confirmed
+// financial impacts. AI never influences these values.
+
+const DISRUPTION_TYPE: Record<string, string> = {
+  sanctions: "trade_restriction", tariffs: "trade_restriction", trade_restrictions: "trade_restriction",
+  shipping_disruptions: "logistics", energy_disruptions: "energy",
+  natural_disasters: "physical_disruption", infrastructure_disruptions: "physical_disruption",
+  military_conflict: "conflict", political_instability: "political", cybersecurity_incidents: "cyber",
+};
+
+export function disruptionType(eventType?: string): string | null {
+  return eventType ? DISRUPTION_TYPE[eventType] ?? "other" : null;
+}
+
+export function purchasingDimensions(matches: Match[]): string[] {
+  const dims = new Set<string>();
+  for (const m of matches) {
+    if (m.kind === "commodity") dims.add("commodity_exposure");
+    if (m.kind === "country") dims.add("geographic_exposure");
+    if (m.kind === "industry") dims.add("industry_exposure");
+    if (m.kind === "dependency") dims.add("logistics_exposure");
+  }
+  return [...dims];
+}
+
+export function potentialImplications(exposure: Exposure, dtype: string | null): string[] {
+  if (exposure === "none") return [];
+  const out = new Set<string>();
+  if (exposure === "direct" || exposure === "inferred") {
+    if (dtype === "trade_restriction") { out.add("Possible commodity price pressure"); out.add("Regulatory uncertainty for procurement"); out.add("Supplier availability concerns"); }
+    if (dtype === "logistics" || dtype === "physical_disruption" || dtype === "conflict") { out.add("Potential procurement delays"); out.add("Increased transportation costs"); out.add("Supplier availability concerns"); }
+    if (dtype === "energy") { out.add("Possible input-cost pressure"); out.add("Potential production delays"); }
+    if (!dtype || dtype === "other" || dtype === "political" || dtype === "cyber") { out.add("Possible cost or availability effects worth investigating"); }
+  } else {
+    out.add("Monitor for knock-on cost or availability effects");
+  }
+  return [...out];
+}
+
+export function exposureAssumptions(exposure: Exposure, matches: Match[]): { assumptions: string[]; missing: string[] } {
+  const assumptions: string[] = [];
+  const missing: string[] = [];
+  const has = (k: string) => matches.some((m) => m.kind === k);
+  if (exposure === "inferred") assumptions.push("Assumes the single matched link (commodity or supplier country) affects your supply; the other link is unconfirmed.");
+  if (exposure === "indirect") assumptions.push("Assumes secondary links (industry, customer/transport country or route dependency) can transmit impact to your business.");
+  if (!has("commodity")) missing.push("No direct commodity overlap between this event and your profile.");
+  if (!has("country")) missing.push("No country overlap between this event and your profile.");
+  if (!matches.some((m) => m.kind === "country" && (m.role === "supplier" || m.role === "operating"))) missing.push("No supplier/operating-country confirmation for this event.");
+  return { assumptions, missing };
 }
