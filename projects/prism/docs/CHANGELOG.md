@@ -1,5 +1,30 @@
 ﻿# PRISM — Changelog
 
+## [Unreleased] — V2 Phase 3: Personalized Relevance Engine
+
+### Added
+- _shared/relevance.ts: deterministic, explainable matching of company
+  profile facts against event attributes (commodities, countries by role,
+  industries, confirmed chokepoint/route dependencies). Exposure classes:
+  direct (commodity + supplier/operating country, or operating country +
+  industry), inferred (single strong link), indirect (secondary link),
+  none. Relevance score 0-100 SEPARATE from global risk; origin-aware
+  (user-confirmed facts score higher than AI-confirmed); unconfirmed AI
+  guesses never drive relevance. Plain-language explanations are
+  deterministic templates — no AI, no profile egress.
+- match-company-events Edge Function (deployed): caller JWT; profile
+  loaded THROUGH THE CALLER'S client so owner RLS is enforced by Postgres;
+  service client only for shared event data; read-only, on-demand, no new
+  tables/migration; returns top-20 relevant events with exposure,
+  relevance, reasons, and global risk kept separate (unrated mapped).
+- Dashboard: "Relevant to your company" section (hidden unless a profile
+  exists and matches are found).
+- test/relevance-smoke.mjs: 25 checks (all exposure classes, scoring
+  bounds/origins, explanation transparency, function privacy guarantees).
+
+### Verified
+- 14 suites: 963 checks, 0 failures.
+
 ## [Unreleased] — V2 Phase 2: Company Profile & Onboarding
 
 ### Added

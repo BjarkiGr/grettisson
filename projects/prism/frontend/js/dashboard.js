@@ -2,6 +2,7 @@
 // Overview dashboard driven by real Supabase intelligence.
 
 import { loadIntelligence, weeklyActivity, commodityIndex } from "./data.js";
+import { getClient } from "./supabase.js";
 import { aggregateByRegion } from "./regions.js";
 import { initFeed } from "./intelligence.js";
 import { statCard, eventListItem, simpleTable, emptyState, riskBadgeFromScore, loadingState } from "./components.js";
@@ -111,4 +112,27 @@ export async function init() {
   const feedRoot = document.getElementById("feed-root");
   if (feedRoot) initFeed(feedRoot, data);
   renderCharts(data);
+  loadRelevance();
+}
+
+// V2 Phase 3: personalized relevance (shown only when a company profile exists).
+async function loadRelevance() {
+  const section = document.getElementById("company-relevance");
+  const list = document.getElementById("relevance-list");
+  if (!section || !list) return;
+  try {
+    const sb = await getClient();
+    const { data, error } = await sb.functions.invoke("match-company-events", { body: {} });
+    if (error || !data?.has_profile || !data.items?.length) return;
+    section.hidden = false;
+    list.innerHTML = data.items.map((it) =>
+      '<article class="feed-item">' +
+      '<div class="feed-item-head"><a class="feed-title" href="event-detail.html?id=' + encodeURIComponent(it.event_id) + '">' + escapeHtml(it.title) + "</a>" +
+      '<span class="chip">' + escapeHtml(it.exposure) + " exposure</span>" +
+      '<span class="chip">relevance ' + escapeHtml(it.relevance_score) + "/100</span>" +
+      (it.global_risk ? '<span class="chip">global risk ' + (it.global_risk.overall_score === null ? "unrated" : escapeHtml(it.global_risk.overall_score)) + "</span>" : "") +
+      "</div>" +
+      '<p class="feed-excerpt">' + escapeHtml(it.explanation) + "</p>" +
+      "</article>").join("");
+  } catch { /* relevance is optional; the dashboard works without it */ }
 }
