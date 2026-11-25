@@ -1,0 +1,53 @@
+﻿{
+  "_note": "RETROSPECTIVE historical cases for PRISM risk validation (V2.1 Phase 3). These are NOT predictions made at the time: initial-evidence inputs are reconstructed approximations from public historical records, clearly labeled retrospective. Outcomes are documented history. Sample is far too small for statistical calibration claims.",
+  "cases": [
+    {
+      "id": "hist-suez-2021", "retrospective": true,
+      "what_happened": "Container ship Ever Given grounded in the Suez Canal, blocking the corridor for six days (March 2021).",
+      "initial_evidence_reconstructed": "Multiple independent reports confirmed an active full corridor blockage; salvage underway with uncertain timeline; ~12% of global trade transits the canal.",
+      "inputs": { "dimensions": { "escalation": { "proposed": 2, "verified_evidence": true }, "economic": { "proposed": 4, "verified_evidence": true }, "supply_chain": { "proposed": 4, "verified_evidence": true }, "geographic": { "proposed": 4, "verified_evidence": true }, "strategic": { "proposed": 3, "verified_evidence": true }, "persistence": { "proposed": 1, "verified_evidence": true } }, "major_economy_affected": true, "independent_sources": 4, "material_contradictions": false, "verified_fact_count": 6, "ai_likelihood": { "level": "very_high", "horizon_days": 14, "outcome": "continued corridor closure with global shipping delays" }, "ongoing_confirmed": true },
+      "subsequent_outcome": "Canal reopened after 6 days; hundreds of ships delayed; measurable global trade and freight-cost impact; no long-term structural change.",
+      "impact_materialized": true, "anticipated_disruption": true
+    },
+    {
+      "id": "hist-redsea-2023", "retrospective": true,
+      "what_happened": "Houthi attacks on Red Sea shipping from late 2023 forced major carriers to reroute around the Cape of Good Hope.",
+      "initial_evidence_reconstructed": "Confirmed attacks on multiple vessels; several major carriers announced rerouting; insurance costs rising; sustained campaign indicated.",
+      "inputs": { "dimensions": { "escalation": { "proposed": 3, "verified_evidence": true }, "economic": { "proposed": 3, "verified_evidence": true }, "supply_chain": { "proposed": 4, "verified_evidence": true }, "geographic": { "proposed": 3, "verified_evidence": true }, "strategic": { "proposed": 3, "verified_evidence": true }, "persistence": { "proposed": 3, "verified_evidence": true } }, "major_economy_affected": true, "independent_sources": 4, "material_contradictions": false, "verified_fact_count": 5, "ai_likelihood": { "level": "high", "horizon_days": 90, "outcome": "sustained rerouting with higher freight costs and delays" }, "ongoing_confirmed": true },
+      "subsequent_outcome": "Rerouting persisted for months; transit times +10-14 days; freight rates spiked; disruption materialized as anticipated.",
+      "impact_materialized": true, "anticipated_disruption": true
+    },
+    {
+      "id": "hist-grain-2022", "retrospective": true,
+      "what_happened": "Russia-Ukraine war disrupted Black Sea grain exports from February 2022; later partially mitigated by the Black Sea Grain Initiative.",
+      "initial_evidence_reconstructed": "Confirmed port closures and naval activity; Ukraine and Russia are major wheat exporters; conflicting reports on export continuity.",
+      "inputs": { "dimensions": { "escalation": { "proposed": 4, "verified_evidence": true }, "economic": { "proposed": 4, "verified_evidence": true }, "supply_chain": { "proposed": 3, "verified_evidence": true }, "geographic": { "proposed": 3, "verified_evidence": true }, "strategic": { "proposed": 4, "verified_evidence": true }, "persistence": { "proposed": 3, "verified_evidence": true } }, "major_economy_affected": true, "independent_sources": 3, "material_contradictions": true, "verified_fact_count": 4, "ai_likelihood": { "level": "high", "horizon_days": 180, "outcome": "grain export shortfall with global price pressure" }, "ongoing_confirmed": true },
+      "subsequent_outcome": "Wheat prices spiked to record levels; exports fell sharply until the July 2022 corridor deal; impact materialized.",
+      "impact_materialized": true, "anticipated_disruption": true
+    },
+    {
+      "id": "hist-baltimore-2024", "retrospective": true,
+      "what_happened": "Francis Scott Key Bridge collapsed after a container ship strike (March 2024), closing the Port of Baltimore for weeks.",
+      "initial_evidence_reconstructed": "Single confirmed catastrophic incident; port closure announced; vehicle and coal shipments affected; national impact limited.",
+      "inputs": { "dimensions": { "escalation": { "proposed": 1, "verified_evidence": true }, "economic": { "proposed": 2, "verified_evidence": true }, "supply_chain": { "proposed": 3, "verified_evidence": true }, "geographic": { "proposed": 1, "verified_evidence": true }, "strategic": { "proposed": 1, "verified_evidence": true }, "persistence": { "proposed": 2, "verified_evidence": true } }, "major_economy_affected": true, "independent_sources": 3, "material_contradictions": false, "verified_fact_count": 4, "ai_likelihood": { "level": "very_high", "horizon_days": 60, "outcome": "weeks-long port closure with regional logistics disruption" }, "ongoing_confirmed": true },
+      "subsequent_outcome": "Port reopened ~11 weeks later; regional disruption real but national impact contained; materialized at anticipated scale.",
+      "impact_materialized": true, "anticipated_disruption": true
+    },
+    {
+      "id": "hist-panama-2023", "retrospective": true,
+      "what_happened": "Drought lowered Gatun Lake levels; Panama Canal Authority cut daily transits through 2023-2024.",
+      "initial_evidence_reconstructed": "Official transit restrictions announced; drought conditions verified; gradual rather than sudden disruption; some conflicting forecasts on duration.",
+      "inputs": { "dimensions": { "escalation": { "proposed": 2, "verified_evidence": true }, "economic": { "proposed": 2, "verified_evidence": true }, "supply_chain": { "proposed": 3, "verified_evidence": true }, "geographic": { "proposed": 2, "verified_evidence": true }, "strategic": { "proposed": 2, "verified_evidence": false }, "persistence": { "proposed": 3, "verified_evidence": true } }, "major_economy_affected": true, "independent_sources": 3, "material_contradictions": true, "verified_fact_count": 3, "ai_likelihood": { "level": "high", "horizon_days": 180, "outcome": "reduced canal capacity with rerouting and delays" }, "ongoing_confirmed": true },
+      "subsequent_outcome": "Transits cut by ~a third; queues and auction fees soared; rains restored capacity in 2024; disruption materialized.",
+      "impact_materialized": true, "anticipated_disruption": true
+    },
+    {
+      "id": "hist-tariff-review-2023", "retrospective": true,
+      "what_happened": "Announced review of possible new tariffs on a major trading partner (2023); measures were largely not implemented within the horizon.",
+      "initial_evidence_reconstructed": "Single-source announcement of a review; no enacted measures; officials signaled negotiation; thin detail on scope.",
+      "inputs": { "dimensions": { "escalation": { "proposed": 3, "verified_evidence": false }, "economic": { "proposed": 3, "verified_evidence": false }, "supply_chain": { "proposed": 2, "verified_evidence": false }, "geographic": { "proposed": 2, "verified_evidence": true }, "strategic": { "proposed": 2, "verified_evidence": false }, "persistence": { "proposed": 2, "verified_evidence": false } }, "major_economy_affected": true, "independent_sources": 1, "material_contradictions": false, "verified_fact_count": 1, "ai_likelihood": { "level": "insufficient_evidence", "horizon_days": 90, "outcome": "possible new tariffs affecting import costs" }, "ongoing_confirmed": false },
+      "subsequent_outcome": "No broad tariffs enacted within 90 days; talks continued; anticipated disruption did NOT materialize.",
+      "impact_materialized": false, "anticipated_disruption": false
+    }
+  ]
+}

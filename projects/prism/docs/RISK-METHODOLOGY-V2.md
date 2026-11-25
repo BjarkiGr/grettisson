@@ -177,3 +177,11 @@ test/risk-v2-cases.json: 12/12 expected outcomes matched. Highlights:
   impact stay separate.
 This validation used a throwaway script (not committed); no engine code was
 implemented. The fixtures become acceptance tests upon approval.
+
+## Errata (V2.1 Phase 3, 2026-12-01)
+
+L1b: when the AI reports insufficient_evidence and no ongoing disruption
+is confirmed, the result is UNRATED regardless of verified-fact count.
+An implementation fallback previously defaulted such cases to moderate;
+fixed in risk-v2.ts. Methodology intent unchanged. See
+docs/RISK-VALIDATION-REPORT.md.

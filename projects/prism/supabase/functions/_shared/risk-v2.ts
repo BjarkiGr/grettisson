@@ -1,4 +1,4 @@
-﻿// PRISM — risk engine V2 (scoring_version 2.0.0). Pure, Node-testable.
+// PRISM — risk engine V2 (scoring_version 2.0.0). Pure, Node-testable.
 // Implements docs/RISK-METHODOLOGY-V2.md exactly. The AI proposes; this
 // code gates, validates, computes and explains. No numeric probabilities.
 
@@ -97,6 +97,12 @@ export function assessRiskV2(inp: RiskV2Inputs): RiskV2Result {
   } else if (ongoing) {
     likelihood = "very_high";
     likelihood_notes.push("L2: confirmed ongoing disruption -> very_high (ongoing)");
+  } else if (inp.ai_likelihood?.level === "insufficient_evidence") {
+    // Errata 2026-12-01 (V2.1 Phase 3): the documented UNRATED path must hold
+    // whenever evidence is insufficient and no ongoing disruption is confirmed.
+    // Previously this fell through to a "moderate" default — a bug.
+    likelihood = "insufficient_evidence";
+    likelihood_notes.push("L1b: insufficient evidence, no confirmed ongoing disruption -> unrated");
   } else {
     const ai = inp.ai_likelihood?.level;
     likelihood = (["very_low", "low", "moderate", "high", "very_high"].includes(ai) ? ai : "moderate") as LikelihoodLevel;

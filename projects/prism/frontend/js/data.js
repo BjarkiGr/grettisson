@@ -92,7 +92,7 @@ export function composeIntelligence({ events, riskScores, analyses, articles, ev
       }) : null,
       explanation: latest ? latest.explanation : null,
       confidence: latest?.confidence ?? an?.confidence ?? null,
-      history: risks.map((r) => ({ date: r.created_at, overall_score: r.overall_score })),
+      history: risks.map((r) => ({ date: r.created_at, overall_score: r.scoring_version === "2.0.0" && r.likelihood_level === "insufficient_evidence" ? null : r.overall_score })),
       analysis: an,
       countries: Array.isArray(aj.countries_involved) && aj.countries_involved.length ? aj.countries_involved : (e.primary_country ? [e.primary_country] : []),
       commodities: aj.commodities_affected ?? [],

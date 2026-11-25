@@ -1,4 +1,4 @@
-// PRISM — dashboard.js (Phase 6: live data)
+﻿// PRISM — dashboard.js (Phase 6: live data)
 // Overview dashboard driven by real Supabase intelligence.
 
 import { loadIntelligence, weeklyActivity, commodityIndex } from "./data.js";
@@ -39,7 +39,7 @@ function renderRiskChanges(data) {
   const el = document.getElementById("risk-changes");
   if (!el) return;
   const changes = data.events
-    .filter((e) => e.history.length >= 2)
+    .filter((e) => e.overall_score !== null && e.history.length >= 2 && e.history[e.history.length - 2].overall_score !== null)
     .map((e) => ({ event: e, delta: e.overall_score - e.history[e.history.length - 2].overall_score }))
     .sort((a, b) => Math.abs(b.delta) - Math.abs(a.delta));
   el.innerHTML = changes.length
