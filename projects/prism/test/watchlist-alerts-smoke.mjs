@@ -45,7 +45,7 @@ check("duplicate handled", wl.includes("23505"));
 
 console.log("[4] dashboard alerts wiring");
 const dj = read("frontend/js/dashboard.js");
-check("freshAlerts imported + used", dj.includes('import { freshAlerts }') && dj.includes("freshAlerts(data.items, seenIds)"));
+check("freshAlerts imported + used", dj.includes('import { freshAlerts }') && dj.includes("freshAlerts(data.items, [...seenScores.keys()])"));
 check("per-user seen key", dj.includes('"prism_seen_relevance_" + (session?.user?.id ?? "anon")'));
 check("NEW chip on fresh items", dj.includes("freshIds.has(it.event_id) ? '<span class=\"chip\">NEW</span>' : ''"));
 check("mark-all-seen button", dj.includes('id="rel-seen"') || dj.includes("#rel-seen"));

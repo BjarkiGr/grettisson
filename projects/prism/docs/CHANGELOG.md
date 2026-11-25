@@ -1,5 +1,18 @@
 ﻿# PRISM — Changelog
 
+## [Unreleased] — V2.1 Phase 6: Testing, documentation & release
+
+### Added
+- test/integration-smoke.mjs (20 checks): full deterministic chain
+  RSS -> classify -> dedup -> prompt -> validation -> risk -> relevance,
+  plus failure scenarios (malformed RSS, irrelevant filter, AI 429/402/
+  500/non-JSON, insufficient evidence, fabricated citations, injection).
+- docs/V2.1-RELEASE-NOTES.md (incl. rollback procedures).
+
+### Verified
+- 23 suites: 1287 checks, 0 failures. Live probes: security 13/13,
+  schema 17/17. All V2.1 functions deployed.
+
 ## [Unreleased] — V2.1 Phase 2: AI Intelligence Integrity
 
 ### Added

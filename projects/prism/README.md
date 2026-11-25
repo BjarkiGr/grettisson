@@ -6,7 +6,10 @@ with a free-tier AI provider, computes explainable risk scores and presents
 structured intelligence in a static web dashboard — now with private
 company profiles and personalized relevance.
 
-**Status: V1 MVP complete (Phases 0-8) + V2 Phases 0-5 complete.**
+**Status: V1 MVP + V2 (Phases 0-5) + V2.1 (Phases 0-6) complete.**
+V2.1 = trust/intelligence/reliability release: security hardening, AI
+integrity (prompt 2.1.0), risk validation, queue reliability, purchasing
+intelligence. See docs/V2.1-RELEASE-NOTES.md.
 
 - V1: live Supabase intelligence behind an admin-managed login gate
   (admin/viewer roles), full automated pipeline (pg_cron + Vault),
@@ -25,7 +28,7 @@ company profiles and personalized relevance.
 - `supabase/` — config.toml, 7 migrations, 9 Edge Functions (Deno/TS).
 - `docs/` — architecture, database, AI, risk methodology (V1+V2),
   automation, deployment, changelog.
-- `test/` — zero-dependency Node smoke tests (16 suites, ~1000 checks).
+- `test/` — zero-dependency Node smoke tests (23 suites, ~1300 checks).
 
 ## Quick start (development)
 
