@@ -1,4 +1,4 @@
-﻿// PRISM — settings.js
+// PRISM — settings.js
 // Phase 2: real connection diagnostics against Supabase (read tests under
 // RLS). Preferences UI arrives in Phase 6. Added file: justified like
 // components.js — the spec requires settings behavior but names no module.
@@ -12,6 +12,7 @@ import { loadingState, errorState } from "./components.js";
 const READ_TABLES = ["sources", "articles", "events", "analyses", "risk_scores", "watchlists"];
 
 export async function init() {
+  loadSystemHealth();
   const root = document.getElementById("connection-root");
   if (!root) return;
 
@@ -157,4 +158,31 @@ async function initUserManagement() {
     }
   };
   await render();
+}
+
+// V2.1 Phase 4: sanitized system health (authenticated users).
+async function loadSystemHealth() {
+  const main = document.getElementById("main");
+  if (!main) return;
+  const sec = document.createElement("section");
+  sec.className = "panel";
+  sec.innerHTML = '<h2>System health</h2><p class="muted state" role="status">Checking\u2026</p>';
+  main.prepend(sec);
+  try {
+    const sb = await getClient();
+    const { data, error } = await sb.functions.invoke("system-status", { body: {} });
+    if (error || !data?.state) throw new Error(error?.message ?? "unavailable");
+    const fmt = (v) => v ? formatDate(v) : "never";
+    sec.innerHTML = '<h2>System health</h2>' +
+      '<div class="chip-row"><span class="chip">' + escapeHtml(data.state) + '</span>' +
+      '<span class="chip">pending ' + escapeHtml(data.jobs?.pending ?? 0) + '</span>' +
+      '<span class="chip">failed ' + escapeHtml(data.jobs?.failed ?? 0) + '</span>' +
+      (data.jobs?.paused ? '<span class="chip">AI paused ' + escapeHtml(data.jobs.paused) + '</span>' : '') + '</div>' +
+      '<p class="muted">Last ingestion: ' + escapeHtml(fmt(data.last_ingestion_at)) +
+      ' \u00b7 last AI assessment: ' + escapeHtml(fmt(data.last_analysis_at)) +
+      ' \u00b7 last risk calculation: ' + escapeHtml(fmt(data.last_risk_at)) + '</p>' +
+      '<p class="muted">States: HEALTHY / DELAYED / DEGRADED / PAUSED / FAILED (docs/OPERATIONS.md).</p>';
+  } catch (e) {
+    sec.innerHTML = '<h2>System health</h2>' + errorState("Unavailable: " + escapeHtml(e?.message ?? "error"));
+  }
 }

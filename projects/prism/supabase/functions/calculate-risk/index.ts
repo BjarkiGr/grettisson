@@ -5,6 +5,7 @@
 
 import { handleCorsPreflight, jsonResponse } from "../_shared/cors.ts";
 import { isServiceRole, readJsonLimited } from "../_shared/auth.ts";
+import { recoverStaleJobs } from "../_shared/queue.ts";
 import { createServiceClient } from "../_shared/database.ts";
 import { deriveDimensions, computeOverallScore, buildExplanation } from "../_shared/risk.ts";
 import { assessRiskV2, SCORING_VERSION, MAJOR_ECONOMIES, CHOKEPOINT_STATES, V2_DIMENSIONS } from "../_shared/risk-v2.ts";
@@ -24,6 +25,7 @@ Deno.serve(async (req: Request) => {
 
   try {
     const db = createServiceClient();
+    await recoverStaleJobs(db);
     const { data: jobs, error } = await db.from("processing_jobs")
       .select("id, entity_id, attempts")
       .eq("job_type", "calculate_risk").eq("status", "pending")

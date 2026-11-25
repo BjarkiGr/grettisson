@@ -35,3 +35,6 @@ verify_jwt = true
 
 # Scheduled invocations (Phase 7) will authenticate with a key stored in
 # Supabase Vault — never committed to this repository.
+
+[functions.system-status]
+verify_jwt = true

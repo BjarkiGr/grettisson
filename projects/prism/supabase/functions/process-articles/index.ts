@@ -6,6 +6,8 @@
 
 import { handleCorsPreflight, jsonResponse } from "../_shared/cors.ts";
 import { isServiceRole, readJsonLimited } from "../_shared/auth.ts";
+import { recoverStaleJobs } from "../_shared/queue.ts";
+import { eventSimilarity, MERGE_THRESHOLD } from "../_shared/dedup.ts";
 import { createServiceClient } from "../_shared/database.ts";
 import { classifyArticle } from "../_shared/classify.ts";
 import type { SupabaseClient } from "../_shared/database.ts";
@@ -44,13 +46,19 @@ async function processOne(db: SupabaseClient, job: JobRow): Promise<string> {
     const cutoff = new Date(Date.now() - EVENT_MATCH_DAYS * 86400000).toISOString();
     const { data: matches } = await db
       .from("events")
-      .select("id")
+      .select("id, title, last_updated_at")
       .eq("category", cls.category)
       .eq("primary_country", cls.primaryCountry)
       .gte("last_updated_at", cutoff)
       .order("last_updated_at", { ascending: false })
-      .limit(1);
-    if (matches && matches.length > 0) eventId = matches[0].id;
+      .limit(10);
+    // V2.1: weighted similarity; uncertain matches never auto-merge.
+    let best: { id: string; score: number } | null = null;
+    for (const m of matches ?? []) {
+      const score = eventSimilarity(article.title, m, Date.now());
+      if (!best || score > best.score) best = { id: m.id, score };
+    }
+    if (best && best.score >= MERGE_THRESHOLD) eventId = best.id;
   }
 
   let created = false;
@@ -98,6 +106,7 @@ Deno.serve(async (req: Request) => {
 
   try {
     const db = createServiceClient();
+    await recoverStaleJobs(db);
     const { data: jobs, error } = await db
       .from("processing_jobs")
       .select("id, entity_id, attempts")

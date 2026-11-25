@@ -1,4 +1,4 @@
-﻿// PRISM — analyze-events Edge Function (Phase 4).
+// PRISM — analyze-events Edge Function (Phase 4).
 // Drains analyze_event jobs in small batches through the configured
 // free-tier AI provider. Validates structured output strictly (fabricated
 // citations rejected), stores analyses with full provenance, refines
@@ -8,6 +8,7 @@
 
 import { handleCorsPreflight, jsonResponse } from "../_shared/cors.ts";
 import { isServiceRole, readJsonLimited } from "../_shared/auth.ts";
+import { recoverStaleJobs } from "../_shared/queue.ts";
 import { createServiceClient } from "../_shared/database.ts";
 import type { SupabaseClient } from "../_shared/database.ts";
 import { readProviderConfig, createOpenAiCompatibleProvider } from "../_shared/ai-provider.ts";
@@ -59,6 +60,7 @@ Deno.serve(async (req: Request) => {
 
   try {
     const db = createServiceClient();
+    await recoverStaleJobs(db);
     const provider = createOpenAiCompatibleProvider(config);
     const body = req.method === "POST" ? ((await readJsonLimited(req, 2048)) ?? {}) : {};
 
