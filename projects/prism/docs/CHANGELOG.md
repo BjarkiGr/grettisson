@@ -1,5 +1,24 @@
 ﻿# PRISM — Changelog
 
+## [Unreleased] — V2 stabilization pass
+
+### Changed
+- README.md: V2 status, features, layout (10 pages, 9 functions,
+  7 migrations), test instructions, privacy constraints, V2 roadmap.
+- REVIEW-REQUEST.txt: updated for external review — V2 phases, risk
+  engine 2.0.0 description, company-intelligence data flow and privacy
+  model, current state (16 suites / 1009 checks), revised limitations
+  (matrix not empirically calibrated; extraction quality; substring
+  chokepoint matching; device-local alert state; pending migrations),
+  V2 review checklist items.
+
+### Added
+- test/http-serve-check.mjs: serves frontend/ over HTTP and verifies all
+  10 pages (module script + nav) and 18 JS modules + CSS (29 checks).
+
+### Verified
+- 17 suites: 1038 checks, 0 failures.
+
 ## [Unreleased] — V2 Phase 5: Personalized watchlists & alerts
 
 ### Added

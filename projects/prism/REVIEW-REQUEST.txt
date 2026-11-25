@@ -1,4 +1,4 @@
-﻿PRISM — REQUEST FOR EXTERNAL AI REVIEW
+PRISM — REQUEST FOR EXTERNAL AI REVIEW
 ======================================
 
 HOW TO USE THIS FILE
@@ -34,7 +34,8 @@ Hard constraints from the master specification:
 2. THE IMPLEMENTING AGENT'S ROLE (plain text)
 ---------------------------------------------
 A single AI coding agent (Cline, in VS Code) acted as the sole implementation
-engineer across nine approved phases (0-8), plus two post-MVP features. It
+engineer across nine approved V1 phases (0-8), post-MVP features (multi-user
+roles, Supply Chain Map) and six approved V2 phases (0-5). It
 worked inside an existing personal-site monorepo (grettisson), placing PRISM
 at projects/prism/ with user approval. Its rules: inspect before changing;
 implement only the authorized phase; test everything; report and stop for
@@ -59,10 +60,14 @@ provisional events; queue analysis) -> analyze-events function (Groq AI,
 versioned prompt 1.0.0 requiring a strict 16-field JSON schema; evidence
 must be tagged verified_fact/inference/speculation; citations must reference
 only the provided articles; output validated before storage; rate limits
-pause jobs with auto-resume windows) -> calculate-risk function (six 0-5
-dimensions derived by documented deterministic rules from the validated
-analysis; overall = weighted mean normalized to 0-100; append-only history
-with generated explanations; confidence stored separately from impact).
+pause jobs with auto-resume windows) -> calculate-risk function (engine
+2.0.0: evidence gates G1-G3; likelihood bands L1-L4 from evidence quality;
+confidence computed by code, never by the AI; six impact dimensions ->
+heuristic impact index; 5x5 likelihood x impact matrix -> overall 0-100;
+UNRATED/insufficient_evidence path stored as score 0 + special level and
+shown as "unrated"; append-only history; legacy V1 rows kept as 1.0.0;
+quota-safe change detection; methodology in docs/RISK-METHODOLOGY-V2.md
+with 12 regression fixtures).
 
 Automation: pg_cron + pg_net invoke the functions (ingest every 30 min,
 process/analyze every 15 min, risk hourly, health daily). The service key
@@ -71,6 +76,19 @@ whitelisted to the five PRISM functions and revoked from anon. An overlap
 guard skips invocations while a previous one is unacknowledged; a reaper
 job records HTTP outcomes into a cron_runs history table and times out
 stale invocations.
+
+V2 company intelligence: company_profiles + 5 child tables (owner-only
+RLS; origin tagging user_supplied/ai_confirmed/imported_verified).
+extract-company-profile (caller JWT + explicit consent flag) sends the
+user's description to Groq once, validates suggestions strictly, returns
+them WITHOUT persisting; the user confirms/edits in the UI before save.
+match-company-events (caller JWT; profile read through the caller's own
+client so RLS applies) deterministically matches profile facts against
+event commodities/countries/industries/chokepoints; exposure classes
+direct/inferred/indirect/none; relevance 0-100 separate from global risk;
+template explanations; no AI, no writes. Frontend: Company Profile page,
+"My company" feed mode, why-this-matters panels, watchlist suggestions,
+device-local new-relevance alerts.
 
 Frontend: static multi-page site. Auth gate: every page except login
 redirects signed-out visitors. Data loads via the Supabase JS client (pinned
@@ -95,6 +113,10 @@ selector showing real events that could disrupt each route.
 - service_role (Edge Functions only): full access; key auto-injected by the
   hosted runtime; also stored in Vault for cron invocation.
 - AI key: Supabase Edge Function secrets only. Never in Git or frontend.
+- Company profiles: owner-only RLS on all six tables; anon zero privileges;
+  extraction is the ONLY profile->AI path and requires explicit consent;
+  AI suggestions are never auto-saved; relevance matching never sends the
+  profile anywhere (pure server-side code, template explanations).
 - All dynamic frontend strings HTML-escaped before innerHTML; map popups
   included. Articles and AI output treated as untrusted.
 - Secret scans run before every git push. Public publishable key in
@@ -105,7 +127,7 @@ selector showing real events that could disrupt each route.
 ---------------------------
 Production: 8 sources, ~180+ articles, ~30 events, analyses and risk scores
 for all analyzed events; pipeline fully automated; 0 job failures at last
-check. 10 test suites, ~800 assertions, all passing. Everything committed
+check. 16 test suites, 1009 assertions, all passing; 9 Edge Functions deployed; 7 migrations (0006 risk_v2 and 0007 company_profiles pending manual application at time of writing). Everything committed
 and pushed to GitHub. Render deployment blueprint prepared (manual deploy
 pending). One operational incident history: pg_net's default 5s timeout
 initially mislabeled successful invocations as failed; fixed with a 120s
@@ -117,9 +139,9 @@ timeout; pre-fix failures remain in the audit history.
 1. Single-admin MVP; multi-user expansion untested beyond RLS design.
 2. Keyword classifier is a cheap first pass; Icelandic coverage is
    stem-limited; misclassification possible.
-3. Risk dimensions use simple heuristics (count-based exposure, category
-   duration priors, verified-fact ratio as probability proxy). Documented
-   but not empirically validated; probability is an estimate, not a statistic.
+3. Risk engine 2.0.0 replaced the V1 heuristics: likelihood bands and the
+   impact index are documented but not empirically validated; the matrix
+   is a judgment framework, not a calibrated probability model.
 4. RSS excerpts only (licensing-safe but shallow context for the AI).
 5. Region preference stored in localStorage, not synced to the profile.
 6. Free-tier AI quotas can pause analysis; resume windows are fixed.
@@ -133,6 +155,11 @@ timeout; pre-fix failures remain in the audit history.
 11. The Groq API key was pasted into the implementation chat once; rotation
     is recommended and documented but may not have been performed yet.
 12. No external penetration test or formal code audit has been performed.
+13. Company extraction quality depends on one AI call; suggestions can be
+    wrong and rely on user confirmation. Chokepoint matching is substring
+    based and coarse. Alert read-state is device-local (localStorage).
+14. Migrations 0006/0007 may not be applied yet; V1 is unaffected but
+    company features need 0007 and the new risk engine needs 0006.
 
 
 7. WHAT TO REVIEW (suggested checklist for the reviewer)
@@ -156,6 +183,10 @@ timeout; pre-fix failures remain in the audit history.
 - Operational: backup/restore realism on free tier, pause recovery,
   key rotation procedures.
 - Anything the implementing agent may be overconfident about.
+- V2: can relevance matching leak profile data across users? Is the
+  consent gate on extraction airtight? Can AI-suggested entries become
+  facts without user action? Is the risk matrix reproducible from stored
+  inputs? Are UNRATED events handled honestly everywhere?
 
 
 8. REQUESTED OUTPUT FORMAT
