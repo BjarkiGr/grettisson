@@ -18,6 +18,7 @@ const PAGE_MODULES = {
   regions: "./regions.js",
   commodities: "./commodities.js",
   "supply-chains": "./supply-chains.js",
+  company: "./company.js",
   watchlists: "./watchlists.js",
   login: "./auth.js",
   settings: "./settings.js",

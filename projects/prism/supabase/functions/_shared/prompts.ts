@@ -111,3 +111,24 @@ export const SYSTEM_PROMPT_V2 = [
   "DIMENSION ANCHORS (0-5): escalation: 0 resolved, 1 stable, 2 plausible worsening, 3 active escalation, 4 uncontrolled escalation, 5 systemic contagion. economic: 0 negligible, 1 local/niche, 2 regional/single-sector, 3 multi-sector national, 4 severe multi-national, 5 systemic/global. supply_chain: 0 none, 1 minor delays, 2 partial corridor disruption, 3 major corridor/input disrupted, 4 chokepoint closed/widespread halt, 5 global network failure. geographic: 0 locality, 1 subnational, 2 national, 3 2-3 countries/one region, 4 multi-region, 5 global. strategic: 0 routine, 1 minor diplomatic, 2 notable bilateral, 3 major architecture, 4 major-power flashpoint, 5 existential/systemic. persistence: 0 hours, 1 days, 2 weeks, 3 months, 4 quarters, 5 years/structural.",
   "Scores >=3 REQUIRE at least one verified_fact citation in evidence_article_ids; otherwise propose <=2. Likelihood high/very_high requires corroborated evidence; if evidence is too thin use insufficient_evidence. ongoing_claim=true only if articles verify an ACTIVE disruption.",
 ].join("\n");
+
+// ===================== Company profile extraction (V2 Phase 2) =====================
+export const EXTRACTION_PROMPT_VERSION = "1.0.0";
+
+export const EXTRACTION_PROMPT = [
+  "You extract a STRUCTURED company profile from a user's own description of their business. You SUGGEST; the user confirms everything afterwards. Never invent facts not supported by the text.",
+  "Rules:",
+  "- Only extract what the description states or clearly implies. Put guesses in uncertainties, not in fields.",
+  "- Country codes: ISO 3166-1 alpha-2 uppercase.",
+  "- commodity_slug: lowercase hyphenated English slugs (e.g. steel, timber, electrical-equipment, insulation, plumbing-supplies, building-materials, cement, copper, aluminium).",
+  "- If the text does not mention something, use empty arrays / null. Do not pad.",
+  "OUTPUT: one JSON object, no markdown, EXACTLY:",
+  '{',
+  '  "name": string|null, "industry": string|null, "business_type": string|null,',
+  '  "operating_countries": string[], "supplier_countries": string[], "customer_countries": string[], "transport_countries": string[],',
+  '  "commodities": string[], "industries": string[],',
+  '  "products": [{"name": string, "category": string|null}],',
+  '  "dependencies": [{"kind": "route"|"chokepoint"|"infrastructure"|"other", "ref": string}],',
+  '  "uncertainties": string[]',
+  '}',
+].join("\n");

@@ -1,5 +1,31 @@
 ﻿# PRISM — Changelog
 
+## [Unreleased] — V2 Phase 2: Company Profile & Onboarding
+
+### Added
+- Migration 0007: company_profiles + company_industries/commodities/
+  products/countries/dependencies. Normalized, one profile per user,
+  OWNER-ONLY RLS on every table, origin tagging (user_supplied /
+  ai_confirmed / imported_verified), country roles, dependency kinds.
+  anon: no privileges.
+- extract-company-profile Edge Function (deployed): authenticated caller,
+  EXPLICIT consent flag required, description bounded (20-4000 chars),
+  Groq extraction (prompt 1.0.0), strict validation (ISO codes, slugs,
+  kinds), returns SUGGESTIONS ONLY — never writes company tables, never
+  logs the description, generic errors.
+- company.html + js/company.js: natural-language onboarding with consent
+  checkbox, editable confirmation UI (accept/edit/remove/add), origin
+  chips, save with origins, update anytime, skippable (V1 unaffected).
+- Nav "Company Profile" on all 10 pages; app routing.
+- test/company-profile-smoke.mjs: 48 checks.
+
+### Verified
+- 13 suites: 935 checks, 0 failures.
+
+### Pending (manual)
+- Apply migrations 0006 (if not yet) and 0007 in SQL Editor; create a
+  profile in the browser.
+
 ## [Unreleased] — V2 Phase 1 implementation + classifier repairs
 
 ### Fixed (classifier, from real-feed diagnosis)

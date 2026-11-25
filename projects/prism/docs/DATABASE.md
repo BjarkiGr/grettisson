@@ -43,3 +43,14 @@ Domain TypeScript shapes mirroring these tables already exist in
 - Normalize URLs (strip tracking params, unify scheme/host casing).
 - SHA-256 content hash over normalized title + url; unique constraint.
 - Insert with conflict-ignore semantics; never reprocess existing articles.
+
+## V2 company profile tables (Phase 2, migration 0007)
+
+company_profiles (one per user, private description + ai_consent_at) and
+company_industries / company_commodities / company_products /
+company_countries (role: supplier|operating|customer|transport) /
+company_dependencies (kind: route|chokepoint|infrastructure|other,
+confirmed flag). Every entry: origin = user_supplied | ai_confirmed |
+imported_verified. OWNER-ONLY RLS (user_id = auth.uid()) on all six;
+anon has no privileges. AI extraction returns suggestions only; the user
+confirms in the UI before anything is persisted.

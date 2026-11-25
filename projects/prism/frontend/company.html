@@ -1,0 +1,40 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PRISM — Company Profile</title>
+  <link rel="stylesheet" href="css/main.css">
+  <link rel="stylesheet" href="css/layout.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/dashboard.css">
+  <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body class="app-shell" data-page="company">
+  <a class="skip-link" href="#main">Skip to content</a>
+  <header class="app-header">
+    <div class="brand">PRISM<span class="brand-sub">Political Risk &amp; Impact Scoring Model</span></div>
+    <button id="nav-toggle" class="nav-toggle" aria-expanded="false" aria-controls="app-nav">Menu</button>
+    <nav id="app-nav" class="app-nav" aria-label="Main navigation">
+      <a href="index.html">Overview</a>
+      <a href="index.html#intelligence-feed">Intelligence Feed</a>
+      <a href="events.html">Geopolitical Events</a>
+      <a href="regions.html">Regional Risk</a>
+      <a href="commodities.html">Commodities</a>
+      <a href="supply-chains.html">Supply Chains</a>
+      <a href="company.html" aria-current="page">Company Profile</a>
+      <a href="watchlists.html">Watchlists</a>
+      <a href="settings.html">Settings</a>
+    </nav>
+  </header>
+  <main id="main" class="app-main">
+    <div class="page-head">
+      <h1>Company Profile</h1>
+      <p class="muted">Private to your account. Tell PRISM what your company depends on; confirm every suggestion before it becomes part of your profile.</p>
+    </div>
+    <div id="company-root"><p class="muted state" role="status">Loading…</p></div>
+  </main>
+  <footer class="app-footer">PRISM v1.0 — live intelligence, authenticated access only. <a href="login.html">Account</a>.</footer>
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
