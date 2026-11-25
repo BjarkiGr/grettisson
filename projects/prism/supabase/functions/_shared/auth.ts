@@ -1,4 +1,4 @@
-﻿// PRISM V2.1 Phase 1 — request authentication helpers (backend only).
+// PRISM V2.1 Phase 1 — request authentication helpers (backend only).
 // The hosted gateway (verify_jwt = true) verifies JWT signatures BEFORE
 // the handler runs; payload role claims are therefore trustworthy here.
 // Pipeline functions accept ONLY the service-role key (cron sends it from
@@ -13,6 +13,12 @@ export function bearerToken(req: Request): string | null {
 export function isServiceRole(req: Request): boolean {
   const token = bearerToken(req);
   if (!token) return false;
+  // New API-key system: the Vault may hold an sb_secret_... key (NOT a JWT).
+  // Accept an exact match against the runtime-injected service credential.
+  // The gateway validated the credential before we run; never logged/returned.
+  const injected = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+  if (injected && token === injected) return true;
+  // Legacy JWT-format service key: role claim (gateway-verified signature).
   const parts = token.split(".");
   if (parts.length !== 3) return false;
   try {

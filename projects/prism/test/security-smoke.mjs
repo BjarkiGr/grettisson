@@ -1,4 +1,4 @@
-﻿// PRISM V2.1 Phase 1 — security regression suite. Zero dependencies.
+// PRISM V2.1 Phase 1 — security regression suite. Zero dependencies.
 // Run: node projects/prism/test/security-smoke.mjs
 import { readFileSync, readdirSync } from "node:fs";
 import path from "node:path";
@@ -50,6 +50,7 @@ for (const fn of ["ingest-sources", "process-articles", "analyze-events", "calcu
 }
 const auth = read("supabase/functions/_shared/auth.ts");
 check("strict role equality", auth.includes('payload?.role === "service_role"'));
+check("new-format service key accepted via injected secret match", auth.includes("token === injected") && auth.includes("SUPABASE_SERVICE_ROLE_KEY"));
 check("bounded body reader", auth.includes("readJsonLimited") && auth.includes("maxBytes"));
 
 console.log("[3] user-facing hardening");
