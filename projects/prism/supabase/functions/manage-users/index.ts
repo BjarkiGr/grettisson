@@ -1,4 +1,4 @@
-﻿// PRISM — manage-users Edge Function.
+// PRISM — manage-users Edge Function.
 // Admin-only user management. Verifies the CALLER's JWT, checks their
 // profile role server-side, then uses the service key (never exposed) for
 // Supabase Auth admin operations. Created users are always 'viewer'.
@@ -6,6 +6,7 @@
 
 import { handleCorsPreflight, jsonResponse } from "../_shared/cors.ts";
 import { createServiceClient } from "../_shared/database.ts";
+import { readJsonLimited } from "../_shared/auth.ts";
 
 const MAX_LIST = 50;
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -29,7 +30,8 @@ Deno.serve(async (req: Request) => {
       return jsonResponse({ error: "admin_only", message: "Only administrators can manage users." }, 403);
     }
 
-    const body = await req.json().catch(() => ({}));
+    const body = await readJsonLimited(req, 4096);
+    if (body === null) return jsonResponse({ error: "invalid_body" }, 400);
     const action = body?.action;
 
     if (action === "list") {
@@ -55,6 +57,7 @@ Deno.serve(async (req: Request) => {
       const password = String(body?.password ?? "");
       if (!EMAIL_RE.test(email)) return jsonResponse({ error: "invalid_email" }, 400);
       if (password.length < 8) return jsonResponse({ error: "password_too_short", message: "Minimum 8 characters." }, 400);
+      if (password.length > 128 || email.length > 254) return jsonResponse({ error: "invalid_input" }, 400);
       const { data: created, error } = await db.auth.admin.createUser({
         email,
         password,
@@ -81,6 +84,6 @@ Deno.serve(async (req: Request) => {
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
     console.error("[PRISM] manage-users failed:", message);
-    return jsonResponse({ status: "error", error: message }, 500);
+    return jsonResponse({ status: "error", error: "internal_error" }, 500);
   }
 });

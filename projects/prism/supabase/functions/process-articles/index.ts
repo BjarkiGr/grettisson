@@ -1,10 +1,11 @@
-﻿// PRISM — process-articles Edge Function (Phase 3).
+// PRISM — process-articles Edge Function (Phase 3).
 // Claims pending process_article jobs atomically, classifies articles with
 // transparent keyword rules, links them to matching events or creates
 // clearly-labeled PROVISIONAL events, and queues analyze_event jobs (which
 // wait for Phase 4). Bounded retries; idempotent; small batches.
 
 import { handleCorsPreflight, jsonResponse } from "../_shared/cors.ts";
+import { isServiceRole, readJsonLimited } from "../_shared/auth.ts";
 import { createServiceClient } from "../_shared/database.ts";
 import { classifyArticle } from "../_shared/classify.ts";
 import type { SupabaseClient } from "../_shared/database.ts";
@@ -90,6 +91,7 @@ async function processOne(db: SupabaseClient, job: JobRow): Promise<string> {
 Deno.serve(async (req: Request) => {
   const preflight = handleCorsPreflight(req);
   if (preflight) return preflight;
+  if (!isServiceRole(req)) return jsonResponse({ error: "unauthorized" }, 401);
   if (req.method !== "GET" && req.method !== "POST") {
     return jsonResponse({ error: "method_not_allowed" }, 405);
   }

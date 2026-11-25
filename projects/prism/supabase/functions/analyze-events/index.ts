@@ -7,6 +7,7 @@
 // The rest of PRISM keeps working when AI is unavailable.
 
 import { handleCorsPreflight, jsonResponse } from "../_shared/cors.ts";
+import { isServiceRole, readJsonLimited } from "../_shared/auth.ts";
 import { createServiceClient } from "../_shared/database.ts";
 import type { SupabaseClient } from "../_shared/database.ts";
 import { readProviderConfig, createOpenAiCompatibleProvider } from "../_shared/ai-provider.ts";
@@ -43,6 +44,7 @@ Deno.serve(async (req: Request) => {
   const preflight = handleCorsPreflight(req);
   if (preflight) return preflight;
   if (req.method !== "GET" && req.method !== "POST") return jsonResponse({ error: "method_not_allowed" }, 405);
+  if (!isServiceRole(req)) return jsonResponse({ error: "unauthorized" }, 401);
 
   const config = readProviderConfig();
   if (!config) {
@@ -56,7 +58,7 @@ Deno.serve(async (req: Request) => {
   try {
     const db = createServiceClient();
     const provider = createOpenAiCompatibleProvider(config);
-    const body = req.method === "POST" ? await req.json().catch(() => ({})) : {};
+    const body = req.method === "POST" ? ((await readJsonLimited(req, 2048)) ?? {}) : {};
 
     // Auto-resume paused jobs once their backoff window has elapsed.
     const rateCutoff = new Date(Date.now() - RATE_LIMIT_RESUME_MINUTES * 60000).toISOString();

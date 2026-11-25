@@ -1,10 +1,11 @@
-﻿// PRISM — ingest-sources Edge Function (Phase 3).
+// PRISM — ingest-sources Edge Function (Phase 3).
 // Fetches active RSS sources in small batches, parses items, normalizes,
 // deduplicates via content_hash, stores new articles and queues processing.
 // Stateless, idempotent, per-source error isolation. Never processes an
 // entire archive: MAX_SOURCES and MAX_ITEMS_PER_FEED bound every run.
 
 import { handleCorsPreflight, jsonResponse } from "../_shared/cors.ts";
+import { isServiceRole, readJsonLimited } from "../_shared/auth.ts";
 import { createServiceClient } from "../_shared/database.ts";
 import { parseFeed } from "../_shared/rss.ts";
 import { normalizeUrl, contentHash } from "../_shared/normalize.ts";
@@ -44,6 +45,7 @@ async function fetchFeed(url: string): Promise<string> {
 Deno.serve(async (req: Request) => {
   const preflight = handleCorsPreflight(req);
   if (preflight) return preflight;
+  if (!isServiceRole(req)) return jsonResponse({ error: "unauthorized" }, 401);
   if (req.method !== "GET" && req.method !== "POST") {
     return jsonResponse({ error: "method_not_allowed" }, 405);
   }

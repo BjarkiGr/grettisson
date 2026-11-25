@@ -1,5 +1,34 @@
 ﻿# PRISM — Changelog
 
+## [Unreleased] — V2.1 Phase 1: Security & Data Protection
+
+### Fixed
+- P0-01 CRITICAL: match-company-events boot error (wrong cors import
+  names) — personalization restored and live-verified (401 gated).
+- P0-02/03: pipeline + health functions now require a gateway-verified
+  service_role JWT (_shared/auth.ts); public anon key rejected (live).
+  health-check internals no longer public.
+- Gate placement bug caught by live probes (gate inside braced method
+  block in ingest/process) — fixed, redeployed, re-verified 13/13.
+
+### Added
+- Migration 0008: revoke invoke_edge_function from authenticated (P0-04).
+- Bounded request bodies (manage-users 4KB + input caps, analyze 2KB,
+  match 1KB); generic 500 bodies (P0-05/06).
+- config.toml explicit verify_jwt entries for all 9 functions (P0-16);
+  supabase-js pinned to esm.sh@2.45.4 everywhere (P0-10).
+- docs/SECURITY.md incl. credential rotation procedure.
+- test/security-smoke.mjs (102 checks incl. import/export consistency —
+  would have caught P0-01) + test/phase1-live-probes.mjs (13 live).
+
+### Verified
+- 18 suites: 1141 checks, 0 failures. Live probes 13/13. 10 functions
+  redeployed. Cron unaffected (sends Vault service key).
+
+### Pending (user)
+- Apply migration 0008; rotate Groq key; create viewer test account for
+  live two-user isolation verification.
+
 ## [Unreleased] — V2 stabilization pass
 
 ### Changed

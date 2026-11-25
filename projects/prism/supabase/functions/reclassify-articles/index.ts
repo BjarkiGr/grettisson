@@ -63,6 +63,6 @@ Deno.serve(async (req: Request) => {
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
     console.error("[PRISM] reclassify failed:", message);
-    return jsonResponse({ status: "error", error: message }, 500);
+    return jsonResponse({ status: "error", error: "internal_error" }, 500);
   }
 });

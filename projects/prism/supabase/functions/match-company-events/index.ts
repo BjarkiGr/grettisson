@@ -3,9 +3,10 @@
 // so owner RLS is enforced by Postgres itself; the service client is used
 // ONLY for shared event data. Nothing is persisted; no AI is involved;
 // the profile never leaves this function except as match results.
-import { corsPreflight, json } from "../_shared/cors.ts";
-import { createClient } from "npm:@supabase/supabase-js@2";
+import { handleCorsPreflight as corsPreflight, jsonResponse as json } from "../_shared/cors.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.4";
 import { createServiceClient } from "../_shared/database.ts";
+import { readJsonLimited } from "../_shared/auth.ts";
 import { matchProfileToEvent, type ProfileFacts, type EventFacts } from "../_shared/relevance.ts";
 
 const MAX_EVENTS = 100;
@@ -37,8 +38,7 @@ Deno.serve(async (req: Request) => {
     };
 
     // Optional single-event mode: relevance for one specific event page.
-    let body: Record<string, unknown> = {};
-    try { body = await req.json(); } catch { /* empty body = list mode */ }
+    const body = await readJsonLimited(req, 1024);
     const singleId = typeof body?.event_id === "string" && /^[0-9a-f-]{36}$/i.test(body.event_id) ? body.event_id : null;
 
     // Shared event data via service client (read-only here).

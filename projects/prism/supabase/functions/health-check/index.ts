@@ -1,14 +1,16 @@
-﻿// PRISM — health-check Edge Function.
+// PRISM — health-check Edge Function.
 // Reports backend availability, configuration presence (booleans only,
 // never secret values) and recent processing activity from the database.
 
 import { handleCorsPreflight, jsonResponse } from "../_shared/cors.ts";
+import { isServiceRole } from "../_shared/auth.ts";
 import { readProviderConfig } from "../_shared/ai-provider.ts";
 import { createServiceClient } from "../_shared/database.ts";
 
 Deno.serve(async (req: Request) => {
   const preflight = handleCorsPreflight(req);
   if (preflight) return preflight;
+  if (!isServiceRole(req)) return jsonResponse({ error: "unauthorized" }, 401);
 
   const activity: Record<string, unknown> = {};
   try {

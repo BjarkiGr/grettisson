@@ -20,5 +20,18 @@ verify_jwt = true
 [functions.health-check]
 verify_jwt = true
 
+
+[functions.manage-users]
+verify_jwt = true
+
+[functions.reclassify-articles]
+verify_jwt = true
+
+[functions.extract-company-profile]
+verify_jwt = true
+
+[functions.match-company-events]
+verify_jwt = true
+
 # Scheduled invocations (Phase 7) will authenticate with a key stored in
 # Supabase Vault — never committed to this repository.

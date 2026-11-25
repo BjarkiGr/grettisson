@@ -1,9 +1,10 @@
-﻿// PRISM — calculate-risk Edge Function (V2).
+// PRISM — calculate-risk Edge Function (V2).
 // V2 analyses (prompt 2.0.0) -> risk-v2 matrix methodology with full inputs
 // snapshot (scoring_version 2.0.0). Legacy analyses -> V1 derivation, stored
 // as scoring_version 1.0.0 history. Append-only. AI never writes final scores.
 
 import { handleCorsPreflight, jsonResponse } from "../_shared/cors.ts";
+import { isServiceRole, readJsonLimited } from "../_shared/auth.ts";
 import { createServiceClient } from "../_shared/database.ts";
 import { deriveDimensions, computeOverallScore, buildExplanation } from "../_shared/risk.ts";
 import { assessRiskV2, SCORING_VERSION, MAJOR_ECONOMIES, CHOKEPOINT_STATES, V2_DIMENSIONS } from "../_shared/risk-v2.ts";
@@ -19,6 +20,7 @@ Deno.serve(async (req: Request) => {
   const preflight = handleCorsPreflight(req);
   if (preflight) return preflight;
   if (req.method !== "GET" && req.method !== "POST") return jsonResponse({ error: "method_not_allowed" }, 405);
+  if (!isServiceRole(req)) return jsonResponse({ error: "unauthorized" }, 401);
 
   try {
     const db = createServiceClient();
