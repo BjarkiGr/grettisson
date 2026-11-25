@@ -1,0 +1,431 @@
+/* COFFEE EMPIRE — original pixel art. 16x16 sprites drawn from character maps,
+   rendered once to canvas data-URLs. Palette letters map to colors; '.' = transparent. */
+(function (global) {
+'use strict';
+const CE = global.CE = global.CE || {};
+
+const PAL = {
+  '.': null,
+  'k': '#2b1a12', // espresso outline
+  'd': '#4a2c1a', // dark roast
+  'b': '#6f4e37', // coffee brown
+  'l': '#a97c50', // latte
+  'c': '#e8d5b5', // cream
+  'w': '#f7f0e3', // paper white
+  'g': '#7a8b5c', // muted leaf green
+  'G': '#556b3f', // dark leaf
+  'r': '#b5484d', // muted red
+  'o': '#d9903f', // caramel orange
+  'y': '#e8c15a', // gold
+  's': '#9aa3ad', // steel
+  'S': '#6b7480', // dark steel
+  't': '#c9d6d3', // glass
+  'm': '#efe6d8', // milk
+  'p': '#8b6f9e', // plum accent
+  'n': '#3f6f6a', // teal accent
+  'e': '#b5484d', // cherry red
+  'x': '#1d1109'  // near black
+};
+
+const MAPS = {
+  cup: [
+    '................',
+    '....w.w.w.......',
+    '...w.w.w........',
+    '....w.w.w.......',
+    '..kkkkkkkkkk....',
+    '..kcccccccck....',
+    '..kdddddddckkk..',
+    '..kdddddddck.k..',
+    '..kcccccccck.k..',
+    '..kcccccccckkk..',
+    '...kcccccck.....',
+    '...kcccccck.....',
+    '....kcccck......',
+    '....kkkkkk......',
+    '..kkkkkkkkkk....',
+    '................'],
+  cart: [
+    '................',
+    '..rrrrrrrrrr....',
+    '.rwrwrwrwrwrr...',
+    '.kkkkkkkkkkkk...',
+    '..kcccccccck....',
+    '..kcbbbbbcck....',
+    '..kcbssbbcck....',
+    '..kcbssbbcck....',
+    '..kcccccccck....',
+    '..kkkkkkkkkk....',
+    '...k......k.....',
+    '...k......k.....',
+    '..kkk....kkk....',
+    '..kxk....kxk....',
+    '..kkk....kkk....',
+    '................'],
+  shop: [
+    '................',
+    '...kkkkkkkkkk...',
+    '..kddddddDDDDk..'.replace(/D/g, 'd'),
+    '..kcccccccck....',
+    '..kggggggggk....',
+    '..kwkwkwkwkk....',
+    '..kkkkkkkkkk....',
+    '..kcttckttck....',
+    '..kcttckttck....',
+    '..kcttckttck....',
+    '..kcccckcck.....',
+    '..kcccckcck.....',
+    '..kcccckcck.....',
+    '..kkkkkkkkkk....',
+    '................',
+    '................'],
+  tree: [
+    '................',
+    '......gggg......',
+    '....ggGGGGgg....',
+    '...gGGeGGeGg....',
+    '..gGGGGGGGGGg...',
+    '..gGeGGeGGeGg...',
+    '..gGGGGGGGGGg...',
+    '...gGGeGGeGg....',
+    '....ggGGGGgg....',
+    '......gbbg......',
+    '.......bb.......',
+    '.......bb.......',
+    '.......bb.......',
+    '.....ddbbdd.....',
+    '....dddddddd....',
+    '................'],
+  factory: [
+    '................',
+    '..kk............',
+    '..kSk..w........',
+    '..kSk.www.......',
+    '..kSk..w........',
+    '..kkkkkkkkkkk...',
+    '..kSSSSSSSSSk...',
+    '..ksksksksksk...',
+    '..kkkkkkkkkkk...',
+    '..kcttcttcttk...',
+    '..kcttcttcttk...',
+    '..kkkkkkkkkkk...',
+    '..kccckkkccck...',
+    '..kccckxkccck...',
+    '..kkkkkkkkkkk...',
+    '................'],
+  warehouse: [
+    '................',
+    '................',
+    '....kkkkkkkk....',
+    '..kkbbbbbbbbkk..',
+    '.kbbbbbbbbbbbbk.',
+    '.kkkkkkkkkkkkkk.',
+    '..kccccccccck...',
+    '..kckkkkkkcck...',
+    '..kckddddkcck...',
+    '..kckddddkcck...',
+    '..kckddddkcck...',
+    '..kckddddkcck...',
+    '..kkkkkkkkkkk...',
+    '................',
+    '................',
+    '................'],
+  truck: [
+    '................',
+    '................',
+    '................',
+    '..kkkkkkkkkk....',
+    '..kcccccccck....',
+    '..kcbbbbbclk....',
+    '..kcbbbbbcllk...',
+    '..kcbbbbbcttk...',
+    '..kcccccccttk...',
+    '..kkkkkkkkkkk...',
+    '...kxk..kxk.....',
+    '...kxk..kxk.....',
+    '................',
+    '................',
+    '................',
+    '................'],
+  ship: [
+    '................',
+    '........kk......',
+    '........kSk.....',
+    '.....kkkkkk.....',
+    '.....kcccck.....',
+    '..kkkkkkkkkkkk..',
+    '..krrkyyknnkSk..',
+    '..krrkyyknnkSk..',
+    '.kkkkkkkkkkkkkk.',
+    '.kdddddddddddk..',
+    '..kdddddddddk...',
+    '...kkkkkkkkk....',
+    '..tttttttttttt..',
+    '................',
+    '................',
+    '................'],
+  plane: [
+    '................',
+    '................',
+    '.......kk.......',
+    '......kwwk......',
+    '......kwwk......',
+    '..kk..kwwk..kk..',
+    '.kwwkkkwwkkkwwk.',
+    '.kwwwwwwwwwwwwk.',
+    '..kkkwwwwwwkkk..',
+    '.....kwwwwk.....',
+    '.....kwwwwk.....',
+    '....kkwkkwkk....',
+    '....kwk..kwk....',
+    '................',
+    '................',
+    '................'],
+  tower: [
+    '................',
+    '....kkkkkkkk....',
+    '....kcccccck....',
+    '....kcttcttk....',
+    '....kcttcttk....',
+    '....kcccccck....',
+    '....kcttcttk....',
+    '....kcttcttk....',
+    '....kcccccck....',
+    '....kcttcttk....',
+    '....kcttcttk....',
+    '....kcccccck....',
+    '....kckkkkck....',
+    '....kckxxkck....',
+    '...kkkkkkkkkk...',
+    '................'],
+  globe: [
+    '................',
+    '.....kkkkkk.....',
+    '...kkttttttkk...',
+    '..kttggtttttk...',
+    '..ktggggttgtk...',
+    '.kttggtttggttk..',
+    '.kttttttggggtk..',
+    '.ktggttttggttk..',
+    '.ktgggtttttttk..',
+    '.kttggttgttttk..',
+    '..ktttttgggtk...',
+    '..kttttttgtk....',
+    '...kkttttkk.....',
+    '.....kkkk.......',
+    '................',
+    '................'],
+  flask: [
+    '................',
+    '......kkkk......',
+    '......kttk......',
+    '......kttk......',
+    '......kttk......',
+    '.....kkttkk.....',
+    '....kttttttk....',
+    '...kttggggttk...',
+    '...ktggggggtk...',
+    '..ktggggggggtk..',
+    '..kttttttttttk..',
+    '...kkkkkkkkkk...',
+    '................',
+    '................',
+    '................',
+    '................'],
+  megaphone: [
+    '................',
+    '................',
+    '..........kk....',
+    '........kkok....',
+    '..kkkkkkkoook...',
+    '..kccccckoook...',
+    '..kccccckoook...',
+    '..kkkkkkkoook...',
+    '....kk....kkok..',
+    '....kbk.....kk..',
+    '....kbk.........',
+    '....kkk.........',
+    '................',
+    '................',
+    '................',
+    '................'],
+  coin: [
+    '................',
+    '................',
+    '.....kkkkkk.....',
+    '...kkyyyyyykk...',
+    '..kyyyyyyyyyyk..',
+    '..kyykyyyykyyk..',
+    '.kyyyykyykyyyyk.',
+    '.kyyyyykyyyyyyk.',
+    '.kyyyykyykyyyyk.',
+    '..kyykyyyykyyk..',
+    '..kyyyyyyyyyyk..',
+    '...kkyyyyyykk...',
+    '.....kkkkkk.....',
+    '................',
+    '................',
+    '................'],
+  bean: [
+    '................',
+    '................',
+    '.....kkkkk......',
+    '...kkbbbbbk.....',
+    '..kbbbkbbbbk....',
+    '..kbbkbbbbbk....',
+    '.kbbbkbbbbbbk...',
+    '.kbbkbbbbbbbk...',
+    '.kbbbkbbbkbbk...',
+    '..kbbbkbbkbbk...',
+    '..kbbbbkbbbk....',
+    '...kbbbbbbk.....',
+    '....kkkkkk......',
+    '................',
+    '................',
+    '................'],
+  machine: [
+    '................',
+    '...kkkkkkkkkk...',
+    '...kSSSSSSSSk...',
+    '...ksyyyyyysk...',
+    '...kSSSSSSSSk...',
+    '...kkkkkkkkkk...',
+    '...kssk..kssk...',
+    '...kkkk..kkkk...',
+    '....kc....ck....',
+    '....kcc..cck....',
+    '.....kkkkkk.....',
+    '...kddddddddk...',
+    '...kddddddddk...',
+    '...kkkkkkkkkk...',
+    '................',
+    '................'],
+  store: [
+    '................',
+    '..kkkkkkkkkkkk..',
+    '..knnnnnnnnnnk..',
+    '..kwwwwwwwwwwk..',
+    '..kkkkkkkkkkkk..',
+    '..knwnwnwnwnwk..',
+    '..kkkkkkkkkkkk..',
+    '..kcttcttcttk...',
+    '..kcttcttcttk...',
+    '..kcccckkcctk...',
+    '..kcccckkcctk...',
+    '..kkkkkkkkkkk...',
+    '................',
+    '................',
+    '................',
+    '................'],
+  greenhouse: [
+    '................',
+    '................',
+    '......kkkk......',
+    '....kkttttkk....',
+    '...kttttttttk...',
+    '..kttgttgttttk..',
+    '..ktgggtgggttk..',
+    '..kttgttgttttk..',
+    '..ktgtttgtgttk..',
+    '..kttgttgttttk..',
+    '..kkkkkkkkkkkk..',
+    '................',
+    '................',
+    '................',
+    '................',
+    '................'],
+  box: [
+    '................',
+    '................',
+    '...kkkkkkkkkk...',
+    '..kllllllllllk..',
+    '..klllkkkllllk..',
+    '..kkkkkkkkkkkk..',
+    '..klllkllllllk..',
+    '..klllkllllllk..',
+    '..klllkllllllk..',
+    '..klllkllllllk..',
+    '..klllkllllllk..',
+    '..kkkkkkkkkkkk..',
+    '................',
+    '................',
+    '................',
+    '................'],
+};
+
+/* Variants: base map + palette overrides keep a consistent style across 48 businesses. */
+const VARIANTS = {
+  cafe:      { base: 'shop', pal: { g: '#b5484d' } },
+  premium:   { base: 'shop', pal: { g: '#8b6f9e', c: '#f7f0e3' } },
+  drive:     { base: 'shop', pal: { g: '#d9903f' } },
+  bakery:    { base: 'shop', pal: { g: '#e8c15a' } },
+  mall:      { base: 'store', pal: { n: '#6f4e37' } },
+  airport:   { base: 'store', pal: { n: '#3f6f6a', w: '#c9d6d3' } },
+  flagship:  { base: 'tower', pal: { c: '#e8c15a' } },
+  chain:     { base: 'store', pal: { n: '#556b3f' } },
+  kiosk:     { base: 'machine', pal: { S: '#4a2c1a', y: '#7a8b5c' } },
+  lounge:    { base: 'shop', pal: { g: '#2b1a12', c: '#e8c15a', t: '#8b6f9e' } },
+  farm:      { base: 'tree' },
+  plantation: { base: 'tree', pal: { g: '#8ba36a' } },
+  plantation2: { base: 'tree', pal: { g: '#556b3f', e: '#d9903f' } },
+  estate:    { base: 'tree', pal: { g: '#3f6f6a', e: '#b5484d', d: '#6b7480' } },
+  agsupply:  { base: 'warehouse', pal: { b: '#7a8b5c', d: '#556b3f' } },
+  processing: { base: 'factory', pal: { S: '#556b3f', s: '#7a8b5c' } },
+  roastery:  { base: 'factory', pal: { S: '#6f4e37', s: '#a97c50' } },
+  roastplant: { base: 'factory', pal: { S: '#4a2c1a', s: '#6f4e37', c: '#d9903f' } },
+  grinder:   { base: 'machine', pal: { S: '#6f4e37', y: '#e8d5b5' } },
+  instant:   { base: 'factory', pal: { S: '#9aa3ad', s: '#c9d6d3', c: '#e8c15a' } },
+  capsule:   { base: 'machine', pal: { S: '#8b6f9e', y: '#e8d5b5' } },
+  bottled:   { base: 'factory', pal: { S: '#3f6f6a', s: '#c9d6d3' } },
+  packaging: { base: 'box' },
+  equipment: { base: 'machine' },
+  beverage:  { base: 'factory', pal: { S: '#b5484d', s: '#9aa3ad', c: '#c9d6d3' } },
+  warehouse2: { base: 'warehouse', pal: { b: '#9aa3ad' } },
+  warehouse3: { base: 'warehouse', pal: { b: '#3f6f6a' } },
+  van:       { base: 'truck', pal: { b: '#7a8b5c' } },
+  onlinestore: { base: 'store', pal: { n: '#8b6f9e' } },
+  subscription: { base: 'box', pal: { l: '#b5484d' } },
+  supermarket: { base: 'store', pal: { n: '#d9903f' } },
+  wholesale: { base: 'warehouse', pal: { b: '#6f4e37', d: '#4a2c1a' } },
+  vending:   { base: 'machine', pal: { S: '#b5484d', y: '#e8d5b5', d: '#2b1a12' } },
+  machineretail: { base: 'store', pal: { n: '#6b7480' } },
+  lab:       { base: 'flask' },
+  marketing: { base: 'megaphone' },
+  equipmfr:  { base: 'factory', pal: { S: '#6b7480', s: '#9aa3ad', c: '#e8c15a' } },
+  holding:   { base: 'globe' },
+  financial: { base: 'coin' },
+  corporation: { base: 'tower', pal: { c: '#c9d6d3', t: '#e8c15a' } },
+  logo:      { base: 'cup' }
+};
+
+const cache = {};
+CE.spriteURL = function (key, size) {
+  size = size || 64;
+  const ck = key + '@' + size;
+  if (cache[ck]) return cache[ck];
+  const v = VARIANTS[key] || { base: key };
+  const map = MAPS[v.base] || MAPS.box;
+  const pal = Object.assign({}, PAL, v.pal || {});
+  const cv = document.createElement('canvas');
+  cv.width = 16; cv.height = 16;
+  const ctx = cv.getContext('2d');
+  for (let y = 0; y < 16; y++) {
+    const row = map[y] || '';
+    for (let x = 0; x < 16; x++) {
+      const col = pal[row[x]];
+      if (col) { ctx.fillStyle = col; ctx.fillRect(x, y, 1, 1); }
+    }
+  }
+  const out = document.createElement('canvas');
+  out.width = size; out.height = size;
+  const octx = out.getContext('2d');
+  octx.imageSmoothingEnabled = false;
+  octx.drawImage(cv, 0, 0, size, size);
+  cache[ck] = out.toDataURL();
+  return cache[ck];
+};
+CE.spriteImg = function (key, cls, size) {
+  return '<img class="sprite ' + (cls || '') + '" src="' + CE.spriteURL(key, size || 64) + '" alt="" draggable="false">';
+};
+})(typeof window !== 'undefined' ? window : globalThis);
+

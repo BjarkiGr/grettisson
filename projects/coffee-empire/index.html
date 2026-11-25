@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <title>Coffee Empire — Incremental Tycoon</title>
+  <meta name="description" content="Build the world's largest coffee corporation. A complete incremental idle tycoon: farms, roasteries, logistics, research, markets, acquisitions and Legacy prestige.">
+  <meta name="theme-color" content="#2b1a12">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>☕</text></svg>">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header id="topbar">
+    <div class="tb-brand">
+      <img id="logo-img" class="sprite" alt="Coffee Empire logo">
+      <span class="tb-title">COFFEE&nbsp;EMPIRE</span>
+    </div>
+    <div class="tb-stats">
+      <div class="tb-stat"><span class="tb-label">Cash</span><b class="tb-value gold" id="tb-cash">$0</b></div>
+      <div class="tb-stat"><span class="tb-label">Net worth</span><b class="tb-value" id="tb-worth">$0</b></div>
+      <div class="tb-stat"><span class="tb-label">Revenue</span><b class="tb-value pos" id="tb-rev">$0/s</b></div>
+      <div class="tb-stat"><span class="tb-label">Profit</span><b class="tb-value" id="tb-profit">$0/s</b></div>
+      <div class="tb-stat"><span class="tb-label">Research</span><b class="tb-value" id="tb-rp">0 RP</b></div>
+    </div>
+    <div class="tb-actions">
+      <button class="icon-btn bell" data-action="bell" title="Notifications">🔔<span id="bell-count" class="bell-count">0</span></button>
+      <button class="icon-btn" data-action="settings" title="Settings">⚙️</button>
+    </div>
+  </header>
+
+  <div id="layout">
+    <nav id="nav" aria-label="Sections"></nav>
+    <main id="main" tabindex="-1"></main>
+  </div>
+
+  <nav id="bottomnav" aria-label="Mobile navigation"></nav>
+  <div id="toasts" aria-live="polite"></div>
+  <div id="modal-root"></div>
+
+  <script src="src/bignum.js"></script>
+  <script src="src/data.js"></script>
+  <script src="src/data2.js"></script>
+  <script src="src/data3.js"></script>
+  <script src="src/data4.js"></script>
+  <script src="src/data5.js"></script>
+  <script src="src/sprites.js"></script>
+  <script src="src/state.js"></script>
+  <script src="src/engine.js"></script>
+  <script src="src/ui.js"></script>
+  <script src="src/ui2.js"></script>
+  <script src="src/ui3.js"></script>
+  <script src="src/ui4.js"></script>
+  <script src="src/main.js"></script>
+</body>
+</html>

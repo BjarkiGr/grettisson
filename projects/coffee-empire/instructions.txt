@@ -1,0 +1,1322 @@
+# MASTER DEVELOPMENT PROMPT: COFFEE EMPIRE
+## Complete Incremental Tycoon Browser Game
+
+You are an experienced game developer, economy designer, UI/UX designer and JavaScript engineer.
+
+Your task is to design and build a complete, polished, fully playable incremental idle game called **COFFEE EMPIRE**.
+
+This is not a prototype, MVP, demonstration or phased development exercise. Build the complete game with all specified systems, content, progression mechanics and functionality.
+
+Do not return a development roadmap instead of the game. Do not leave major features as placeholders. Make sensible design decisions independently where details are unspecified.
+
+The finished product must be playable immediately after opening `index.html` in a browser.
+
+---
+
+# 1. GAME CONCEPT
+
+Coffee Empire is a large-scale incremental business simulation game.
+
+The player starts with a tiny coffee cart, limited capital and a basic coffee machine.
+
+Over time, the player builds an enormous international coffee corporation by expanding into:
+
+- Coffee shops
+- Coffee chains
+- Coffee plantations
+- Agricultural operations
+- Bean processing
+- Coffee roasting
+- Manufacturing
+- Packaging
+- Warehousing
+- Transportation
+- Wholesale distribution
+- Supermarket retail
+- Coffee subscriptions
+- Coffee equipment manufacturing
+- International markets
+- Corporate acquisitions
+
+The ultimate objective is to become the world's largest coffee corporation.
+
+The game should combine the addictive progression of Cookie Clicker and Adventure Capitalist with the economic depth of a business management simulator.
+
+The player should always have something to purchase, improve, unlock, optimize or work towards.
+
+## Core principles
+
+- Numbers continuously increase.
+- Businesses generate passive income.
+- Upgrades provide satisfying multipliers.
+- New industries unlock throughout progression.
+- Production chains create interconnected economic systems.
+- Automation becomes increasingly powerful.
+- Prestige provides long-term replayability.
+- Offline progression rewards returning players.
+- The game must remain enjoyable over extended play sessions.
+
+The game must be playable entirely offline after loading.
+
+---
+
+# 2. VISUAL DESIGN AND PRESENTATION
+
+## Overall aesthetic
+
+Use a polished 2D pixel-art aesthetic.
+
+The game should feel like a premium indie management game rather than a generic browser idle game.
+
+Visual direction:
+
+- Warm cream backgrounds.
+- Dark espresso brown panels.
+- Coffee-colored accent elements.
+- Muted green accents.
+- Pixel-art illustrations.
+- Clean typography.
+- Subtle animations.
+- Carefully designed icons.
+- Consistent spacing and alignment.
+
+Avoid excessive gradients, generic corporate stock graphics and childish cartoon aesthetics.
+
+The game should have its own recognizable visual identity.
+
+## Pixel art
+
+Create or generate original pixel-art assets for:
+
+- Coffee carts.
+- Coffee shops.
+- Baristas.
+- Coffee machines.
+- Coffee trees.
+- Coffee plantations.
+- Harvesting equipment.
+- Processing facilities.
+- Roasteries.
+- Packaging factories.
+- Warehouses.
+- Trucks.
+- Cargo ships.
+- Retail stores.
+- Corporate headquarters.
+
+If actual image assets are unavailable, create suitable pixel-art illustrations using Canvas, CSS or SVG.
+
+Do not leave empty image placeholders.
+
+All assets must use a consistent visual style.
+
+Use `image-rendering: pixelated` where appropriate.
+
+## Interface layout
+
+Design a desktop-first responsive interface.
+
+The primary layout should consist of:
+
+**Top bar**
+- Company logo.
+- Current cash.
+- Net worth.
+- Revenue per second.
+- Profit per second.
+- Notification indicator.
+- Settings.
+
+**Sidebar navigation**
+- Overview
+- Businesses
+- Production
+- Locations
+- Farms
+- Research
+- Markets
+- Corporate
+- Achievements
+- Statistics
+
+**Main content area**
+
+Displays the selected section, with contextual cards, tables, upgrade buttons, production information and management controls.
+
+**Optional bottom notification area**
+
+Shows important events, unlocks, purchases and economic notifications.
+
+The interface must be responsive and usable on mobile devices.
+
+---
+
+# 3. STARTING GAMEPLAY
+
+The player begins with:
+
+- $100 starting capital.
+- One coffee cart.
+- One basic coffee machine.
+- A small amount of starting coffee inventory.
+- No employees.
+- No automated production.
+
+The player can manually produce and sell coffee.
+
+Starting products:
+
+1. Regular Coffee
+2. Espresso
+
+Each sale generates revenue and consumes ingredients.
+
+The initial gameplay should be immediately understandable.
+
+The player should quickly discover that upgrading equipment, buying inventory and hiring employees increases earnings.
+
+The first permanent coffee shop should feel like a meaningful achievement.
+
+The player should not be forced to manually click forever.
+
+Manual interaction should be useful early, but automation should become increasingly important.
+
+---
+
+# 4. COMPLETE BUSINESS CATALOG
+
+Implement a large catalog of businesses, with individual purchase costs, operating expenses, revenue, production capacity, upgrade levels and unlock requirements.
+
+Each business must have meaningful economic characteristics.
+
+## Retail businesses
+
+1. Coffee Cart
+2. Small Coffee Shop
+3. Standard Coffee Shop
+4. Premium Coffee Shop
+5. Drive-through Coffee Shop
+6. Bakery Café
+7. Shopping Mall Coffee Shop
+8. Airport Coffee Shop
+9. Flagship Coffee Store
+10. International Coffee Chain
+11. Coffee Kiosk Network
+12. Luxury Coffee Lounge
+
+## Agricultural businesses
+
+13. Small Coffee Farm
+14. Medium Coffee Plantation
+15. Large Coffee Plantation
+16. Industrial Coffee Estate
+17. Greenhouse Research Farm
+18. Agricultural Supply Company
+
+## Manufacturing businesses
+
+19. Bean Processing Facility
+20. Coffee Roastery
+21. Industrial Roasting Plant
+22. Ground Coffee Factory
+23. Instant Coffee Factory
+24. Coffee Capsule Factory
+25. Bottled Coffee Factory
+26. Packaging Factory
+27. Coffee Equipment Factory
+28. Industrial Beverage Factory
+
+## Logistics businesses
+
+29. Local Distribution Warehouse
+30. Regional Warehouse
+31. National Distribution Center
+32. Delivery Van Fleet
+33. Trucking Company
+34. Cargo Shipping Company
+35. Freight Airline
+36. Global Logistics Network
+
+## Retail and distribution businesses
+
+37. Online Coffee Store
+38. Coffee Subscription Company
+39. Supermarket Coffee Brand
+40. Wholesale Coffee Distributor
+41. Coffee Vending Network
+42. Coffee Machine Retailer
+
+## Corporate businesses
+
+43. Coffee Research Laboratory
+44. Marketing Agency
+45. Coffee Equipment Manufacturer
+46. International Coffee Holding
+47. Financial Services Division
+48. Global Coffee Corporation
+
+Each business should have:
+
+- Purchase cost.
+- Operating cost.
+- Revenue potential.
+- Production rate.
+- Required resources.
+- Employee requirements.
+- Upgrade tree.
+- Unlock requirements.
+- Visual representation.
+- Current ownership.
+- Total lifetime profit.
+- Automation status.
+
+Businesses should scale in cost as ownership increases.
+
+Use configurable scaling formulas rather than hardcoding every purchase price.
+
+---
+
+# 5. COFFEE PRODUCTS AND RESOURCES
+
+Implement a resource economy.
+
+## Coffee products
+
+Retail products:
+
+- Regular Coffee
+- Espresso
+- Americano
+- Cappuccino
+- Latte
+- Mocha
+- Flat White
+- Macchiato
+- Cold Brew
+- Iced Coffee
+- Specialty Coffee
+- Seasonal Coffee
+
+Packaged products:
+
+- Whole Bean Coffee
+- Ground Coffee
+- Instant Coffee
+- Coffee Capsules
+- Bottled Iced Coffee
+- Ready-to-Drink Coffee
+- Premium Coffee Blends
+- Wholesale Coffee Bags
+
+## Raw materials
+
+- Arabica Coffee Cherries
+- Robusta Coffee Cherries
+- Green Arabica Beans
+- Green Robusta Beans
+- Specialty Beans
+- Roasted Beans
+- Ground Coffee
+- Milk
+- Sugar
+- Cocoa
+- Water
+- Packaging Materials
+- Coffee Capsules
+- Bottles
+- Cardboard Boxes
+
+Each resource must have:
+
+- Current inventory.
+- Storage capacity.
+- Production rate.
+- Consumption rate.
+- Market price.
+- Supplier availability.
+- Resource quality where applicable.
+
+Use appropriate units:
+
+- Grams and kilograms for coffee.
+- Liters for liquids.
+- Units for packaged products.
+- Units per hour for production.
+
+The interface should format quantities clearly.
+
+---
+
+# 6. PRODUCTION CHAIN SYSTEM
+
+This is a fundamental part of the game.
+
+Businesses must interact through a functional production chain.
+
+Example:
+
+Coffee Plantation:
+Coffee cherries are harvested.
+
+Processing Facility:
+Coffee cherries become green coffee beans.
+
+Roastery:
+Green beans become roasted coffee beans.
+
+Grinding Facility:
+Roasted beans become ground coffee.
+
+Packaging Factory:
+Ground coffee becomes packaged retail coffee.
+
+Warehouse:
+Stores finished products.
+
+Logistics:
+Transports inventory to retail locations.
+
+Coffee Shops:
+Consume coffee, milk, sugar and other ingredients to serve customers.
+
+Supermarkets:
+Sell packaged products.
+
+The player should be able to own the entire chain.
+
+## Production mechanics
+
+Every facility has:
+
+- Input requirements.
+- Output products.
+- Production speed.
+- Maximum capacity.
+- Current utilization.
+- Operating expenses.
+- Employee requirements.
+- Efficiency.
+- Inventory.
+
+Production must respect available resources.
+
+If a facility runs out of inputs, its production should slow or stop.
+
+If a warehouse is full, production should pause or use another available storage location.
+
+If a coffee shop runs out of beans, its sales should decrease or stop.
+
+Display clear warnings for production bottlenecks.
+
+## Supply management
+
+Implement automatic purchasing and automatic distribution.
+
+Players should be able to configure:
+
+- Minimum inventory thresholds.
+- Maximum inventory levels.
+- Automatic purchasing.
+- Preferred suppliers.
+- Automatic restocking.
+- Production priorities.
+- Distribution destinations.
+
+Automation should unlock through upgrades and research.
+
+Manual supply management should be possible but should not be mandatory throughout the entire game.
+
+---
+
+# 7. COMPLEX ECONOMY
+
+The economy must be more than simply multiplying revenue.
+
+Implement meaningful financial systems.
+
+## Revenue
+
+Businesses generate revenue through sales, wholesale contracts, subscriptions and other commercial activity.
+
+## Expenses
+
+Businesses incur:
+
+- Employee wages.
+- Rent.
+- Electricity.
+- Water.
+- Maintenance.
+- Raw material costs.
+- Transportation.
+- Marketing.
+- Administrative costs.
+
+## Profit
+
+Always distinguish:
+
+- Gross revenue.
+- Cost of goods sold.
+- Operating expenses.
+- Net profit.
+
+Show revenue and expenses separately.
+
+## Pricing
+
+Players should be able to adjust product selling prices.
+
+Pricing influences:
+- Customer demand.
+- Profit margin.
+- Brand positioning.
+- Customer satisfaction.
+
+Premium products can support higher prices.
+
+Excessive pricing should reduce demand.
+
+## Market dynamics
+
+Implement a simulated commodity market.
+
+Commodity categories:
+
+- Coffee beans.
+- Milk.
+- Sugar.
+- Cocoa.
+- Packaging.
+- Fuel.
+- Electricity.
+
+Prices fluctuate gradually according to simulated supply and demand, random events and market conditions.
+
+Display:
+- Current price.
+- Previous price.
+- Percentage change.
+- Price history.
+- Market trend.
+
+## Demand
+
+Demand is influenced by:
+
+- Product price.
+- Product quality.
+- Location.
+- Reputation.
+- Marketing.
+- Brand recognition.
+- Competition.
+- Customer satisfaction.
+
+Businesses must have finite sales capacity.
+
+Avoid infinite demand that makes production constraints meaningless.
+
+## Financial reporting
+
+Provide company-wide and individual business financial reports.
+
+Display:
+- Revenue.
+- Expenses.
+- Gross profit.
+- Net profit.
+- Profit margins.
+- Assets.
+- Liabilities.
+- Business valuation.
+- Net worth.
+
+---
+
+# 8. EMPLOYEE MANAGEMENT
+
+Implement a complete employee system.
+
+Employee categories:
+
+- Baristas.
+- Shop Managers.
+- Farm Workers.
+- Agricultural Managers.
+- Factory Workers.
+- Factory Managers.
+- Logistics Workers.
+- Drivers.
+- Researchers.
+- Marketing Specialists.
+- Executives.
+
+Employees have:
+
+- Salary.
+- Productivity.
+- Experience.
+- Skill.
+- Efficiency bonus.
+
+Employees improve business performance.
+
+Managers automate operations.
+
+Examples:
+
+Shop Managers:
+- Automate coffee shop operations.
+- Improve customer throughput.
+- Reduce operating inefficiency.
+
+Farm Managers:
+- Improve harvest output.
+- Reduce agricultural expenses.
+
+Factory Managers:
+- Improve manufacturing speed.
+- Reduce production waste.
+
+Logistics Managers:
+- Improve delivery capacity.
+- Reduce transport expenses.
+
+Introduce company-wide staffing upgrades later in progression.
+
+---
+
+# 9. UPGRADE SYSTEM
+
+Implement hundreds of meaningful upgrade opportunities.
+
+Upgrades must be data-driven.
+
+Categories:
+
+## Coffee equipment
+- Better espresso machines.
+- Professional grinders.
+- Automatic brewing.
+- High-pressure extraction.
+- Industrial coffee machines.
+- Smart brewing systems.
+
+## Agriculture
+- Improved irrigation.
+- Fertilization.
+- Automated harvesting.
+- Better coffee varieties.
+- Advanced cultivation.
+- Precision agriculture.
+
+## Manufacturing
+- Industrial roasters.
+- Automated grinders.
+- Packaging automation.
+- Quality control.
+- Factory optimization.
+- Waste reduction.
+
+## Retail
+- Better store layouts.
+- Faster service.
+- Improved customer experience.
+- Loyalty programs.
+- Premium branding.
+- Larger locations.
+
+## Marketing
+- Local advertising.
+- Billboards.
+- Social media.
+- Influencer partnerships.
+- International campaigns.
+- Brand sponsorships.
+
+## Logistics
+- Larger vehicles.
+- Fuel efficiency.
+- Warehouse automation.
+- Route optimization.
+- Global distribution.
+
+## Corporate
+- Better management.
+- Reduced administrative costs.
+- Acquisition efficiency.
+- Advanced financial systems.
+- International management.
+
+Upgrades should include:
+
+- Name.
+- Description.
+- Price.
+- Requirements.
+- Effect.
+- Current level.
+- Purchase button.
+
+Some upgrades should be repeatable.
+
+Others should be permanent unlocks.
+
+Include powerful milestone upgrades that significantly improve production or revenue.
+
+---
+
+# 10. RESEARCH SYSTEM
+
+Implement a visual research tree.
+
+Research categories:
+
+1. Agriculture
+2. Coffee Science
+3. Manufacturing
+4. Retail
+5. Logistics
+6. Marketing
+7. Automation
+8. Corporate Management
+
+Research costs Research Points and takes time.
+
+Research continues while offline.
+
+Example technologies:
+
+Agriculture:
+- Advanced Irrigation
+- High-Yield Plants
+- Automated Harvesting
+- Precision Farming
+
+Coffee Science:
+- Advanced Roasting
+- Specialty Blending
+- Extraction Optimization
+- Premium Coffee Development
+
+Manufacturing:
+- Automated Production
+- Industrial Packaging
+- Smart Quality Control
+- High-Speed Manufacturing
+
+Automation:
+- Automatic Inventory
+- Intelligent Purchasing
+- Production Scheduling
+- Automated Distribution
+- Integrated Business Management
+
+Research must unlock real features and bonuses.
+
+Avoid research nodes that merely provide insignificant numerical bonuses.
+
+---
+
+# 11. CUSTOMER AND BRAND SYSTEM
+
+Each coffee shop has:
+
+- Customer demand.
+- Customer satisfaction.
+- Product quality.
+- Reputation.
+- Location popularity.
+- Sales capacity.
+
+Implement a company-wide brand reputation system.
+
+Higher reputation should:
+- Increase demand.
+- Unlock premium products.
+- Improve customer loyalty.
+- Improve expansion opportunities.
+- Increase company valuation.
+
+Marketing campaigns temporarily increase customer acquisition and demand.
+
+Introduce brand recognition milestones.
+
+---
+
+# 12. INTERNATIONAL EXPANSION
+
+Unlock different regions throughout progression.
+
+Regions:
+
+- North America
+- South America
+- Europe
+- Africa
+- Asia
+- Oceania
+
+Each region has different economic characteristics.
+
+Examples:
+- Operating costs.
+- Labor costs.
+- Market size.
+- Customer demand.
+- Commodity availability.
+- Expansion costs.
+
+Allow players to open locations and establish subsidiaries in different regions.
+
+International logistics should connect production facilities and markets.
+
+Do not require detailed geographic navigation.
+
+Use a clear regional management interface.
+
+---
+
+# 13. COMPETITORS AND ECONOMIC EVENTS
+
+Implement AI competitors.
+
+Each competitor has:
+- Company name.
+- Company valuation.
+- Market share.
+- Product quality.
+- Business portfolio.
+- Expansion behavior.
+
+Competitors should expand independently over time.
+
+They can:
+- Open new stores.
+- Launch products.
+- Increase marketing.
+- Compete on pricing.
+- Acquire smaller companies.
+
+The player can compete, outperform or acquire them.
+
+## Random economic events
+
+Positive:
+- Record coffee harvest.
+- Viral coffee trend.
+- Supplier discount.
+- Competitor bankruptcy.
+- Increased seasonal demand.
+- Successful marketing campaign.
+
+Negative:
+- Coffee shortage.
+- Poor harvest.
+- Equipment breakdown.
+- Shipping disruption.
+- Fuel price increase.
+- Economic downturn.
+- Competitor price war.
+
+Events must have durations, effects and notifications.
+
+Events should create variety without making progress frustrating.
+
+---
+
+# 14. ACQUISITIONS AND CORPORATE MANAGEMENT
+
+Unlock corporate acquisitions during advanced progression.
+
+Allow players to:
+
+- Purchase competing coffee chains.
+- Acquire plantations.
+- Buy manufacturing companies.
+- Acquire distribution networks.
+- Merge subsidiaries.
+- Establish regional divisions.
+
+Acquisitions require capital.
+
+Some acquisitions should provide immediate access to new production capacity, customers or technology.
+
+Create a corporate overview showing the player's subsidiaries and business ownership.
+
+---
+
+# 15. PRESTIGE SYSTEM: LEGACY
+
+Implement a prestige system called LEGACY.
+
+The player can eventually sell or restructure their entire corporation.
+
+In return, they receive permanent Legacy Points.
+
+Legacy Points purchase permanent upgrades.
+
+Examples:
+- Starting capital bonuses.
+- Production efficiency.
+- Increased revenue.
+- Reduced operating expenses.
+- Better offline earnings.
+- Faster research.
+- Improved starting equipment.
+- Increased initial reputation.
+
+Prestige resets normal progression but preserves:
+- Achievements.
+- Lifetime statistics.
+- Legacy Points.
+- Permanent Legacy upgrades.
+
+Prestige must be optional.
+
+The game should continue to provide long-term goals even after multiple prestige cycles.
+
+---
+
+# 16. ACHIEVEMENTS
+
+Implement a substantial achievement system.
+
+Examples:
+
+- First Cup: Sell your first coffee.
+- First Employee: Hire a barista.
+- Local Favorite: Serve 1,000 customers.
+- Coffee Farmer: Purchase your first farm.
+- Industrialist: Open a roasting factory.
+- Vertical Integration: Own the complete coffee production chain.
+- Millionaire: Reach $1 million.
+- Billionaire: Reach $1 billion.
+- Coffee Mogul: Reach $1 trillion.
+- Global Presence: Operate in every region.
+- Market Leader: Reach 25% global market share.
+- Coffee Monopoly: Reach 50% global market share.
+
+Achievements should provide rewards.
+
+Include hidden achievements for unusual accomplishments.
+
+---
+
+# 17. OFFLINE PROGRESSION
+
+Offline progression is essential.
+
+When the player leaves:
+
+- Businesses continue operating.
+- Farms produce resources.
+- Factories manufacture products.
+- Shops generate sales.
+- Employees continue working.
+- Research continues.
+- Markets evolve.
+- Events can occur.
+
+Use timestamps to calculate elapsed time.
+
+Do not simulate every individual offline second.
+
+Implement an initial 12-hour offline earnings cap.
+
+Research and Legacy upgrades can increase the cap.
+
+On returning, display an attractive offline earnings summary.
+
+Include:
+- Time away.
+- Total revenue.
+- Expenses.
+- Net profit.
+- Products manufactured.
+- Resources produced.
+- Research completed.
+- Events experienced.
+
+The offline calculation must respect inventory, production bottlenecks and business operating costs.
+
+Do not simply multiply the last revenue-per-second value by elapsed time.
+
+---
+
+# 18. STATISTICS AND ANALYTICS
+
+Create a detailed statistics page.
+
+Display:
+
+- Total lifetime revenue.
+- Current net worth.
+- Current profit per second.
+- Total coffee cups sold.
+- Total beans harvested.
+- Total products manufactured.
+- Total businesses owned.
+- Total employees.
+- Total customers served.
+- Total acquisitions.
+- Total playtime.
+- Highest revenue per second.
+- Highest company valuation.
+- Current global market share.
+
+Include attractive charts for:
+- Revenue history.
+- Profit history.
+- Company valuation.
+- Production volume.
+- Market prices.
+
+Allow the player to view individual business performance.
+
+---
+
+# 19. GAME INTERFACE DETAILS
+
+## Dashboard
+
+Display the most important company statistics.
+
+Include:
+- Cash.
+- Net worth.
+- Revenue/sec.
+- Expenses/sec.
+- Profit/sec.
+- Total businesses.
+- Current objectives.
+- Recent events.
+- Progression milestones.
+
+## Businesses
+
+Show all available businesses in categorized lists.
+
+Each card should display:
+- Pixel-art icon.
+- Name.
+- Owned quantity.
+- Purchase cost.
+- Revenue.
+- Operating expenses.
+- Profit.
+- Production capacity.
+- Upgrade availability.
+
+Include purchase quantity options:
+
+- Buy 1
+- Buy 10
+- Buy 100
+- Buy MAX
+
+## Production
+
+Show the complete resource production network.
+
+Display bottlenecks clearly.
+
+Provide controls for:
+- Production priorities.
+- Automatic purchasing.
+- Inventory thresholds.
+- Distribution.
+- Facility upgrades.
+
+## Research
+
+Show an interactive research tree with:
+- Locked technologies.
+- Available technologies.
+- Completed technologies.
+- Research costs.
+- Research progress.
+
+## Markets
+
+Show commodity prices, historical charts and economic events.
+
+## Corporate
+
+Show company ownership, acquisitions, subsidiaries, valuation and market share.
+
+## Achievements
+
+Show progress toward achievements.
+
+## Settings
+
+Include:
+- Sound toggle.
+- Music toggle.
+- Animation toggle.
+- Number formatting.
+- Autosave settings.
+- Offline progression settings.
+- Export save.
+- Import save.
+- Reset game.
+
+Include a reset confirmation dialog.
+
+---
+
+# 20. TECHNICAL IMPLEMENTATION
+
+Build the game using:
+
+- HTML5.
+- CSS3.
+- Vanilla JavaScript.
+- Canvas where useful for pixel-art scenes and animations.
+
+No backend.
+
+No user accounts.
+
+No mandatory external APIs.
+
+No mandatory frameworks.
+
+The game must run locally by opening index.html.
+
+## Suggested architecture
+
+Organize the code into separate modules:
+
+- Main game initialization.
+- Central game state.
+- Economy engine.
+- Production engine.
+- Business management.
+- Resource inventory.
+- Employees.
+- Upgrades.
+- Research.
+- Markets.
+- Competitors.
+- Events.
+- Prestige.
+- Achievements.
+- Offline progression.
+- Save/load.
+- UI rendering.
+- Notifications.
+- Statistics.
+
+Use ES modules where supported.
+
+If local file restrictions make ES modules impractical, use a bundled script structure that remains compatible with opening index.html directly.
+
+## Central game state
+
+Maintain a single authoritative game state.
+
+It must contain:
+- Currency.
+- Resources.
+- Inventory.
+- Businesses.
+- Locations.
+- Employees.
+- Production.
+- Upgrades.
+- Research.
+- Markets.
+- Competitors.
+- Events.
+- Achievements.
+- Prestige.
+- Statistics.
+- Save timestamps.
+
+Do not allow different systems to maintain conflicting copies of the same financial information.
+
+## Simulation engine
+
+Implement a centralized game loop running approximately 5–10 times per second.
+
+Separate:
+- Economic calculations.
+- Production calculations.
+- UI rendering.
+- Persistence.
+
+Do not rerender the entire interface on every tick.
+
+Use elapsed-time calculations to maintain accuracy when the browser tab is inactive.
+
+Use a centralized simulation engine rather than hundreds of independent timers.
+
+## Large numbers
+
+The economy must support very large values.
+
+Use a reliable large-number representation.
+
+Support:
+- Thousands.
+- Millions.
+- Billions.
+- Trillions.
+- Quadrillions.
+- Quintillions.
+- Sextillions.
+- Scientific notation.
+
+Avoid ordinary floating-point precision problems.
+
+Use BigInt-based fixed-point arithmetic or a suitable large-number abstraction.
+
+Fractional production rates must be supported.
+
+Never use JavaScript BigInt directly with JSON serialization without an explicit serialization strategy.
+
+## Save system
+
+Use LocalStorage for normal saves.
+
+Use IndexedDB if needed for larger datasets.
+
+Implement:
+- Autosave every 30 seconds.
+- Save on visibility change.
+- Save on page unload where possible.
+- Manual saving.
+- Export save to JSON.
+- Import save from JSON.
+- Save versioning.
+- Data validation.
+- Recovery from invalid saves.
+
+The save system must preserve all meaningful progression.
+
+---
+
+# 21. GAME BALANCING
+
+The game must be balanced around long-term incremental progression.
+
+Early game:
+- Frequent purchases.
+- Fast upgrades.
+- Constant unlocks.
+- Immediate feedback.
+
+Mid-game:
+- More businesses.
+- Resource management.
+- Production optimization.
+- Research decisions.
+- Automation.
+
+Late game:
+- Massive corporations.
+- Complex production networks.
+- International markets.
+- Acquisitions.
+- Large-scale financial optimization.
+
+Endgame:
+- Prestige.
+- Legacy upgrades.
+- Extremely large production.
+- Long-term achievements.
+- Continuous expansion.
+
+Use configurable balancing data.
+
+Do not hardcode individual prices throughout the code.
+
+Avoid:
+- Progression walls.
+- Unreasonably long mandatory waits.
+- Completely useless upgrades.
+- Businesses that become permanently irrelevant.
+- Production systems that are impossible to understand.
+- Excessive micromanagement.
+
+---
+
+# 22. SOUND AND FEEDBACK
+
+Include optional sound effects.
+
+Examples:
+- Coffee brewing.
+- Cash register.
+- Purchase confirmation.
+- Upgrade unlock.
+- Achievement notification.
+- New business opening.
+- Research completion.
+
+Use generated or original sounds where possible.
+
+Provide volume controls and mute options.
+
+Animations should communicate purchases, production and unlocks without slowing down gameplay.
+
+---
+
+# 23. FINAL QUALITY REQUIREMENTS
+
+The finished game must be a complete playable product.
+
+Mandatory requirements:
+
+- All navigation works.
+- All business categories function.
+- All purchases function.
+- Production chains function.
+- Inventory updates correctly.
+- Revenue and expenses calculate correctly.
+- Employees function.
+- Research functions.
+- Upgrades function.
+- Events function.
+- Competitors function.
+- Acquisitions function.
+- Prestige functions.
+- Achievements function.
+- Offline progression functions.
+- Saving and loading function.
+- Import and export function.
+- Statistics update correctly.
+- Responsive interface works.
+- No broken buttons.
+- No placeholder sections.
+- No fake or hardcoded financial statistics.
+- No critical console errors.
+
+Create meaningful default content throughout the game.
+
+Use data-driven systems so new businesses, products, upgrades and research can be added without rewriting the underlying game engine.
+
+Test the economic calculations and ensure that production chains cannot generate resources from nothing.
+
+Make sure the game remains stable during extended play sessions and after repeated saves and reloads.
+
+---
+
+# FINAL INSTRUCTION
+
+Build COFFEE EMPIRE as a complete, cohesive, polished incremental tycoon game.
+
+Do not respond with a plan, explanation, partial prototype or a list of files you intend to create.
+
+Actually implement the game and all its systems.
+
+Make independent design decisions wherever necessary.
+
+Prioritize a finished, functional and enjoyable game over theoretical complexity.
+
+The player should be able to open the game, start with $100, sell their first coffee and eventually build an enormous global coffee empire.
+
+**Now build Coffee Empire.**
