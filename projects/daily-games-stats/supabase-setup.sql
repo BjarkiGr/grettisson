@@ -1,5 +1,5 @@
 ﻿-- ============================================================================
--- Daily Games Stats — Supabase uppsetning (Size It Up, Skuggabaldur, Krillion, Verðlengjan)
+-- Daily Games Stats — Supabase uppsetning (Size It Up, Skuggabaldur, Krillion, Verðlengjan, TimeGuessr, Farflung)
 -- Límdu allt þetta í SQL Editor í Supabase og ýttu á Run (sjá README.md).
 -- ATH: Ef þú keyrðir eldri útgáfu af þessari skriptu skaltu keyra
 -- supabase-migration-games.sql í staðinn (hún uppfærir núverandi gögn).
@@ -20,7 +20,7 @@ create unique index if not exists players_name_lower_idx on public.players (lowe
 create table if not exists public.scores (
   id         bigint generated always as identity primary key,
   name       text not null references public.players (name) on update cascade on delete cascade,
-  game       text not null default 'sizeitup' check (game in ('sizeitup', 'skuggabaldur', 'krillion', 'verdlengjan')),
+  game       text not null default 'sizeitup' check (game in ('sizeitup', 'skuggabaldur', 'krillion', 'verdlengjan', 'timeguessr', 'farflung')),
   puzzle     integer not null check (puzzle > 0),
   score      integer not null check (score >= 0),
   rounds     jsonb not null default '[]'::jsonb,
@@ -133,12 +133,13 @@ begin
     raise exception 'Innskráning rann út. Skráðu þig inn aftur.';
   end if;
 
-  if v_game not in ('sizeitup', 'skuggabaldur', 'krillion', 'verdlengjan') then
+  if v_game not in ('sizeitup', 'skuggabaldur', 'krillion', 'verdlengjan', 'timeguessr', 'farflung') then
     raise exception 'Óþekktur leikur.';
   end if;
 
-  -- Hámark per leik: Size It Up 500, Skuggabaldur 700, Krillion 700, Verðlengjan 102 + 5 fimmtudagsbonus.
-  v_max := case v_game when 'sizeitup' then 500 when 'skuggabaldur' then 700 when 'krillion' then 700 when 'verdlengjan' then 107 else null end;
+  -- Hámark per leik: Size It Up 500, Skuggabaldur 700, Krillion 700, Verðlengjan 102 + 5 fimmtudagsbonus,
+  -- TimeGuessr 50000, Farflung 500 km (lægra er betra — röðun fer fram í viðmótinu).
+  v_max := case v_game when 'sizeitup' then 500 when 'skuggabaldur' then 700 when 'krillion' then 700 when 'verdlengjan' then 107 when 'timeguessr' then 50000 when 'farflung' then 500 else null end;
 
   if p_puzzle is null or p_puzzle <= 0 or p_score is null or p_score < 0
      or (v_max is not null and p_score > v_max) then

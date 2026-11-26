@@ -14,7 +14,8 @@ UI.init = function (S) {
   UI.S = S;
   CE.fmtMode = S.settings.fmt;
   $('#logo-img').src = CE.spriteURL('logo', 48);
-  /* Sidebar */
+  /* Full section catalog. Locked sections are HIDDEN entirely (progression
+     based visibility) — renderNav only shows what the player has unlocked. */
   const nav = [
     ['overview', 'Overview', 'cup'], ['brew', 'Brew', 'machine'],
     ['businesses', 'Businesses', 'shop'], ['milestones', 'Milestones', 'coin'],
@@ -25,23 +26,42 @@ UI.init = function (S) {
     ['statistics', 'Statistics', 'bean']
   ];
   UI.navList = nav;
-  $('#nav').innerHTML = nav.map(([id, label, icon]) =>
-    '<button class="nav-btn" data-action="nav" data-id="' + id + '">' +
-    CE.spriteImg(icon, 'nav-icon', 32) + '<span>' + label + '</span></button>').join('');
-  /* Mobile fixed bottom navigation: Home / Brew / Businesses / Production / More */
-  const bottom = [['overview', 'Home', 'cup'], ['brew', 'Brew', 'machine'],
-    ['businesses', 'Business', 'shop'], ['production', 'Production', 'roastery'], ['more', 'More', 'box']];
-  $('#bottomnav').innerHTML = bottom.map(([id, label, icon]) =>
-    '<button class="bnav-btn" data-action="' + (id === 'more' ? 'more' : 'nav') + '" data-id="' + id + '">' +
-    CE.spriteImg(icon, 'bnav-icon', 32) + '<span>' + label + '</span></button>').join('');
+  UI.navSig = Object.keys(S.tabsUnlocked).sort().join(',');
+  UI.renderNav([]);
   document.addEventListener('click', UI.onClick);
   document.addEventListener('input', UI.onInput);
   document.addEventListener('change', UI.onInput);
   UI.show(S.ui.section || 'overview');
 };
 
+/* Build sidebar + mobile bottom nav from unlocked sections only.
+   `fresh` lists newly unlocked ids so they get a small entrance animation. */
+UI.renderNav = function (fresh) {
+  const S = UI.S;
+  fresh = fresh || [];
+  const unlocked = UI.navList.filter(([id]) => S.tabsUnlocked[id]);
+  $('#nav').innerHTML = unlocked.map(([id, label, icon]) =>
+    '<button class="nav-btn' + (fresh.indexOf(id) >= 0 ? ' nav-new' : '') + '" data-action="nav" data-id="' + id + '">' +
+    CE.spriteImg(icon, 'nav-icon', 32) + '<span>' + label + '</span></button>').join('');
+  /* Mobile fixed bottom navigation: Home / Brew / Businesses / 4th slot / More.
+     The 4th slot shows Milestones early, Production once it unlocks. */
+  const fourth = S.tabsUnlocked.production ? ['production', 'Production', 'roastery'] : ['milestones', 'Goals', 'coin'];
+  const bottom = [['overview', 'Home', 'cup'], ['brew', 'Brew', 'machine'],
+    ['businesses', 'Business', 'shop'], fourth, ['more', 'More', 'box']];
+  UI.bottomIds = bottom.map(b => b[0]);
+  $('#bottomnav').innerHTML = bottom.map(([id, label, icon]) =>
+    '<button class="bnav-btn' + (fresh.indexOf(id) >= 0 ? ' nav-new' : '') + '" data-action="' + (id === 'more' ? 'more' : 'nav') + '" data-id="' + id + '">' +
+    CE.spriteImg(icon, 'bnav-icon', 32) + '<span>' + label + '</span></button>').join('');
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.toggle('active', b.dataset.id === UI.section));
+  document.querySelectorAll('.bnav-btn').forEach(b => b.classList.toggle('active', b.dataset.id === UI.section));
+};
+
 UI.show = function (name) {
-  if (!UI.sections[name]) name = 'overview';
+  if (!UI.sections[name] || !UI.S.tabsUnlocked[name]) name = 'overview';
+  /* Keep the living scene (and its walking customers) across same-section
+     refreshes — structural rebuilds must not interrupt the diorama. */
+  const keep = (UI._scene && name === UI.section) ? UI._scene : null;
+  if (UI._scene && !keep) { UI._scene.destroy(); UI._scene = null; }
   UI.section = name;
   UI.S.ui.section = name;
   document.querySelectorAll('.nav-btn').forEach(b => b.classList.toggle('active', b.dataset.id === name));
@@ -49,8 +69,18 @@ UI.show = function (name) {
   UI.updaters = [];
   const sec = UI.sections[name];
   $('#main').innerHTML = sec.render(UI.S);
-  if (sec.mount) sec.mount(UI.S);
+  if (keep) {
+    const holder = document.getElementById(keep.el.id);
+    if (holder && holder.parentNode && holder.parentNode.replaceChild) {
+      holder.parentNode.replaceChild(keep.el, holder);
+      UI._scene = keep;
+    } else {
+      keep.destroy(); UI._scene = null;
+      if (sec.mount) sec.mount(UI.S);
+    }
+  } else if (sec.mount) sec.mount(UI.S);
   UI.update();
+  if (CE.Tutorial) CE.Tutorial.attach(UI.S);
   $('#main').scrollTop = 0;
 };
 UI.refresh = function () { UI.show(UI.section); };
@@ -66,7 +96,8 @@ UI.signature = function (S) {
     (S.research.active ? S.research.active.id : '-') + '|' + S.legacy.prestiges + '|' +
     Object.keys(S.discovered).length + '|' + Object.keys(S.milestones).length + '|' +
     Object.keys(S.staffUnlocked).length + '|' + Object.keys(S.recipesUnlocked).length + '|' +
-    S.researchCatsUnlocked.length + '|' + (S.brewSession ? S.brewSession.drink + ':' + S.brewSession.step + ':' + (S.brewSession.running ? 1 : 0) : '-');
+    S.researchCatsUnlocked.length + '|' + Object.keys(S.tabsUnlocked).length + '|' +
+    (S.brewSession ? S.brewSession.drink + ':' + S.brewSession.step + ':' + (S.brewSession.running ? 1 : 0) : '-');
 };
 
 UI.update = function () {
@@ -86,10 +117,19 @@ UI.update = function () {
   $('#bell-count').style.display = unread ? '' : 'none';
   const sec = UI.sections[UI.section];
   if (sec && sec.update) sec.update(S);
+  if (CE.Tutorial) CE.Tutorial.update(S);
 };
 
 /* Periodic structural check (1 Hz from main loop). */
 UI.checkStructure = function () {
+  /* Newly unlocked sections appear in the navigation with a small animation. */
+  const navSig = Object.keys(UI.S.tabsUnlocked).sort().join(',');
+  if (navSig !== UI.navSig) {
+    const prev = (UI.navSig || '').split(',');
+    const fresh = Object.keys(UI.S.tabsUnlocked).filter(id => prev.indexOf(id) < 0);
+    UI.navSig = navSig;
+    UI.renderNav(fresh);
+  }
   const sig = UI.signature(UI.S);
   if (sig !== UI.sig) { UI.sig = sig; if (!UI.modalOpen) UI.refresh(); }
 };
@@ -121,15 +161,15 @@ UI.onClick = function (ev) {
     case 'buyqty': S.ui.buyQty = id === 'max' ? 'max' : parseInt(id, 10); refresh = true; break;
     case 'buybiz': {
       const n = E.buyBiz(S, id, S.ui.buyQty);
-      if (n) { CE.Audio.blip(520, 0.06); refresh = true; } else CE.Audio.blip(180, 0.08);
+      if (n) { CE.Audio.blip(520, 0.06); UI.floatText(el, '✓ ' + n + 'x ' + CE.BIZ[id].name, 'buy'); refresh = true; } else CE.Audio.blip(180, 0.08);
       break;
     }
     case 'buyres': E.buyResource(S, id, el.dataset.qty === 'fill' ? 'fill' : parseFloat(el.dataset.qty)); break;
     case 'sellres': E.sellResource(S, id, el.dataset.qty === 'all' ? 'all' : parseFloat(el.dataset.qty)); break;
     case 'hire': E.hire(S, id, parseInt(el.dataset.n, 10)); refresh = true; break;
     case 'fire': E.fire(S, id, parseInt(el.dataset.n, 10)); refresh = true; break;
-    case 'upgrade': if (E.buyUpgrade(S, id)) { CE.Audio.blip(700, 0.06); refresh = true; } break;
-    case 'repeatable': if (E.buyRepeatable(S, id)) { CE.Audio.blip(700, 0.06); refresh = true; } break;
+    case 'upgrade': if (E.buyUpgrade(S, id)) { CE.Audio.blip(700, 0.06); UI.floatText(el, '⬆ Upgraded!', 'buy'); refresh = true; } break;
+    case 'repeatable': if (E.buyRepeatable(S, id)) { CE.Audio.blip(700, 0.06); UI.floatText(el, '⬆ Level up!', 'buy'); refresh = true; } break;
     case 'research': if (E.startResearch(S, id)) refresh = true; break;
     case 'recipe': {
       const w = parseInt(el.dataset.w, 10);
@@ -161,6 +201,9 @@ UI.onClick = function (ev) {
       return;
     }
     case 'save-now': CE.save(S); CE.notify('Game saved.', 'good'); return;
+    case 'tut-next': if (CE.Tutorial) CE.Tutorial.next(S); return;
+    case 'tut-skip': if (CE.Tutorial) CE.Tutorial.skip(S); return;
+    case 'tutorial-replay': UI.closeModal(); if (CE.Tutorial) CE.Tutorial.start(S); return;
   }
   if (refresh) UI.refresh();
   UI.update();
@@ -190,12 +233,12 @@ UI.onInput = function (ev) {
   }
 };
 
-/* Floating +$ text on manual brew */
-UI.floatText = function (el, text) {
+/* Floating +$ text on manual brew (and purchase feedback). */
+UI.floatText = function (el, text, cls) {
   if (!UI.S.settings.animations) return;
   const r = el.getBoundingClientRect();
   const f = document.createElement('div');
-  f.className = 'float-text';
+  f.className = 'float-text' + (cls ? ' ' + cls : '');
   f.textContent = text;
   f.style.left = (r.left + r.width / 2) + 'px';
   f.style.top = r.top + 'px';
@@ -208,7 +251,9 @@ UI.drainNotifications = function () {
   const list = CE.notifications;
   while (UI.notifSeen < list.length) {
     const n = list[UI.notifSeen++];
-    UI.toast(n.msg, n.kind);
+    /* During the tutorial, per-serve payment toasts are redundant noise. */
+    const tutActive = UI.S && UI.S.tutorial && UI.S.tutorial.active;
+    if (!(tutActive && n.msg.indexOf('Served') === 0)) UI.toast(n.msg, n.kind);
     /* Distinct audio feedback per notification type */
     if (n.msg.indexOf('Achievement') >= 0) CE.Audio.cue('achievement');
     else if (n.msg.indexOf('Research complete') >= 0) CE.Audio.cue('research');
@@ -227,8 +272,8 @@ UI.toast = function (msg, kind) {
   t.className = 'toast ' + (kind || 'info');
   t.textContent = msg;
   box.appendChild(t);
-  while (box.children.length > 5) box.firstChild.remove();
-  setTimeout(() => { t.classList.add('out'); setTimeout(() => t.remove(), 400); }, 4200);
+  while (box.children.length > 3) box.firstChild.remove();
+  setTimeout(() => { t.classList.add('out'); setTimeout(() => t.remove(), 400); }, 3200);
 };
 
 /* ---------- Modals ---------- */
@@ -315,7 +360,7 @@ UI.doImport = function () {
 };
 /* ---------- More sheet (mobile navigation) ---------- */
 UI.openMore = function () {
-  const items = UI.navList.filter(([id]) => ['overview', 'brew', 'businesses', 'production'].indexOf(id) < 0);
+  const items = UI.navList.filter(([id]) => UI.S.tabsUnlocked[id] && UI.bottomIds.indexOf(id) < 0);
   UI.modal('More',
     '<div class="more-grid">' + items.map(([id, label, icon]) =>
       '<button class="more-btn" data-action="nav" data-id="' + id + '">' +
@@ -345,6 +390,7 @@ UI.openSettings = function () {
     '<input type="number" min="5" max="120" value="' + s.autosave + '" data-setting="autosave"></label>' +
     '<div class="setting-buttons">' +
     '<button class="btn" data-action="save-now">Save now</button>' +
+    '<button class="btn" data-action="tutorial-replay">Replay tutorial</button>' +
     '<button class="btn" data-action="export">Export save</button>' +
     '<button class="btn" data-action="import">Import save</button>' +
     '<button class="btn danger" data-action="reset">Reset game</button>' +
@@ -551,7 +597,7 @@ UI.sections.businesses = {
 UI.sections.staff = {
   render(S) {
     E.ensureMods(S);
-    let html = '<div class="page-head"><h2>Employees</h2><p class="muted">Staff run your businesses — unstaffed businesses stay closed until you hire or research automation. Managers unlock full automation. Employees gain experience over time.</p></div><div class="biz-grid">';
+    let html = '<div class="page-head"><h2>Employees</h2><p class="muted">Staff run your businesses — unstaffed businesses stay closed until you hire or research automation. Managers unlock full automation. Employees gain experience over time. Staff are only paid while their workplaces run — when everything is idle they are sent home (no wages).</p></div><div class="biz-grid">';
     const unlockedTypes = Object.keys(CE.STAFF).filter(t => S.staffUnlocked[t]);
     if (!unlockedTypes.length) {
       html += '<div class="panel"><p class="muted">No employee types unlocked yet. Reach <b>$250 lifetime revenue</b> (milestone "First Barista") to hire your first barista — then your cart will run automatically.</p></div>';
@@ -583,15 +629,16 @@ UI.sections.staff = {
     for (const t in CE.STAFF) {
       if (!S.staffUnlocked[t]) continue;
       const st = S.staff[t], eff = E.eff[t], need = E.needs[t];
+      const idle = !!(E.idleTypes && E.idleTypes[t]);
       const set = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
       set('sn-' + t, String(st.n));
       set('sd-' + t, CE.fmtQty(need));
-      set('sp-' + t, CE.fmtMoney(st.n * CE.STAFF[t].salary * E.mods.wageMult) + '/s');
+      set('sp-' + t, idle ? '$0/s (idle)' : CE.fmtMoney(st.n * CE.STAFF[t].salary * E.mods.wageMult) + '/s');
       set('se-' + t, CE.fmtPct(eff.mult, 0));
       set('sx-' + t, 'Lv.' + Math.floor(st.xp * 100));
       const fill = document.getElementById('su-' + t);
       if (fill) fill.style.width = Math.round(eff.ratio * 100) + '%';
-      set('sr-' + t, need > 0 ? CE.fmtPct(eff.ratio, 0) + ' staffed' : 'no demand');
+      set('sr-' + t, idle ? 'idle — sent home' : need > 0 ? CE.fmtPct(eff.ratio, 0) + ' staffed' : 'no demand');
       for (const n of [1, 10, 100]) {
         const btn = document.getElementById('sh' + n + '-' + t);
         if (btn) {
@@ -616,6 +663,7 @@ UI.sections.overview = {
       stat('ov-staff', 'Employees') + stat('ov-share', 'Market share') + '</div>';
     /* Brew station shortcut */
     html += '<div class="panel brew-panel"><h3>' + CE.spriteImg('cup', 'cat-icon', 32) + ' Brew Station</h3>' +
+      '<div class="scene" id="ov-scene" aria-hidden="true"></div>' +
       '<button class="btn primary" data-action="nav" data-id="brew">☕ Open Brew Station (' + CE.fmtQty(E.mods.manualMult) + ' cups per brew)</button>' +
       '<p class="muted" id="brew-stock"></p></div>';
     /* Objectives */
@@ -625,7 +673,11 @@ UI.sections.overview = {
       '<div class="panel"><h3>Recent News</h3><div id="ov-news"></div></div></div>';
     return html;
   },
+  mount(S) {
+    if (CE.Scene) UI._scene = CE.Scene.mount(document.getElementById('ov-scene'), S);
+  },
   update(S) {
+    if (UI._scene) UI._scene.update(S);
     const set = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
     set('ov-cash', CE.fmtMoney(S.cash));
     set('ov-worth', CE.fmtMoney(E.valuation(S)));

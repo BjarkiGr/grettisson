@@ -1,5 +1,5 @@
 ﻿// ============================================================================
-// Daily Games Stats — Stigatafla fyrir Size It Up, Skuggabaldur, Krillion og Verðlengjan
+// Daily Games Stats — Stigatafla fyrir Size It Up, Skuggabaldur, Krillion, Verðlengjan, TimeGuessr og Farflung
 // Static frontend sem talar við Supabase (sjá README.md fyrir uppsetningu).
 // Límdu inn þín gildi hér að neðan: Project Settings → API Keys í Supabase.
 // Notaðu PUBLISHABLE-lykilinn (sb_publishable_...) eða eldri anon-lykilinn.
@@ -13,11 +13,14 @@ const API_BASE = SUPABASE_URL.trim().replace(/\/+$/, '').replace(/\/rest\/v1$/, 
 
 // Leikirnir. max: null = ekkert fast hámark (enginn leikur eins og er).
 // Verðlengjan: 102 cm hámark + 5 cm fimmtudagsbonus (gagnagrunnur leyfir 107).
+// lowerBetter: true = lægra skor er betra (Farflung: km frá réttum stað).
 const GAMES = {
   sizeitup:     { label: 'Size It Up',   icon: '📏', max: 500,  url: 'https://magnitudle.com/size-it-up' },
   skuggabaldur: { label: 'Skuggabaldur', icon: '🌑', max: 700,  url: 'https://skuggabaldur.is' },
   krillion:     { label: 'Krillion',     icon: '🦐', max: 700,  url: 'https://krillion.io' },
-  verdlengjan:  { label: 'Verðlengjan',  icon: '🥐', max: 102, unit: ' cm', url: 'https://grettisson.is/projects/verdlengjan/' }
+  verdlengjan:  { label: 'Verðlengjan',  icon: '🥐', max: 102, unit: ' cm', url: 'https://grettisson.is/projects/verdlengjan/' },
+  timeguessr:   { label: 'TimeGuessr',   icon: '🕰️', max: 50000, url: 'https://timeguessr.com' },
+  farflung:     { label: 'Farflung',     icon: '🧭', max: 500, unit: ' km', lowerBetter: true, url: 'https://farflung.game' }
 };
 
 function isConfigured() {
@@ -146,13 +149,14 @@ function switchMode(mode) {
 
 function getStandings() {
   const gameScores = state.scores.filter(s => (s.game || 'sizeitup') === state.game);
+  const lower = !!GAMES[state.game].lowerBetter;
 
   if (state.mode === 'daily') {
     const puzzle = Number(document.getElementById('puzzleSelect').value);
     if (!puzzle) return [];
     return gameScores
       .filter(s => Number(s.puzzle) === puzzle)
-      .sort((a, b) => b.score - a.score)
+      .sort((a, b) => lower ? a.score - b.score : b.score - a.score)
       .map(s => ({
         name: s.name,
         primaryScore: Number(s.score),
@@ -166,11 +170,11 @@ function getStandings() {
     gameScores.forEach(s => {
       const key = s.name.toLowerCase();
       if (!map[key]) {
-        map[key] = { name: s.name, total: 0, count: 0, best: 0 };
+        map[key] = { name: s.name, total: 0, count: 0, best: lower ? Infinity : 0 };
       }
       map[key].total += Number(s.score);
       map[key].count += 1;
-      if (Number(s.score) > map[key].best) map[key].best = Number(s.score);
+      if (lower ? Number(s.score) < map[key].best : Number(s.score) > map[key].best) map[key].best = Number(s.score);
     });
 
     return Object.values(map)
@@ -186,7 +190,7 @@ function getStandings() {
           best: p.best
         };
       })
-      .sort((a, b) => b.primaryScore - a.primaryScore);
+      .sort((a, b) => lower ? a.primaryScore - b.primaryScore : b.primaryScore - a.primaryScore);
   }
 }
 
@@ -316,6 +320,7 @@ function renderTable(list) {
 
   const isDaily = state.mode === 'daily';
   const max = gameMax();
+  const lower = !!GAMES[state.game].lowerBetter;
   // Ef leikur hefur ekkert fast hámark miðum við efsta skor í staðinn.
   const scale = max || (list.length ? list[0].primaryScore : 0) || 1;
   container.innerHTML = `
@@ -331,7 +336,9 @@ function renderTable(list) {
       <tbody>
         ${list.map((row, idx) => {
           const rank = idx + 1;
-          const ratio = row.primaryScore / scale;
+          // Lægra er betra (Farflung km): snúum hlutfallinu við svo nær réttu = grænn/fullur stallur.
+          const raw = row.primaryScore / scale;
+          const ratio = lower ? Math.max(0, 1 - raw) : raw;
           const pct = Math.min(100, Math.round(ratio * 100));
           const color = ratio >= 0.8 ? '#4ade80' : ratio >= 0.5 ? '#fbbf24' : '#f87171';
           return `
@@ -413,6 +420,8 @@ function parseShareText(raw) {
   if (/skuggabaldur/i.test(raw)) return parseSkuggabaldur(raw);
   if (/krillion/i.test(raw)) return parseKrillion(raw);
   if (/verðlengjan/i.test(raw)) return parseVerdlengjan(raw);
+  if (/timeguessr/i.test(raw)) return parseTimeGuessr(raw);
+  if (/farflung/i.test(raw)) return parseFarflung(raw);
   return parseSizeItUp(raw);
 }
 
@@ -482,6 +491,43 @@ function parseVerdlengjan(raw) {
   };
 }
 
+// TimeGuessr: "TimeGuessr #1275 — 42,390/50,000" + 5 línur með 🏆stigum per umferð.
+// Þúsundaskil eru kommur í Share-textanum — hreinsaðar burt áður en tölur eru lesnar.
+function parseTimeGuessr(raw) {
+  const m = raw.match(/TimeGuessr\s*#(\d+)\s*[—–-]?\s*([\d,]+)\s*\/\s*50,?000/i);
+  if (!m) return null;
+  const lines = raw.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+  const roundLines = lines.filter(l => l.includes('🏆'));
+  const rounds = roundLines.map(l => {
+    const r = l.match(/🏆\s*([\d,]+)/);
+    return r ? parseInt(r[1].replace(/,/g, ''), 10) : null;
+  }).filter(n => n !== null);
+  return {
+    game: 'timeguessr',
+    puzzle: parseInt(m[1], 10),
+    score: parseInt(m[2].replace(/,/g, ''), 10),
+    rounds,
+    grid: roundLines.join('\n')
+  };
+}
+
+// Farflung: "Farflung #53 · 265/500 km" + sjaldgæfnislína (texti, engin emoji).
+// Lægra er betra — heildarkm frá réttum stað (lowerBetter í GAMES).
+function parseFarflung(raw) {
+  const m = raw.match(/Farflung\s*#(\d+)\s*[·—–-]\s*(\d+)\s*\/\s*500\s*km/i);
+  if (!m) return null;
+  const gridLines = raw.split(/\r?\n/).map(l => l.trim()).filter(Boolean)
+    .filter(l => !/farflung/i.test(l))
+    .filter(l => !/^https?:\/\//i.test(l));
+  return {
+    game: 'farflung',
+    puzzle: parseInt(m[1], 10),
+    score: parseInt(m[2], 10),
+    rounds: [],
+    grid: gridLines.join('\n')
+  };
+}
+
 function openSubmitModal() {
   if (!state.currentUser) {
     openAuthModal('login');
@@ -500,7 +546,7 @@ function updateParsePreview() {
   const parsed = parseShareText(document.getElementById('shareInput').value);
   const box = document.getElementById('parsePreview');
   if (!parsed) {
-    box.innerHTML = 'Bíð eftir gildum Share-texta frá Size It Up, Skuggabaldur, Krillion eða Verðlengjan...';
+    box.innerHTML = 'Bíð eftir gildum Share-texta frá Size It Up, Skuggabaldur, Krillion, Verðlengjan, TimeGuessr eða Farflung...';
     return;
   }
   const g = GAMES[parsed.game];
@@ -559,7 +605,9 @@ function openPlayerHistory(playerName) {
     body.innerHTML = `<div class="empty-state">Engir leikir skráðir.</div>`;
   } else {
     const avg = (entries.reduce((acc, s) => acc + Number(s.score), 0) / entries.length).toFixed(1);
-    const best = Math.max(...entries.map(s => Number(s.score)));
+    const best = g.lowerBetter
+      ? Math.min(...entries.map(s => Number(s.score)))
+      : Math.max(...entries.map(s => Number(s.score)));
     body.innerHTML = `
       <div style="display:flex;gap:12px;margin-bottom:16px;">
         <div style="flex:1;background:var(--bg);padding:12px;border-radius:10px;text-align:center;">

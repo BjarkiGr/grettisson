@@ -13,6 +13,8 @@ UI.sections.brew = {
     let html = '<div class="page-head"><h2>Brew Coffee</h2>' +
       '<p class="muted">Make coffee by hand: pick a drink, work through each step, serve the customer, get paid. ' +
       'Each brew makes <b>' + CE.fmtQty(E.mods.manualMult) + '</b> cup(s).</p></div>';
+    /* Living diorama of the cart — barista, customers, steam. */
+    html += '<div class="scene" id="brew-scene" aria-hidden="true"></div>';
     /* Drink selector */
     html += '<div class="panel"><h3>Choose a Drink</h3><div class="brew-grid">';
     for (const d in CE.DRINKS) {
@@ -41,7 +43,8 @@ UI.sections.brew = {
       else if (i === ses.step) {
         cls = 'current';
         if (ses.running) {
-          right = '<div class="util-bar brew-progress"><div class="util-fill" id="brew-progress"></div></div>';
+          const remain = Math.max(0.05, ses.dur - ses.t);
+          right = '<div class="util-bar brew-progress"><div class="util-fill brew-run" id="brew-progress" style="animation-duration:' + remain.toFixed(2) + 's;animation-delay:-' + ses.t.toFixed(2) + 's"></div></div>';
         } else {
           const label = step === 'serve' ? 'Serve — ' + payment : def.name + (dur > 0 ? ' (' + dur.toFixed(1) + 's)' : ' (instant)');
           right = '<button class="btn primary brew-action" data-action="brew-step">' + label + '</button>';
@@ -73,11 +76,21 @@ UI.sections.brew = {
         q + ' ' + CE.RESOURCES[r].unit + ' ' + CE.RESOURCES[r].name + ' (' + CE.fmtMoney(E.buyPrice(S, r) * q) + ')</button>').join('') + '</div></div>';
     return html;
   },
+  mount(S) {
+    if (CE.Scene) UI._scene = CE.Scene.mount(document.getElementById('brew-scene'), S);
+  },
   update(S) {
     const ses = S.brewSession;
-    if (ses && ses.running) {
+    /* React to step completion immediately (the 1 Hz structural check made
+       the next button feel frozen, especially on mobile). */
+    const sig = ses ? ses.drink + ':' + ses.step + ':' + (ses.running ? 1 : 0) : '-';
+    if (this._sesSig != null && sig !== this._sesSig) { this._sesSig = sig; UI.refresh(); return; }
+    this._sesSig = sig;
+    if (UI._scene) UI._scene.update(S);
+    if (ses && ses.running && !S.settings.animations) {
+      /* Animations off: drive the bar manually instead of the CSS animation. */
       const fill = document.getElementById('brew-progress');
-      if (fill) fill.style.width = Math.min(100, ses.t / ses.dur * 100) + '%';
+      if (fill) fill.style.transform = 'scaleX(' + Math.min(1, ses.t / ses.dur) + ')';
     }
     const stock = document.getElementById('brew-stock');
     if (stock) {

@@ -48,12 +48,14 @@ require('../src/data3.js');
 require('../src/data4.js');
 require('../src/data5.js');
 require('../src/sprites.js');
+require('../src/scene.js');
 require('../src/state.js');
 require('../src/engine.js');
 require('../src/ui.js');
 require('../src/ui2.js');
 require('../src/ui3.js');
 require('../src/ui4.js');
+require('../src/tutorial.js');
 const CE = globalThis.CE;
 CE.Audio = { blip() {}, cue() {}, setMusic() {}, ensure() {} };
 const E = CE.Engine, UI = CE.UI, Big = CE.Big;
@@ -71,6 +73,10 @@ CE.applyLegacyStart(S);
 S.cash = Big.fromNumber(1e12);
 S.stats.revenue = Big.fromNumber(1e12);
 S.brand = 60; S.rp = 5000;
+/* Rendering test: unlock every section explicitly (visibility itself is
+   covered by test/overhaul.js). */
+for (const id of ['overview', 'brew', 'businesses', 'milestones', 'staff', 'production', 'locations', 'farms', 'research', 'markets', 'corporate', 'achievements', 'statistics']) S.tabsUnlocked[id] = true;
+S.tutorial.done = true;
 E.dirty = true;
 E.tick(S, 1);
 UI.init(S);
@@ -140,6 +146,43 @@ try {
   check('offline modal + structure check', true);
 } catch (e) {
   check('offline modal (' + e.message + ')', false);
+}
+
+console.log('== Tutorial flow (interactive) ==');
+try {
+  const ST = CE.newState();
+  CE.applyLegacyStart(ST);
+  E.dirty = true;
+  UI.init(ST);
+  CE.Tutorial.start(ST);
+  check('tutorial starts at welcome', ST.tutorial.active === true && ST.tutorial.step === 0);
+  click({ action: 'tut-next' });
+  check('welcome advances to pick-a-drink', ST.tutorial.step === 1);
+  click({ action: 'brew-select', id: 'regular' });
+  CE.Tutorial.update(ST);
+  check('selecting a drink advances the tutorial', ST.tutorial.step === 2);
+  for (let i = 0; i < 60 && ST.tutorial.step < 4; i++) {
+    E.tick(ST, 0.25);
+    if (ST.brewSession && !ST.brewSession.running) click({ action: 'brew-step' });
+    CE.Tutorial.update(ST);
+  }
+  check('brewing + serving reaches the money step', ST.tutorial.step === 4);
+  click({ action: 'tut-next' });
+  check('money step advances to first upgrade', ST.tutorial.step === 5);
+  ST.cash = Big.fromNumber(100);
+  click({ action: 'upgrade', id: 'paperCups' });
+  CE.Tutorial.update(ST);
+  check('buying the first upgrade completes the guide', ST.tutorial.step === 6);
+  click({ action: 'tut-next' });
+  check('tutorial completion is recorded', ST.tutorial.done === true && ST.tutorial.active === false);
+  const ST2 = CE.deserialize(CE.serialize(ST));
+  check('completed tutorial persists', ST2.tutorial.done === true);
+  CE.Tutorial.start(ST2);
+  check('tutorial can be replayed', ST2.tutorial.active === true && ST2.tutorial.step === 0);
+  CE.Tutorial.skip(ST2);
+  check('tutorial can be skipped', ST2.tutorial.skipped === true && ST2.tutorial.active === false);
+} catch (e) {
+  check('tutorial flow (' + e.message + ')', false);
 }
 
 console.log(failures === 0 ? '\nALL UI CHECKS PASSED' : '\n' + failures + ' UI CHECKS FAILED');

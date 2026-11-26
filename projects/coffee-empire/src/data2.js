@@ -34,6 +34,7 @@ for (const b of CE.BUSINESSES) {
 }
 /* Hand-crafted global upgrades. */
 const G = [
+  ['paperCups', 'Sturdy Paper Cups', 'Double-walled cups keep coffee hot. Manual brewing x1.25. A perfect first upgrade.', 60, { kind: 'mod', key: 'manualMult', mult: 1.25 }, null],
   ['machines1', 'Better Espresso Machines', 'Professional two-group machines. Manual brewing x2, all retail x1.25.', 500, { kind: 'combo', effects: [{ kind: 'mod', key: 'manualMult', mult: 2 }, { kind: 'mod', key: 'retailMult', mult: 1.25 }] }, { rev: 200 }],
   ['grinders1', 'Professional Grinders', 'Consistent particle size. All retail revenue x1.25.', 2500, { kind: 'mod', key: 'retailRevMult', mult: 1.25 }, { rev: 1000 }],
   ['autoBrew1', 'Automatic Brewing', 'Volumetric dosing. Manual brewing x3.', 8000, { kind: 'mod', key: 'manualMult', mult: 3 }, { rev: 3000 }],

@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Coffee Empire</string>
+    <string name="title_activity_main">Coffee Empire</string>
+    <string name="package_name">com.grettisson.coffeeempire</string>
+    <string name="custom_url_scheme">com.grettisson.coffeeempire</string>
+</resources>

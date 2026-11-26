@@ -257,7 +257,7 @@ check('migration preserves research/upgrades/achievements', !!S12.research.done.
 check('migration initializes discovery', !!S12.discovered.smallShop && !!S12.discovered.cart);
 check('migration unlocks legacy staff/recipes', !!S12.staffUnlocked.barista && !!S12.recipesUnlocked.latte);
 check('migration backfills milestones silently', !!S12.milestones.rev250);
-check('migration version bumped', S12.version === 2);
+check('migration version bumped', S12.version === CE.SAVE_VERSION);
 
 console.log(failures === 0 ? '\nALL CHECKS PASSED' : '\n' + failures + ' CHECKS FAILED');
 process.exit(failures === 0 ? 0 : 1);

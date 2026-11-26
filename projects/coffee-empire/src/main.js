@@ -99,6 +99,12 @@ function boot() {
   UI.sig = UI.signature(S);
   if (offlineSum) UI.offlineModal(offlineSum);
   if (S.settings.music) Audio.setMusic(true);
+  /* New players get the short interactive tutorial; returning players resume
+     it where they left off. Existing saves are migrated as tutorial-done. */
+  if (CE.Tutorial && !S.tutorial.done && !S.tutorial.skipped) {
+    if (S.tutorial.active) { CE.Tutorial.baseCups = S.stats.cups; CE.Tutorial.render(S); }
+    else CE.Tutorial.start(S);
+  }
 
   /* ---------- Centralized loop: 8 Hz simulation ---------- */
   let last = performance.now();
@@ -108,6 +114,9 @@ function boot() {
     let dt = (now - last) / 1000;
     last = now;
     if (dt <= 0) return;
+    /* Suspended (hidden tab / backgrounded app): freeze the simulation.
+       Progress is saved on hide; the resume handler grants offline earnings. */
+    if (document.hidden) return;
     if (dt > 300) dt = 300; /* extremely long tab sleep: cap, offline load handles the rest */
     E.tick(CE.S, dt);
     UI.drainNotifications();
@@ -121,8 +130,34 @@ function boot() {
     }
   }, 125);
 
+  /* ---------- App lifecycle: save on suspend, catch up on resume ---------- */
+  let hiddenAt = 0;
+  function onSuspend() {
+    hiddenAt = Date.now();
+    CE.save(CE.S);
+  }
+  function onResume() {
+    const away = hiddenAt ? (Date.now() - hiddenAt) / 1000 : 0;
+    hiddenAt = 0;
+    last = performance.now();
+    if (away > 60 && CE.S.settings.offline) {
+      try {
+        const sum = E.simulateOffline(CE.S, away);
+        UI.offlineModal(sum);
+        CE.save(CE.S);
+      } catch (e) { /* simulation must never break resuming */ }
+    }
+  }
   global.addEventListener('beforeunload', () => CE.save(CE.S));
-  document.addEventListener('visibilitychange', () => { if (document.hidden) CE.save(CE.S); });
+  global.addEventListener('pagehide', () => CE.save(CE.S));
+  document.addEventListener('visibilitychange', () => { if (document.hidden) onSuspend(); else onResume(); });
+  /* Native Capacitor lifecycle (iOS / Android app suspension). */
+  const CapApp = global.Capacitor && global.Capacitor.Plugins && global.Capacitor.Plugins.App;
+  if (CapApp && CapApp.addListener) {
+    CapApp.addListener('appStateChange', ({ isActive }) => { if (isActive) onResume(); else onSuspend(); });
+  }
+  const CapSplash = global.Capacitor && global.Capacitor.Plugins && global.Capacitor.Plugins.SplashScreen;
+  if (CapSplash && CapSplash.hide) { try { CapSplash.hide(); } catch (e) {} }
   /* Unlock audio on first interaction */
   document.addEventListener('pointerdown', function once() {
     Audio.ensure();

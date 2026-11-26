@@ -1,8 +1,9 @@
 ﻿# daily-games-stats — Daily Games Stats stigatafla
 
-Static leaderboard for four daily games: [Size It Up](https://magnitudle.com/size-it-up),
-[Skuggabaldur](https://skuggabaldur.is), [Krillion](https://krillion.io) and
-[Verðlengjan](https://grettisson.is/projects/verdlengjan/) (our own Krónan price guesser).
+Static leaderboard for six daily games: [Size It Up](https://magnitudle.com/size-it-up),
+[Skuggabaldur](https://skuggabaldur.is), [Krillion](https://krillion.io),
+[Verðlengjan](https://grettisson.is/projects/verdlengjan/) (our own Krónan price guesser),
+[TimeGuessr](https://timeguessr.com) and [Farflung](https://farflung.game).
 Register with a name + 4-digit PIN, paste your Share text (the game is
 detected automatically), and compare
 scores with friends (daily standings + overall averages).
@@ -19,6 +20,7 @@ with no server and no database to manage.
 - `supabase-migration-games.sql` — upgrades an older single-game setup to multi-game
 - `supabase-migration-verdlengjan.sql` — adds Verðlengjan to an existing multi-game setup
 - `supabase-migration-krillion-max.sql` — sets Krillion's max score to 700
+- `supabase-migration-timeguessr-farflung.sql` — adds TimeGuessr and Farflung to an existing setup
 - `supabase-migration-verdlengjan-traffic.sql` — anonymous Verðlengjan traffic
   counting (`verd_track` / `verd_traffic`) for the participation panel
 - `supabase-migration-feedback.sql` — feedback box ("Senda inn ábendingu")
@@ -64,8 +66,14 @@ Until step 4 is done the page shows a setup notice instead of the table.
 | 🌑 Skuggabaldur | 700 | `Skuggabaldur #37 🌑 380/700` + animal grid |
 | 🦐 Krillion | 700 | `Krillion #128 🦐` + score line + sea grid |
 | 🥐 Verðlengjan | 102 cm (+5 Thursday) | `🥐 Verðlengjan #3 — 74 cm` + tier row |
+| 🕰️ TimeGuessr | 50,000 | `TimeGuessr #1275 — 42,390/50,000` + 5 round lines |
+| 🧭 Farflung | 500 km (lower is better) | `Farflung #53 · 265/500 km` + rarity row |
 
 The paste box auto-detects the game from the share text.
+Farflung scores are total kilometres off target — **lower is better**, so its
+standings, averages and "best" are ranked ascending (unlike the other games).
+TimeGuessr share texts use comma thousands separators (`42,390`) — the parser
+strips them, and the per-round 🏆 scores are kept as rounds.
 Verðlengjan scores are pastry centimetres; Thursdays allow up to 107 cm.
 Logged-in users also see a "Þátttaka í Verðlengjunni" panel on the 🥐 tab:
 **total traffic** per day — how many people visited the game and how many

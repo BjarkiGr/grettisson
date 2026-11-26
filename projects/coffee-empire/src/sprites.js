@@ -24,7 +24,10 @@ const PAL = {
   'p': '#8b6f9e', // plum accent
   'n': '#3f6f6a', // teal accent
   'e': '#b5484d', // cherry red
-  'x': '#1d1109'  // near black
+  'x': '#1d1109', // near black
+  'f': '#e8b88a', // skin
+  'A': '#3f6f6a', // shirt (customer variants override)
+  'B': '#4a2c1a'  // pants
 };
 
 const MAPS = {
@@ -351,6 +354,58 @@ const MAPS = {
     '................',
     '................',
     '................'],
+  /* Little people: customers walk into the shop, the barista runs the cart. */
+  person: [
+    '................',
+    '.....kkkkkk.....',
+    '....kffffffk....',
+    '....kfkffkfk....',
+    '....kffffffk....',
+    '.....kffffk.....',
+    '....kkAAAAkk....',
+    '...kfAAAAAAfk...',
+    '...kfAAAAAAfk...',
+    '...kkAAAAAAkk...',
+    '....kBBBBBBk....',
+    '....kBBBBBBk....',
+    '....kBBkkBBk....',
+    '....kBBk.kBBk...',
+    '....kkk..kkk....',
+    '................'],
+  barista: [
+    '................',
+    '....kkkkkkkk....',
+    '....kggggggk....',
+    '.....kkkkkk.....',
+    '....kffffffk....',
+    '....kfkffkfk....',
+    '.....kffffk.....',
+    '....kkddddkk....',
+    '...kfdccccdfk...',
+    '...kfdccccdfk...',
+    '...kkdccccdkk...',
+    '....kcccccck....',
+    '....kbbbbbbk....',
+    '....kbbkkbbk....',
+    '....kbbk.kbbk...',
+    '....kkk..kkk....'],
+  heart: [
+    '................',
+    '................',
+    '................',
+    '....kk...kk.....',
+    '...krrk.krrk....',
+    '...krrrkrrrk....',
+    '...krrrrrrrk....',
+    '....krrrrrk.....',
+    '.....krrrk......',
+    '......krk.......',
+    '.......k........',
+    '................',
+    '................',
+    '................',
+    '................',
+    '................'],
 };
 
 /* Variants: base map + palette overrides keep a consistent style across 48 businesses. */
@@ -395,7 +450,11 @@ const VARIANTS = {
   holding:   { base: 'globe' },
   financial: { base: 'coin' },
   corporation: { base: 'tower', pal: { c: '#c9d6d3', t: '#e8c15a' } },
-  logo:      { base: 'cup' }
+  logo:      { base: 'cup' },
+  customer1: { base: 'person', pal: { A: '#8b6f9e', B: '#6b7480' } },
+  customer2: { base: 'person', pal: { A: '#d9903f', B: '#2b1a12' } },
+  customer3: { base: 'person', pal: { A: '#3f6f6a', B: '#6f4e37' } },
+  customer4: { base: 'person', pal: { A: '#b5484d', B: '#556b3f' } }
 };
 
 const cache = {};
@@ -427,5 +486,7 @@ CE.spriteURL = function (key, size) {
 CE.spriteImg = function (key, cls, size) {
   return '<img class="sprite ' + (cls || '') + '" src="' + CE.spriteURL(key, size || 64) + '" alt="" draggable="false">';
 };
+/* Exposed for tooling (native app icon / splash generation). */
+CE.SPRITE_MAPS = MAPS; CE.SPRITE_PAL = PAL; CE.SPRITE_VARIANTS = VARIANTS;
 })(typeof window !== 'undefined' ? window : globalThis);
 

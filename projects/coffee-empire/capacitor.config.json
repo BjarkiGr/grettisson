@@ -1,0 +1,20 @@
+{
+  "appId": "com.grettisson.coffeeempire",
+  "appName": "Coffee Empire",
+  "webDir": "www",
+  "backgroundColor": "#2b1a12",
+  "android": {
+    "allowMixedContent": false
+  },
+  "ios": {
+    "contentInset": "always"
+  },
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 1200,
+      "launchAutoHide": true,
+      "backgroundColor": "#2b1a12",
+      "showSpinner": false
+    }
+  }
+}

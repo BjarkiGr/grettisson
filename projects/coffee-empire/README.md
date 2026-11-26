@@ -6,6 +6,55 @@ production chain and eventually manage a global coffee empire. Pure HTML/CSS/
 vanilla JS — no backend, no frameworks, no external assets. Open `index.html`
 and play (works directly from `file://`, fully offline).
 
+## v3 overhaul — economy, tutorial, living world, mobile
+
+- **AFK-safe economy**: a permanent $25 minimum-cash floor means recurring
+  costs can never bankrupt you at any stage; closed (unstaffed) facilities
+  cost nothing; staff are only paid while their workplaces actually run —
+  idle staff are sent home (shown on the Staff page); retail costs scale with
+  activity. Operating expenses stay fully strategic while businesses run —
+  the floor is negligible at late-game scale. Offline operating costs scale
+  with offline activity (wages/materials paid in full), and the floor covers
+  the offline adjustment too. Leaving the game running can never bankrupt you.
+- **Short interactive tutorial (1–3 min)**: Rosa the barista guides new players
+  through real actions — pick a drink, brew, serve, see the money, buy the new
+  $60 first upgrade (Sturdy Paper Cups). Skippable, replayable from Settings,
+  progress saved. Existing saves are never forced through it.
+- **Living shop scene**: an animated pixel diorama on Brew & Overview — the
+  barista grinds/brews/steams/serves in sync with the real brew session,
+  customers walk in on every real sale, wait, get their cup, react with a
+  heart and leave; steam, lamp glow and a swaying plant keep it cozy when idle.
+  Pure CSS transforms, non-blocking, honors the Animations setting and
+  `prefers-reduced-motion`.
+- **Progression-based navigation**: locked sections are completely hidden
+  (no greyed-out buttons). Staff unlocks with hiring, Farms/Production with
+  discovery, Locations with expansion, Research with your first employee,
+  Statistics after 100 cups, etc. Unlocks are permanent, persisted, survive
+  prestige, and arrive with a toast + entrance animation.
+- **Mobile & native apps**: Capacitor 7 wraps the unchanged web game for iOS
+  and Android (portrait-first, zoom/scroll hardened, safe areas, bottom nav).
+  The simulation freezes while the app is backgrounded, progress is saved on
+  suspend, and returning grants offline earnings with a welcome-back summary.
+- **Save v3 migration**: v1/v2 saves keep everything; earned tabs are
+  backfilled silently and the tutorial is marked complete for existing players.
+
+### Native build workflow (Capacitor)
+
+```
+npm install            # once
+npm run build          # icons/splash + www/ bundle
+npx cap add android    # already generated in android/
+npx cap add ios        # already generated in ios/
+npm run android        # sync + open Android Studio
+npm run ios            # sync + open Xcode (macOS required)
+```
+
+Icons and splash screens are generated from the game's own pixel art by
+`tools/make-icons.mjs` (pure Node, no image dependencies) into `assets/`,
+the Android mipmaps/drawables and the iOS asset catalog. App id:
+`com.grettisson.coffeeempire`. Store builds need the usual signing setup
+(Android keystore / Apple Developer team) in the native projects.
+
 ## v2 gameplay redesign
 
 - **No passive starting income.** The starting cart produces nothing until you
@@ -86,12 +135,16 @@ off a single `CE` namespace with one authoritative state object.
 | `src/data3.js` | Research tree, events, campaigns, competitors, acquisitions |
 | `src/data4.js` | Achievements, Legacy upgrades |
 | `src/sprites.js` | 16×16 pixel maps → canvas data-URL sprites + palette variants |
-| `src/state.js` | State factory, LocalStorage save/load, export/import |
-| `src/engine.js` | Centralized 8 Hz simulation + all player actions + offline sim |
-| `src/ui.js` | UI core, dashboard, businesses, staff, modals, charts |
+| `src/scene.js` | Living shop diorama: barista states, walking customers, steam |
+| `src/state.js` | State factory, LocalStorage save/load, export/import, v1→v3 migrations |
+| `src/engine.js` | Centralized 8 Hz simulation + all player actions + offline sim + tab unlocks |
+| `src/ui.js` | UI core, dynamic navigation, dashboard, businesses, staff, modals, charts |
 | `src/ui2.js` | Production, locations, farms, research sections |
 | `src/ui3.js` | Markets, corporate, achievements, statistics sections |
-| `src/main.js` | Boot, game loop, autosave, audio |
+| `src/ui4.js` | Interactive Brew screen + Milestones |
+| `src/tutorial.js` | Rosa's short interactive tutorial (saved, skippable, replayable) |
+| `src/main.js` | Boot, game loop, autosave, audio, app lifecycle (suspend/resume) |
+| `tools/` | `build-www.mjs` (Capacitor bundle), `make-icons.mjs` (icons/splash) |
 
 The engine ticks ~8×/second with elapsed-time deltas; the UI updates at 4 Hz
 via targeted DOM writes and only rebuilds a section when its structural
@@ -103,7 +156,8 @@ Headless Node tests (no browser needed):
 
 ```
 node test/smoke.js       # economy, chains, brew session, milestones, migration, offline, prestige
-node test/ui.js          # all sections render/update + click actions via a DOM shim
+node test/ui.js          # all sections render/update + click actions + tutorial flow via a DOM shim
 node test/progression.js # 40-minute honest bot playthrough
 node test/pacing.js      # human-speed early-game unlock cadence
+node test/overhaul.js    # AFK protection, offline balance, tab visibility, tutorial, v2→v3 migration
 ```

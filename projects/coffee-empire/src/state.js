@@ -4,7 +4,7 @@
 const CE = global.CE = global.CE || {};
 const Big = CE.Big;
 CE.SAVE_KEY = 'coffeeEmpireSave_v1'; /* key kept for compatibility with existing saves */
-CE.SAVE_VERSION = 2;
+CE.SAVE_VERSION = 3;
 
 CE.newState = function () {
   const S = {
@@ -27,6 +27,9 @@ CE.newState = function () {
     recipesUnlocked: { regular: true, espresso: true },
     researchCatsUnlocked: (CE.DEFAULT_RESEARCH_CATS || ['Agriculture', 'Coffee Science', 'Manufacturing', 'Retail']).slice(),
     features: {},
+    /* v3: progression-based section visibility + interactive tutorial */
+    tabsUnlocked: { overview: true, brew: true, businesses: true, milestones: true },
+    tutorial: { done: false, skipped: false, active: false, step: 0 },
     brewSession: null,
     legacy: { points: 0, prestiges: 0, upgrades: {}, lifetimeEarned: 0 },
     stats: {
@@ -89,7 +92,10 @@ CE.deserialize = function (json) {
   for (const b of CE.BUSINESSES) S.biz[b.id] = Object.assign({ regions: {}, lifetime: Big.ZERO, util: 1, bottleneck: '' }, S.biz[b.id] || {});
   for (const t in CE.STAFF) S.staff[t] = Object.assign({ n: 0, xp: 0 }, S.staff[t] || {});
   S.cash = Big.from(S.cash);
+  S.tabsUnlocked = Object.assign({ overview: true, brew: true, businesses: true, milestones: true }, raw.tabsUnlocked || {});
+  S.tutorial = Object.assign({ done: false, skipped: false, active: false, step: 0 }, raw.tutorial || {});
   if (raw.version < 2) CE.migrateV1(S);
+  if (raw.version < 3) CE.migrateV2(S);
   S.version = CE.SAVE_VERSION;
   return S;
 };
@@ -107,6 +113,14 @@ CE.migrateV1 = function (S) {
   }
   /* Mark already-achieved milestones complete silently (no duplicate rewards). */
   if (CE.Engine && CE.Engine.backfillMilestones) CE.Engine.backfillMilestones(S);
+};
+/* v2 -> v3: existing players keep every section they have already earned
+   (backfilled silently from live progression) and are not forced through the
+   new-player tutorial. All money, businesses and progress are untouched. */
+CE.migrateV2 = function (S) {
+  if (CE.Engine && CE.Engine.backfillTabs) CE.Engine.backfillTabs(S);
+  S.tutorial.done = true;
+  S.tutorial.active = false;
 };
 CE.loadWarning = null;
 CE.save = function (S) {

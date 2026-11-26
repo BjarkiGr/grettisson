@@ -256,11 +256,22 @@ E.tick = function (S, dt, offline) {
   const share = E.marketShare(S);
   const compF = 0.85 + 0.15 * (1 - share);
 
-  /* Wages + experience */
+  /* Wages + experience. Staff are only paid while their workplaces actually
+     run — when everything is idle (out of stock, paused, closed) they are
+     sent home and pay nothing. An unattended business never drains payroll. */
+  const activeType = {};
+  for (const b of CE.BUSINESSES) {
+    const st = S.biz[b.id];
+    if (!b.staff || st.paused || !(st.util > 0.01)) continue;
+    if (E.totalOwned(S, b.id) > 0) for (const t in b.staff) activeType[t] = true;
+  }
+  this.idleTypes = {};
   for (const t in CE.STAFF) {
     const st = S.staff[t];
     if (st.n > 0) {
-      const w = Big.fromNumber(st.n * CE.STAFF[t].salary * m.wageMult * dt);
+      const idle = E.IDLE_CAPABLE.indexOf(t) >= 0 && !activeType[t];
+      if (idle) this.idleTypes[t] = true;
+      const w = Big.fromNumber(st.n * CE.STAFF[t].salary * m.wageMult * dt * (idle ? 0 : 1));
       acc.exp = acc.exp.add(w); acc.wages = acc.wages.add(w);
       st.xp = Math.min(1, st.xp + dt * 0.0005 * eff[t].ratio);
     }
@@ -298,6 +309,13 @@ E.tick = function (S, dt, offline) {
         acc.exp = acc.exp.add(half); acc.opex = acc.opex.add(half);
         st.util = 0; st.bottleneck = 'Paused';
         continue;
+      }
+      /* Closed facilities (no operational staff, no automation) cost nothing:
+         a business that isn't operating pays no rent, power or maintenance. */
+      if (b.staff) {
+        let closed = true;
+        for (const t in b.staff) { const e = eff[t]; if (e && e.mult > 0) { closed = false; break; } }
+        if (closed) opex = 0;
       }
 
       if (b.cat === 'farm') {
@@ -412,7 +430,8 @@ E.tick = function (S, dt, offline) {
         const avgDemand = menu.length ? demandSum / menu.length : 0;
         util = scale * avgDemand;
         if (!bottleneck && avgDemand < 0.5) bottleneck = 'Low demand (pricing/brand)';
-        opex *= elecF;
+        /* Retail costs scale with activity: an empty shop pays mostly rent. */
+        opex *= elecF * (0.35 + 0.65 * util);
         S.rp += cupsTotal * 0.002 * m.rpMult;
       } else if (b.sells) {
         const demandF = Math.min(1, brandFactor * m.demandMult * region.demand);
@@ -597,9 +616,25 @@ E.tick = function (S, dt, offline) {
     }
     E.checkDiscovery(S);
     E.checkMilestones(S, H);
+    E.checkTabs(S, false);
   }
 
-  /* Finalize finances */
+  /* Finalize finances. Early-run safety net: recurring costs can never push
+     a young business below the cash floor — going AFK is always survivable.
+     Waived costs are simply not charged (rent relief / reduced shifts). */
+  const floor = E.cashFloor(S);
+  if (floor > 0) {
+    const maxExp = S.cash.add(acc.rev).sub(Big.fromNumber(floor));
+    if (acc.exp.gt(maxExp)) {
+      const target = maxExp.m > 0 ? maxExp : Big.ZERO;
+      const waived = acc.exp.sub(target);
+      const reducible = acc.opex.add(acc.wages);
+      const cut = waived.gt(reducible) ? reducible : waived;
+      const f = reducible.isZero() ? 1 : Math.max(0, reducible.sub(cut).div(reducible).toNumber());
+      acc.opex = acc.opex.mulNum(f); acc.wages = acc.wages.mulNum(f);
+      acc.exp = acc.cogs.add(acc.opex).add(acc.wages);
+    }
+  }
   const profit = acc.rev.sub(acc.exp);
   S.cash = S.cash.add(profit);
   if (S.cash.m < 0) S.cash = Big.ZERO;
@@ -616,7 +651,20 @@ E.tick = function (S, dt, offline) {
   E.flow = { prod: {}, cons: {} };
   for (const r in flowP) E.flow.prod[r] = flowP[r] / dt;
   for (const r in flowC) E.flow.cons[r] = flowC[r] / dt;
-  return { rev: acc.rev, exp: acc.exp };
+  return { rev: acc.rev, exp: acc.exp, opex: acc.opex, wages: acc.wages, cogs: acc.cogs };
+};
+
+/* Staff types tied to physical workplaces (idle-shift wage relief applies).
+   Researchers, marketers and executives always produce their global effect. */
+E.IDLE_CAPABLE = ['barista', 'shopManager', 'farmWorker', 'agManager', 'factoryWorker', 'factoryManager', 'logisticsWorker', 'driver'];
+
+/* Permanent minimum-cash protection against recurring costs: going AFK can
+   never bankrupt the company at ANY stage. $25 is a meaningful early-game
+   reserve and negligible at late-game scale, so profit optimization and
+   expense management remain fully strategic — you can lose nearly everything
+   through bad decisions, but idle ticking costs never finish you off. */
+E.cashFloor = function (S) {
+  return 25;
 };
 
 E.triggerEvent = function (S) {
@@ -648,6 +696,7 @@ E.triggerEvent = function (S) {
    Chunked simulation (never per-second): respects inputs, storage, costs. */
 E.simulateOffline = function (S, seconds) {
   const m = this.mods || this.computeMods(S);
+  const cashBefore = S.cash.clone();
   const capH = 12 + m.offlineCapH;
   const capped = Math.min(seconds, capH * 3600);
   const eff = Math.min(1, 0.75 + 0.05 * (S.legacy.upgrades.lg_offline || 0));
@@ -658,20 +707,34 @@ E.simulateOffline = function (S, seconds) {
   };
   const chunks = Math.max(1, Math.min(240, Math.ceil(capped / 300)));
   const dt = capped / chunks;
-  let rev = Big.ZERO, exp = Big.ZERO;
+  let rev = Big.ZERO, exp = Big.ZERO, opex = Big.ZERO;
   const quiet = CE.notifications.length;
   for (let i = 0; i < chunks; i++) {
     const r = E.tick(S, dt, true);
-    rev = rev.add(r.rev); exp = exp.add(r.exp);
+    rev = rev.add(r.rev); exp = exp.add(r.exp); opex = opex.add(r.opex || Big.ZERO);
   }
-  /* Offline efficiency bonus applies to revenue; expenses were fully paid. */
-  const bonus = rev.mulNum(eff - 1); /* negative adjustment */
-  S.cash = S.cash.add(bonus);
+  /* Offline efficiency applies to revenue AND activity-based operating costs
+     (a quieter shop pays less rent/power). Wages and materials were paid in
+     full, and the early-run cash floor protected every chunk — offline play
+     can never produce a financial disaster. */
+  const bonus = rev.mulNum(eff - 1); /* negative revenue adjustment */
+  const opexBack = opex.mulNum(1 - eff);
+  S.cash = S.cash.add(bonus).add(opexBack);
   if (S.cash.m < 0) S.cash = Big.ZERO;
+  /* The early-run safety net also covers the offline adjustment: returning
+     players never find less than the floor they left with (no free money). */
+  const floor = E.cashFloor(S);
+  if (floor > 0) {
+    const target = Big.fromNumber(Math.min(floor, Math.max(0, cashBefore.toNumber())));
+    if (S.cash.lt(target)) S.cash = target;
+  }
+  S.stats.expenses = S.stats.expenses.sub(opexBack);
+  S.stats.opex = S.stats.opex.sub(opexBack);
+  const netExp = exp.sub(opexBack);
   S.stats.offlineCollects++;
   const summary = {
     seconds: capped, realSeconds: seconds, capped: seconds > capped, eff,
-    revenue: rev.mulNum(eff), expenses: exp, profit: rev.mulNum(eff).sub(exp),
+    revenue: rev.mulNum(eff), expenses: netExp, profit: rev.mulNum(eff).sub(netExp),
     cups: S.stats.cups - before.cups, beans: S.stats.beans - before.beans,
     products: S.stats.products - before.products,
     researchDone: Object.keys(S.research.done).length - before.research,
@@ -789,6 +852,43 @@ E.checkDiscovery = function (S) {
     }
   }
 };
+/* ---------- Progression-based section visibility ----------
+   Locked sections are completely hidden from navigation. Once unlocked they
+   stay unlocked forever (persisted in S.tabsUnlocked, kept through prestige). */
+E.TAB_LABELS = {
+  staff: 'Staff', locations: 'Locations', production: 'Production', farms: 'Farms',
+  research: 'Research', markets: 'Markets', corporate: 'Corporate',
+  achievements: 'Achievements', statistics: 'Statistics'
+};
+E.TAB_CONDITIONS = {
+  staff: S => Object.keys(S.staffUnlocked).length > 0,
+  locations: (S, H) => H.catOwned.retail >= 2 || H.regions >= 2 || S.stats.revenue.gteNum(5000),
+  production: S => CE.BUSINESSES.some(b => (b.cat === 'factory' || b.cat === 'logistics') && S.discovered[b.id]),
+  farms: S => CE.BUSINESSES.some(b => b.cat === 'farm' && S.discovered[b.id]),
+  research: S => !!S.milestones.hire1 || Object.keys(S.research.done).length > 0 || S.rp >= 25,
+  markets: (S, H) => H.catOwned.farm > 0 || H.catOwned.factory > 0 || S.stats.revenue.gteNum(5000),
+  corporate: S => CE.BUSINESSES.some(b => b.cat === 'corporate' && S.discovered[b.id]) || !!S.research.done.acquisitions || S.legacy.prestiges > 0,
+  achievements: S => Object.keys(S.achievements).length >= 3 || S.stats.cups >= 25,
+  statistics: S => S.stats.cups >= 100
+};
+E.checkTabs = function (S, silent) {
+  if (!S.tabsUnlocked) S.tabsUnlocked = { overview: true, brew: true, businesses: true, milestones: true };
+  const H = E.snapshot(S);
+  for (const id in E.TAB_CONDITIONS) {
+    if (S.tabsUnlocked[id]) continue;
+    let ok = false;
+    try { ok = E.TAB_CONDITIONS[id](S, H); } catch (e) { ok = false; }
+    if (ok) {
+      S.tabsUnlocked[id] = Date.now();
+      if (!silent) {
+        E.dirty = true;
+        CE.notify('🔓 New section unlocked: ' + (E.TAB_LABELS[id] || id) + '!', 'good');
+      }
+    }
+  }
+};
+/* Legacy saves: unlock every section whose condition is already met, silently. */
+E.backfillTabs = function (S) { E.ensureMods(S); E.checkTabs(S, true); };
 E.completeMilestone = function (S, m, silent) {
   S.milestones[m.id] = Date.now();
   if (silent) return;
@@ -1068,7 +1168,7 @@ E.prestige = function (S) {
     /* Progression knowledge persists across restructures (prestige QoL). */
     milestones: S.milestones, discovered: S.discovered, staffUnlocked: S.staffUnlocked,
     recipesUnlocked: S.recipesUnlocked, researchCatsUnlocked: S.researchCatsUnlocked,
-    features: S.features
+    features: S.features, tabsUnlocked: S.tabsUnlocked, tutorial: S.tutorial
   };
   const fresh = CE.newState();
   fresh.legacy = keep.legacy;
@@ -1082,6 +1182,8 @@ E.prestige = function (S) {
   fresh.recipesUnlocked = keep.recipesUnlocked;
   fresh.researchCatsUnlocked = keep.researchCatsUnlocked;
   fresh.features = keep.features;
+  fresh.tabsUnlocked = keep.tabsUnlocked;
+  fresh.tutorial = keep.tutorial;
   fresh.legacy.points += gain;
   fresh.legacy.lifetimeEarned += gain;
   fresh.legacy.prestiges++;

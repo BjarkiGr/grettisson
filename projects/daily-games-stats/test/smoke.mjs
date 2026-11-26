@@ -1,4 +1,4 @@
-﻿// Smoke test for the static Daily Games Stats leaderboard (4 games).
+﻿// Smoke test for the static Daily Games Stats leaderboard (6 games).
 // Run: node projects/daily-games-stats/test/smoke.mjs
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
@@ -36,7 +36,7 @@ const ids = [...new Set([...js.matchAll(/getElementById\('([^']+)'\)/g)].map(m =
 for (const id of ids) {
   check(`#${id} in index.html`, html.includes(`id="${id}"`));
 }
-for (const g of ['sizeitup', 'skuggabaldur', 'krillion', 'verdlengjan']) {
+for (const g of ['sizeitup', 'skuggabaldur', 'krillion', 'verdlengjan', 'timeguessr', 'farflung']) {
   check(`#gameTab-${g} in index.html`, html.includes(`id="gameTab-${g}"`));
 }
 
@@ -95,6 +95,66 @@ check('Verðlengjan: grid', p4 !== null && p4.grid === '🎯🟩🟨🟧🟥');
 const verdThu = parseShareText('🥐 Verðlengjan #4 — 107 cm\n🎯🎯🎯🎯🎯 + 🥐 fimmtudagsbonus!\ngrettisson.is/projects/verdlengjan/');
 check('Verðlengjan: Thursday 107 cm', verdThu !== null && verdThu.score === 107 && verdThu.grid.includes('fimmtudagsbonus'));
 check('rejects Verðlengjan without cm', parseShareText('🥐 Verðlengjan #3') === null);
+
+const timeSample = [
+  'TimeGuessr #1275 — 42,390/50,000', '',
+  '1️⃣ 🏆9,846 · 📅 0y · 🌍 13.5mi',
+  '2️⃣ 🏆8,764 · 📅 6y · 🌍 26.7mi',
+  '3️⃣ 🏆8,763 · 📅 0y · 🌍 313.4mi',
+  '4️⃣ 🏆6,859 · 📅 14y · 🌍 30.9mi',
+  '5️⃣ 🏆8,158 · 📅 1y · 🌍 528.5mi', '',
+  'https://timeguessr.com'
+].join('\n');
+const p5 = parseShareText(timeSample);
+check('TimeGuessr: detected', p5 !== null && p5.game === 'timeguessr');
+check('TimeGuessr: puzzle', p5 !== null && p5.puzzle === 1275);
+check('TimeGuessr: score (comma stripped)', p5 !== null && p5.score === 42390);
+check('TimeGuessr: rounds', p5 !== null && JSON.stringify(p5.rounds) === JSON.stringify([9846, 8764, 8763, 6859, 8158]));
+check('TimeGuessr: grid 5 lines', p5 !== null && p5.grid.split('\n').length === 5);
+check('TimeGuessr: no URL in grid', p5 !== null && !p5.grid.includes('https'));
+check('rejects TimeGuessr without score', parseShareText('TimeGuessr #1275\nhttps://timeguessr.com') === null);
+
+const farflungSample = [
+  'Farflung #53 · 265/500 km',
+  'Uncommon · Uncommon · Rare · Miss · Elusive',
+  'https://farflung.game/s/8d3wxp?e=53'
+].join('\n');
+const p6 = parseShareText(farflungSample);
+check('Farflung: detected', p6 !== null && p6.game === 'farflung');
+check('Farflung: puzzle', p6 !== null && p6.puzzle === 53);
+check('Farflung: score', p6 !== null && p6.score === 265);
+check('Farflung: rarity grid', p6 !== null && p6.grid === 'Uncommon · Uncommon · Rare · Miss · Elusive');
+check('Farflung: no URL in grid', p6 !== null && !p6.grid.includes('https'));
+check('rejects Farflung without km', parseShareText('Farflung #53\nhttps://farflung.game') === null);
+
+// 4b. Farflung: lower is better — daily + average standings rank ascending.
+const gsStart = js.indexOf('function getStandings');
+const gsEnd = js.indexOf('function renderAll');
+const gsSnippet = js.slice(gsStart, gsEnd);
+const gamesStub = { farflung: { lowerBetter: true }, sizeitup: {} };
+const ffScores = [
+  { game: 'farflung', puzzle: 53, name: 'a', score: 265 },
+  { game: 'farflung', puzzle: 53, name: 'b', score: 120 },
+  { game: 'farflung', puzzle: 53, name: 'c', score: 400 },
+  { game: 'farflung', puzzle: 52, name: 'a', score: 90 }
+];
+const gsDoc = { getElementById: () => ({ value: '53' }) };
+const runStandings = (mode) => new Function('document', 'state', 'GAMES', gsSnippet + '\nreturn getStandings();')(gsDoc, { game: 'farflung', mode, scores: ffScores }, gamesStub);
+const ffDaily = runStandings('daily');
+check('Farflung: lower score wins daily', ffDaily.length === 3 && ffDaily[0].name === 'b' && ffDaily[2].name === 'c');
+const ffAvg = runStandings('average');
+check('Farflung: average ranked ascending', ffAvg[0].name === 'b' && ffAvg[2].name === 'c');
+check('Farflung: best = minimum', ffAvg.find(p => p.name === 'a').best === 90);
+check('Farflung: lowerBetter flag in GAMES', /farflung:\s*\{[^}]*lowerBetter:\s*true/.test(js));
+
+// 4c. SQL: new games allowed + max scores in setup and migration.
+const setupSql = readFileSync(path.join(dir, 'supabase-setup.sql'), 'utf8');
+const tgffSql = readFileSync(path.join(dir, 'supabase-migration-timeguessr-farflung.sql'), 'utf8');
+for (const [label, sql] of [['setup', setupSql], ['migration', tgffSql]]) {
+  check(`SQL ${label}: allows timeguessr + farflung`, sql.includes("'verdlengjan', 'timeguessr', 'farflung'"));
+  check(`SQL ${label}: TimeGuessr max 50000`, sql.includes("when 'timeguessr' then 50000"));
+  check(`SQL ${label}: Farflung max 500`, sql.includes("when 'farflung' then 500"));
+}
 
 check('rejects invalid text', parseShareText('hello world') === null);
 check('rejects Skuggabaldur without score', parseShareText('Skuggabaldur #37 🌑') === null);
