@@ -38,22 +38,25 @@ and play (works directly from `file://`, fully offline).
 - **Save v3 migration**: v1/v2 saves keep everything; earned tabs are
   backfilled silently and the tutorial is marked complete for existing players.
 
-### Native build workflow (Capacitor)
+### Native build workflow (Capacitor 8)
 
 ```
-npm install            # once
+npm install            # once (Node 22+)
+npm run doctor         # verify Node/Xcode versions
 npm run build          # icons/splash + www/ bundle
-npx cap add android    # already generated in android/
-npx cap add ios        # already generated in ios/
-npm run android        # sync + open Android Studio
-npm run ios            # sync + open Xcode (macOS required)
+npx cap sync           # copy web assets into android/ + ios/
+npm run android        # sync + open Android Studio (2025.2.1+)
+npm run ios            # sync + open Xcode 26+ (macOS required)
 ```
 
-Icons and splash screens are generated from the game's own pixel art by
-`tools/make-icons.mjs` (pure Node, no image dependencies) into `assets/`,
-the Android mipmaps/drawables and the iOS asset catalog. App id:
+The iOS project uses **Swift Package Manager** (Capacitor 8 default) — no
+CocoaPods/pod install needed. Minimum deployment target is iOS 15.0, matching
+current Xcode. Icons and splash screens are generated from the game's own
+pixel art by `tools/make-icons.mjs` (pure Node, no image dependencies) into
+`assets/`, the Android mipmaps/drawables and the iOS asset catalog. App id:
 `com.grettisson.coffeeempire`. Store builds need the usual signing setup
-(Android keystore / Apple Developer team) in the native projects.
+(Android keystore / Apple Developer team) in the native projects; a free
+Apple ID + Xcode "Personal Team" is enough for on-device demo installs.
 
 ## v2 gameplay redesign
 

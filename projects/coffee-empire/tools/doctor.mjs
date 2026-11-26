@@ -15,12 +15,12 @@ function version(cmd, args) {
 }
 function major(v) { return parseInt(String(v).replace(/^v/, '').split('.')[0], 10); }
 
-console.log('Coffee Empire — environment check (Capacitor 7 requirements)');
+console.log('Coffee Empire — environment check (Capacitor 8 requirements)');
 
-/* Node 20+ */
+/* Node 22+ */
 const nodeV = process.version;
-if (major(nodeV) >= 20) ok('Node ' + nodeV + ' (needs 20+)');
-else bad('Node ' + nodeV + ' is too old (needs 20+)',
+if (major(nodeV) >= 22) ok('Node ' + nodeV + ' (needs 22+)');
+else bad('Node ' + nodeV + ' is too old (needs 22+)',
   'brew install node@22 && brew link --overwrite node@22   (or: nvm install 22 && nvm use 22)');
 
 /* npm */
@@ -28,26 +28,20 @@ const npmV = version('npm', ['--version']);
 if (npmV) ok('npm ' + npmV);
 else bad('npm not found', 'reinstall Node 22 (npm ships with it)');
 
-/* CocoaPods 1.15+ (needed for iOS only) */
+/* CocoaPods — OPTIONAL since Capacitor 8 (iOS uses Swift Package Manager). */
 const podV = version('pod', ['--version']);
-if (!podV) bad('CocoaPods not found (needed for iOS builds)',
-  'brew install cocoapods   (do NOT use sudo gem install — macOS system Ruby is too old)');
-else {
-  const parts = podV.split('.').map(n => parseInt(n, 10));
-  const good = parts[0] > 1 || (parts[0] === 1 && parts[1] >= 15);
-  if (good) ok('CocoaPods ' + podV + ' (needs 1.15+)');
-  else bad('CocoaPods ' + podV + ' is too old (needs 1.15+)', 'brew upgrade cocoapods');
-}
+if (!podV) console.log('  --   CocoaPods not installed (optional — Capacitor 8 uses SPM, no pods needed)');
+else ok('CocoaPods ' + podV + ' (optional)');
 
-/* Xcode 16+ (macOS only, iOS builds) */
+/* Xcode 26+ (macOS only, iOS builds) */
 if (process.platform === 'darwin') {
   const xc = version('xcodebuild', ['-version']);
   if (!xc) bad('Xcode command line tools not found', 'install Xcode from the App Store, then: sudo xcode-select -s /Applications/Xcode.app');
   else {
     const m = xc.match(/Xcode (\d+)/);
-    if (m && parseInt(m[1], 10) >= 16) ok('Xcode ' + m[1] + ' (needs 16+)');
-    else bad('Xcode too old for Capacitor 7 (needs 16+)',
-      'update macOS to 14.5+ and install Xcode 16 — or ask to downgrade this project to Capacitor 6 (Xcode 15)');
+    if (m && parseInt(m[1], 10) >= 26) ok('Xcode ' + m[1] + ' (needs 26+)');
+    else bad('Xcode too old for Capacitor 8 (needs 26+)',
+      'update macOS and install the latest Xcode from the App Store');
   }
 } else {
   console.log('  --   Xcode check skipped (iOS builds require a Mac)');

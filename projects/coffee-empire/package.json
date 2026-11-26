@@ -12,18 +12,19 @@
     "test": "node test/smoke.js && node test/ui.js && node test/progression.js && node test/pacing.js && node test/overhaul.js",
     "serve": "node tools/serve.mjs",
     "doctor": "node tools/doctor.mjs",
+    "fix:ios": "node tools/fix-ios.mjs",
     "cap:sync": "npm run build && cap sync",
     "android": "npm run build && cap sync android && cap open android",
     "ios": "npm run build && cap sync ios && cap open ios"
   },
   "dependencies": {
-    "@capacitor/android": "^7.0.0",
-    "@capacitor/app": "^7.0.0",
-    "@capacitor/core": "^7.0.0",
-    "@capacitor/ios": "^7.0.0",
-    "@capacitor/splash-screen": "^7.0.0"
+    "@capacitor/android": "^8.6.3",
+    "@capacitor/app": "^8.1.2",
+    "@capacitor/core": "^8.6.3",
+    "@capacitor/ios": "^8.6.3",
+    "@capacitor/splash-screen": "^8.0.2"
   },
   "devDependencies": {
-    "@capacitor/cli": "^7.0.0"
+    "@capacitor/cli": "^8.6.3"
   }
 }
