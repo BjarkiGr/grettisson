@@ -1,7 +1,9 @@
-﻿// PRISM — strict AI output validation (Phase 4).
-// Rejects malformed/incomplete responses and FABRICATED CITATIONS:
-// source_references must be a subset of the provided article URLs, and
-// supporting_evidence.article_id must be one of the provided article ids.
+﻿// PRISM — strict AI output validation.
+// Layered: common fields -> V1 adds severity/confidence -> V2 adds matrix
+// fields (V2 schema has NO severity_assessment/confidence_level) -> V2.1
+// normalizes assessment_limitations + size caps.
+// Rejects FABRICATED CITATIONS: source_references must be a subset of the
+// provided article URLs; evidence article_id must be a provided id.
 // Nothing is stored unless validation passes.
 
 import { EVENT_CATEGORIES } from "./types.ts";
@@ -18,15 +20,8 @@ function isStringArray(v: unknown): v is string[] {
   return Array.isArray(v) && v.every((x) => typeof x === "string");
 }
 
-export function validateAnalysisOutput(
-  input: unknown,
-  allowedArticleIds: string[],
-  allowedUrls: string[],
-): ValidationResult {
-  const errors: string[] = [];
-  if (!isRecord(input)) return { ok: false, errors: ["output is not an object"] };
-  const o = input as Record<string, unknown>;
-
+/** Fields shared by ALL prompt versions (V1 and V2 schemas). */
+function validateCommon(o: Record<string, unknown>, allowedArticleIds: string[], allowedUrls: string[], errors: string[]): void {
   if (!isNonEmptyString(o.event_title) || (o.event_title as string).length > 300) errors.push("event_title missing/invalid");
   if (!isNonEmptyString(o.executive_summary) || (o.executive_summary as string).length > 4000) errors.push("executive_summary missing/invalid");
   if (!EVENT_CATEGORIES.includes(o.event_category as never)) errors.push("event_category not in enum");
@@ -38,10 +33,6 @@ export function validateAnalysisOutput(
   if (!isNonEmptyString(o.supply_chain_implications)) errors.push("supply_chain_implications missing");
   if (!isNonEmptyString(o.economic_consequences)) errors.push("economic_consequences missing");
   if (!isStringArray(o.escalation_scenarios)) errors.push("escalation_scenarios must be string array");
-  const sev = o.severity_assessment;
-  if (typeof sev !== "number" || !Number.isInteger(sev) || sev < 0 || sev > 5) errors.push("severity_assessment must be integer 0-5");
-  const conf = o.confidence_level;
-  if (typeof conf !== "number" || !Number.isFinite(conf) || conf < 0 || conf > 1) errors.push("confidence_level must be 0-1");
   if (!isStringArray(o.uncertainties)) errors.push("uncertainties must be string array");
 
   const idSet = new Set(allowedArticleIds);
@@ -56,7 +47,6 @@ export function validateAnalysisOutput(
       if (!idSet.has(e.article_id as string)) errors.push("supporting_evidence[" + i + "] cites unknown article_id (fabricated citation)");
     }
   }
-
   const urlSet = new Set(allowedUrls);
   if (!isStringArray(o.source_references) || (o.source_references as string[]).length === 0) {
     errors.push("source_references must be a non-empty string array");
@@ -65,20 +55,34 @@ export function validateAnalysisOutput(
       if (!urlSet.has(u)) errors.push("source_references contains a URL not provided in input (fabricated citation): " + u.slice(0, 100));
     }
   }
+}
 
+/** V1 (prompt 1.0.0): common + severity_assessment + confidence_level. */
+export function validateAnalysisOutput(input: unknown, allowedArticleIds: string[], allowedUrls: string[]): ValidationResult {
+  if (!isRecord(input)) return { ok: false, errors: ["output is not an object"] };
+  const o = input as Record<string, unknown>;
+  const errors: string[] = [];
+  validateCommon(o, allowedArticleIds, allowedUrls, errors);
+  const sev = o.severity_assessment;
+  if (typeof sev !== "number" || !Number.isInteger(sev) || sev < 0 || sev > 5) errors.push("severity_assessment must be integer 0-5");
+  const conf = o.confidence_level;
+  if (typeof conf !== "number" || !Number.isFinite(conf) || conf < 0 || conf > 1) errors.push("confidence_level must be 0-1");
   if (errors.length > 0) return { ok: false, errors };
   return { ok: true, value: o as unknown as AiAnalysisOutput };
 }
 
 // ===================== V2 output validation =====================
+// V2 schema (prompt 2.0.0/2.1.0) has NO severity_assessment/confidence_level:
+// dimensions + likelihood + confidence_inputs replace them. Requiring the
+// V1-only fields here rejected every correct V2 output (outage 2026-11-26).
 const V2_DIMS = ["escalation", "economic", "supply_chain", "geographic", "strategic", "persistence"];
 const LIKELIHOOD_LEVELS = ["insufficient_evidence", "very_low", "low", "moderate", "high", "very_high"];
 
 export function validateAnalysisOutputV2(input: unknown, allowedArticleIds: string[], allowedUrls: string[]): ValidationResult {
-  const base = validateAnalysisOutput(input, allowedArticleIds, allowedUrls);
-  if (!base.ok) return base;
-  const errors: string[] = [];
+  if (!isRecord(input)) return { ok: false, errors: ["output is not an object"] };
   const o = input as Record<string, unknown>;
+  const errors: string[] = [];
+  validateCommon(o, allowedArticleIds, allowedUrls, errors);
   const idSet = new Set(allowedArticleIds);
   const dims = o.dimensions;
   if (!isRecord(dims)) {
@@ -112,16 +116,18 @@ export function validateAnalysisOutputV2(input: unknown, allowedArticleIds: stri
 }
 
 // ===================== V2.1 output validation =====================
-// Wraps V2 (all prior guarantees) + assessment_limitations + size caps.
+// Wraps V2 + size caps. assessment_limitations is NORMALIZED, not a hard
+// gate: an advisory field must never block an otherwise-valid assessment
+// (reliency lesson from the 2026-11-26 outage). Missing/empty -> honest
+// default; oversized entries truncated; max 6 items.
 export function validateAnalysisOutputV21(input: unknown, allowedArticleIds: string[], allowedUrls: string[]): ValidationResult {
   const base = validateAnalysisOutputV2(input, allowedArticleIds, allowedUrls);
   if (!base.ok) return base;
   const o = input as Record<string, unknown>;
   const errors: string[] = [];
-  const lim = o.assessment_limitations;
-  if (!Array.isArray(lim) || lim.length < 1 || lim.length > 6 || !lim.every((x) => typeof x === "string" && x.trim().length > 0 && x.length <= 300)) {
-    errors.push("assessment_limitations must be 1-6 non-empty strings <=300 chars");
-  }
+  const rawLim = Array.isArray(o.assessment_limitations) ? o.assessment_limitations : [];
+  const lim = rawLim.filter((x) => typeof x === "string" && x.trim().length > 0).map((x) => (x as string).slice(0, 300)).slice(0, 6);
+  o.assessment_limitations = lim.length ? lim : ["Limitations not specified by the model."];
   for (const f of ["supply_chain_implications", "economic_consequences"]) {
     if (typeof o[f] !== "string" || (o[f] as string).length > 4000) errors.push(f + " exceeds 4000 chars");
   }
@@ -130,5 +136,5 @@ export function validateAnalysisOutputV21(input: unknown, allowedArticleIds: str
   if (!bounded(o.uncertainties, 20, 500)) errors.push("uncertainties exceeds bounds (20 x 500)");
   if (!bounded(o.organizations, 50, 200) || !bounded(o.commodities_affected, 50, 100) || !bounded(o.industries_affected, 50, 100)) errors.push("entity arrays exceed bounds");
   if (errors.length > 0) return { ok: false, errors };
-  return base;
+  return { ok: true, value: o as unknown as AiAnalysisOutput };
 }

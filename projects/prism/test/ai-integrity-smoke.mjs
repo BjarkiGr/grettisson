@@ -1,4 +1,4 @@
-﻿// PRISM V2.1 Phase 2 — AI intelligence integrity smoke test.
+// PRISM V2.1 Phase 2 — AI intelligence integrity smoke test.
 // Run: node --experimental-strip-types projects/prism/test/ai-integrity-smoke.mjs
 import { readFileSync } from "node:fs";
 import path from "node:path";
@@ -54,10 +54,13 @@ const valid = {
 };
 const V21 = (o) => validation.validateAnalysisOutputV21(o, IDS, URLS);
 check("valid output passes", V21(valid).ok === true);
-check("missing limitations rejected", V21({ ...valid, assessment_limitations: undefined }).ok === false);
-check("empty limitations rejected", V21({ ...valid, assessment_limitations: [] }).ok === false);
-check(">6 limitations rejected", V21({ ...valid, assessment_limitations: Array(7).fill("x") }).ok === false);
-check("oversized limitation rejected", V21({ ...valid, assessment_limitations: ["x".repeat(301)] }).ok === false);
+check("missing limitations normalized to honest default", (() => { const r = V21({ ...valid, assessment_limitations: undefined }); return r.ok === true && r.value.assessment_limitations[0].includes("not specified"); })());
+check("empty limitations normalized", (() => { const r = V21({ ...valid, assessment_limitations: [] }); return r.ok === true && r.value.assessment_limitations.length === 1; })());
+check(">6 limitations truncated to 6", (() => { const r = V21({ ...valid, assessment_limitations: Array(7).fill("x") }); return r.ok === true && r.value.assessment_limitations.length === 6; })());
+check("oversized limitation truncated to 300", (() => { const r = V21({ ...valid, assessment_limitations: ["x".repeat(301)] }); return r.ok === true && r.value.assessment_limitations[0].length === 300; })());
+const { severity_assessment: _s, confidence_level: _c, ...v2Only } = valid;
+check("V2 schema without V1-only fields validates (outage regression)", V21(v2Only).ok === true);
+check("V1 validator still requires severity/confidence", validation.validateAnalysisOutput(v2Only, IDS, URLS).ok === false);
 check("fabricated citation rejected", V21({ ...valid, source_references: ["https://evil.example.com"] }).ok === false);
 check("fabricated evidence id rejected", V21({ ...valid, supporting_evidence: [{ claim: "c", article_id: "fake-99", kind: "verified_fact" }] }).ok === false);
 check("invalid evidence kind rejected", V21({ ...valid, supporting_evidence: [{ claim: "c", article_id: "a1", kind: "confirmed" }] }).ok === false);
