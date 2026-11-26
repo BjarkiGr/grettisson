@@ -3,11 +3,15 @@
   "version": "3.0.0",
   "private": true,
   "description": "Coffee Empire — cozy incremental coffee tycoon. Pure HTML/CSS/JS, packaged natively with Capacitor.",
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
     "icons": "node tools/make-icons.mjs",
     "build": "node tools/make-icons.mjs && node tools/build-www.mjs",
     "test": "node test/smoke.js && node test/ui.js && node test/progression.js && node test/pacing.js && node test/overhaul.js",
     "serve": "node tools/serve.mjs",
+    "doctor": "node tools/doctor.mjs",
     "cap:sync": "npm run build && cap sync",
     "android": "npm run build && cap sync android && cap open android",
     "ios": "npm run build && cap sync ios && cap open ios"
